@@ -1,0 +1,97 @@
+# Cursor Rules for Svelte + TypeScript Project
+
+## Project Context
+This is a Svelte 5 project using TypeScript, Vite, and Tailwind CSS.
+
+## Code Style & Best Practices
+
+### TypeScript
+- Use TypeScript for all `.ts` and `.svelte` files
+- Prefer explicit types over `any`
+- Use type inference where it improves readability
+- Follow the existing TypeScript configuration in `tsconfig.json` and `tsconfig.app.json`
+
+### Svelte
+- Use Svelte 5 runes syntax (`$state`, `$derived`, `$effect`, etc.)
+- Prefer composition over complex component hierarchies
+- Keep components focused and single-purpose
+- Use TypeScript in `<script lang="ts">` blocks
+- Follow Svelte naming conventions (PascalCase for components)
+
+### Styling
+- Use Tailwind CSS utility classes for styling
+- Keep component-specific styles in `<style>` blocks when needed
+- Prefer Tailwind classes over custom CSS when possible
+
+### File Organization
+- Place reusable components in `src/lib/`
+- Keep page-level components in `src/`
+- Use clear, descriptive file names matching component names
+
+### Code Quality
+- Write clean, readable, and maintainable code
+- Add comments for complex logic or non-obvious decisions
+- Keep functions small and focused
+- Prefer early returns for better readability
+
+### Git & Version Control
+- Write meaningful commit messages
+- Don't commit generated files or dependencies
+- Keep commits focused and atomic
+
+## Component Structure
+
+/[module-name]
+  |-- index.ts
+  |-- [module-name].svelte
+  |-- [module-name].types.ts
+  |-- [module-name].constants.ts
+  |-- [module-name].utils.ts
+
+### Index File
+- The index always has the following structure:
+  ```ts
+  export { default as [ModuleName] } from './[module-name].svelte';
+  export * from './[module-name].types';
+  export * from './[module-name].constants';
+  export * from './[module-name].utils';
+  ```
+
+### Component File
+- The component file always has the following structure:
+  ```svelte
+  <script lang="ts">
+    import type { MyComponentProps } from './[module-name].types';
+
+    let { ... }: MyComponentProps = $props();
+  </script>
+
+  ... component code ...
+  ```
+
+### Types File
+- The types file always has the following structure:
+  ```ts
+  export type MyComponentProps = {
+    ... component props types ...
+  };
+  ```
+
+### Constants File
+- The constants file always has the following structure:
+  ```ts
+  export const MY_CONSTANT = 'my constant';
+  ```
+
+### Utils File
+- The utils file always has the following structure:
+  ```ts
+  export const myUtil = () => {
+    ... utility function ...
+  };
+  ```
+
+## Development Workflow
+- Use `npm run dev` for development
+- Use `npm run check` to verify TypeScript and Svelte types
+- Use `npm run build` to create production builds
