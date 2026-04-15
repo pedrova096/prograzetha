@@ -24,6 +24,8 @@
   "dependencies": {
     "@paralleldrive/cuid2": "^3.0.6",
     "@tailwindcss/vite": "^4.1.18",
-    "tailwindcss": "^4.1.18"
+    "lucide-svelte": "^0.562.0",
+    "tailwindcss": "^4.1.18",
+    "tippy.js": "^6.3.7"
   }
 }

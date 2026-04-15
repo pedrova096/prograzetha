@@ -1,8 +1,16 @@
 <script lang="ts">
-  import { Diagram } from './lib/Diagram';
-  import { START_NODE, NODES, EDGES } from './App.mock';
+  import 'tippy.js/dist/tippy.css';
+  import { Diagram, Background } from '~/lib/components';
+  import { setDiagramContext } from './App.context.svelte';
+
+  let { diagram } = setDiagramContext();
 </script>
 
-<main class="flex flex-col p-4">
-  <Diagram nodes={NODES} edges={EDGES} from={START_NODE.id} />
+<main class="h-screen flex flex-col p-4overflow-y-hidden">
+  <Background />
+  <div
+    class="flex-1 p-2 flex flex-col border border-red-300 rounded-sm gap-1 overflow-y-auto relative items-center"
+  >
+    <Diagram from={diagram.start} />
+  </div>
 </main>
