@@ -4,7 +4,7 @@
   import { NodeTypes } from '~/App.mock';
   import { Dropdown } from '~/lib/components/Dropdown';
 
-  let { onSelect }: AddButtonProps = $props();
+  let { onSelect, circle = true }: AddButtonProps = $props();
 
   let open = $state(false);
 
@@ -22,17 +22,19 @@
     fill="currentColor"
     stroke="currentColor"
   >
-    <circle
-      id="outline-half-circle"
-      class="fill-transparent stroke-2 stroke-current"
-      cx="5"
-      cy="5"
-      r="4"
-    />
+    {#if circle}
+      <circle
+        id="outline-half-circle"
+        class="fill-transparent stroke-2 stroke-current"
+        cx="5"
+        cy="5"
+        r="4"
+      />
+    {/if}
     <path
       id="outline-line"
       class="fill-transparent stroke-2 stroke-current"
-      d="m5 10 l0 30"
+      d={circle ? 'm5 10 l0 30' : 'm5 0 l0 40'}
     />
     <path
       id="chevron-down"

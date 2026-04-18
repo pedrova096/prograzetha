@@ -5,3 +5,4 @@ export * from './Diagram';
 export * from './Dropdown';
 export * from './Input';
 export * from './Node';
+export * from './RadioGroup';

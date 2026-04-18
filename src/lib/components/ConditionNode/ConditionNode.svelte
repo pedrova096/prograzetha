@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { slide } from 'svelte/transition';
-  import { cubicOut } from 'svelte/easing';
   import { Diagram, Node } from '~/lib/components';
   import { getDiagramContext } from '~/App.context.svelte';
   import type {
@@ -8,6 +6,7 @@
     ConditionNodeProps,
   } from './ConditionNode.types';
   import { roundedCornerPath } from './ConditionNode.utils';
+  import { AddButton } from '../AddButton';
 
   let { node }: ConditionNodeProps = $props();
 
@@ -37,7 +36,6 @@
     radius: CURVE_RADIUS,
     stroke: CURVE_STROKE,
   });
-  console.log('curveLeftTopPath', curveLeftTopPath);
   const curveRightBottomPath = roundedCornerPath({
     position: { x: 0, y: 0 },
     size: {
@@ -81,7 +79,7 @@
         class="w-[calc(50%+10px)] mx-auto flex flex-row"
       >
         <div class="flex-1 flex flex-row">
-          <svg width={CURVE_SIZE} height={CURVE_SIZE * 2}>
+          <svg class="text-blue-500" width={CURVE_SIZE} height={CURVE_SIZE * 2}>
             <path
               id="curve-bottom-left"
               class="fill-transparent stroke-2 stroke-current"
@@ -90,7 +88,7 @@
           </svg>
 
           <div class="flex-1">
-            <svg width="100%" height={CURVE_SIZE * 2}>
+            <svg class="text-blue-500" width="100%" height={CURVE_SIZE * 2}>
               <path
                 id="line-left"
                 class="fill-transparent stroke-2 stroke-current"
@@ -99,7 +97,7 @@
             </svg>
           </div>
 
-          <svg width={CURVE_SIZE} height={CURVE_SIZE * 2}>
+          <svg class="text-blue-500" width={CURVE_SIZE} height={CURVE_SIZE * 2}>
             <path
               id="curve-bottom-left"
               class="fill-transparent stroke-2 stroke-current"
@@ -109,7 +107,7 @@
         </div>
 
         <div class="flex-1 flex flex-row">
-          <svg width={CURVE_SIZE} height={CURVE_SIZE * 2}>
+          <svg class="text-blue-500" width={CURVE_SIZE} height={CURVE_SIZE * 2}>
             <path
               id="curve-bottom-left"
               class="fill-transparent stroke-2 stroke-current"
@@ -118,7 +116,7 @@
           </svg>
 
           <div class="flex-1">
-            <svg width="100%" height={CURVE_SIZE * 2}>
+            <svg class="text-blue-500" width="100%" height={CURVE_SIZE * 2}>
               <path
                 id="line-left"
                 class="fill-transparent stroke-2 stroke-current"
@@ -127,7 +125,7 @@
             </svg>
           </div>
 
-          <svg width={CURVE_SIZE} height={CURVE_SIZE * 2}>
+          <svg class="text-blue-500" width={CURVE_SIZE} height={CURVE_SIZE * 2}>
             <path
               id="curve-bottom-left"
               class="fill-transparent stroke-2 stroke-current"
@@ -142,6 +140,7 @@
           <div
             class="flex-1 p-2 flex flex-col border border-red-300 rounded-sm gap-1 items-center"
           >
+            <AddButton circle={false} />
             <Diagram from={left} />
           </div>
         {/if}
@@ -150,6 +149,7 @@
           <div
             class="flex-1 p-2 flex flex-col border border-red-300 rounded-sm gap-1 items-center"
           >
+            <AddButton circle={false} />
             <Diagram from={right} />
           </div>
         {/if}

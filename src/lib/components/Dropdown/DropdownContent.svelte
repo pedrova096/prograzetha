@@ -1,4 +1,5 @@
 <script lang="ts" generics="T = string">
+  import { Search } from 'lucide-svelte';
   import { getDropdownContext } from './Dropdown.context';
   import { getFilteredOptions } from './Dropdown.utils';
   import { Input } from '~/lib/components/Input';
@@ -27,7 +28,11 @@
 >
   {#if searchable}
     <div class="mb-2">
-      <Input bind:value={searchQuery} {placeholder} {clearable} autofocus />
+      <Input bind:value={searchQuery} {placeholder} {clearable} autofocus>
+        {#snippet startAdornment()}
+          <Search class="size-4 text-slate-400" />
+        {/snippet}
+      </Input>
     </div>
   {/if}
 
