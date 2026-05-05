@@ -1,12 +1,10 @@
 <script lang="ts">
   import { Diagram, Node } from '~/lib/components';
   import { getDiagramContext } from '~/App.context.svelte';
-  import type {
-    ConditionEdge,
-    ConditionNodeProps,
-  } from './ConditionNode.types';
+  import type { ConditionNodeProps } from './ConditionNode.types';
   import { roundedCornerPath } from './ConditionNode.utils';
   import { AddButton } from '../AddButton';
+  import type { ConditionalEdge } from '~/lib/modules/edge';
 
   let { node }: ConditionNodeProps = $props();
 
@@ -15,8 +13,8 @@
   } = getDiagramContext();
 
   let isOpen = $state(true);
-  let left = $derived((edges.get(node.id) as ConditionEdge)?.left);
-  let right = $derived((edges.get(node.id) as ConditionEdge)?.right);
+  let left = $derived((edges.get(node.id) as ConditionalEdge)?.left);
+  let right = $derived((edges.get(node.id) as ConditionalEdge)?.right);
 
   const onClickHandler = () => {
     isOpen = !isOpen;

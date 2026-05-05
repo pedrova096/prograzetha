@@ -1,12 +1,5 @@
-import type { Node } from '~/App.mock';
+import type { Node } from '~/lib/modules/nodes';
 
 export type ConditionNodeProps = {
   node: Node;
-};
-
-export type ConditionEdge = {
-  from: string;
-  to: string;
-  left: string;
-  right: string;
 };

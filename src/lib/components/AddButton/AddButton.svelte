@@ -1,8 +1,8 @@
 <script lang="ts">
   import { Plus } from 'lucide-svelte';
   import type { AddButtonProps } from './AddButton.types';
-  import { NodeTypes } from '~/App.mock';
   import { Dropdown } from '~/lib/components/Dropdown';
+  import { NodeTypes } from '~/lib/modules/nodes';
 
   let { onSelect, circle = true }: AddButtonProps = $props();
 
@@ -12,7 +12,7 @@
     { label: 'Input', value: NodeTypes.Input },
     { label: 'Output', value: NodeTypes.Output },
     { label: 'Condition', value: NodeTypes.Condition },
-    { label: 'Logical', value: NodeTypes.Logical },
+    { label: 'Operation', value: NodeTypes.Operation },
   ];
 </script>
 

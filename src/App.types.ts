@@ -1,4 +1,5 @@
-import type { Node, Edge } from './App.mock';
+import type { Edge } from './lib/modules/edge';
+import type { Node } from './lib/modules/nodes';
 
 export type DiagramContext = {
   nodes: Map<string, Node>;
