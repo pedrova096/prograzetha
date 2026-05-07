@@ -3,7 +3,7 @@
   import { getLayout } from '~/lib/modules/layout';
   import type { RenderEdge, RenderNode } from '~/lib/modules/layout';
   import { AddButton, type AddButtonProps } from '../AddButton';
-  import { Node } from '../Node';
+  import { Node } from './Node';
   import { edgeMidpoint, roundedEdgePath } from './Diagram.utils';
 
   let {

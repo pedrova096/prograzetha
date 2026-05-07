@@ -1,16 +1,19 @@
 <script lang="ts">
   import 'tippy.js/dist/tippy.css';
-  import { Diagram, Background } from '~/lib/components';
+  import { Diagram, Background, SidebarDrawer } from '~/lib/components';
   import { setDiagramContext } from './App.context.svelte';
 
   setDiagramContext();
 </script>
 
-<main class="h-screen flex flex-col p-4overflow-y-hidden">
+<main class="flex h-screen gap-4 overflow-hidden p-4">
   <Background />
+
   <div
-    class="flex-1 p-2 flex flex-col border border-red-300 rounded-sm gap-1 overflow-y-auto relative items-center"
+    class="relative flex flex-1 flex-col items-center gap-1 overflow-y-auto rounded-sm border border-red-300 p-2"
   >
     <Diagram />
   </div>
+
+  <SidebarDrawer />
 </main>

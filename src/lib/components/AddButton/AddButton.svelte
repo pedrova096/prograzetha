@@ -3,7 +3,7 @@
   import { Dropdown } from '~/lib/components/Dropdown';
   import { NodeTypes } from '~/lib/modules/nodes';
 
-  import { TITLE_BY_TYPE } from '../Node';
+  import { TITLE_BY_TYPE } from '../Diagram/Node';
   import type { AddButtonProps } from './AddButton.types';
 
   let {
