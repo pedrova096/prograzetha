@@ -16,7 +16,7 @@
   {@attach tooltip({ content: id, interactive: false })}
   {...props}
   class={[
-    'flex items-center justify-center rounded-lg border-2 border-zinc-300 bg-white px-4 py-2 shadow-md transition-shadow hover:shadow-lg z-10 w-40 relative',
+    'flex items-center justify-center rounded-lg border-2 border-zinc-300 bg-white px-4 py-2 shadow-md transition-shadow hover:shadow-lg z-10 w-40',
     className,
   ]}
 >

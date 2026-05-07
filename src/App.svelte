@@ -3,7 +3,7 @@
   import { Diagram, Background } from '~/lib/components';
   import { setDiagramContext } from './App.context.svelte';
 
-  let { diagram } = setDiagramContext();
+  setDiagramContext();
 </script>
 
 <main class="h-screen flex flex-col p-4overflow-y-hidden">
@@ -11,6 +11,6 @@
   <div
     class="flex-1 p-2 flex flex-col border border-red-300 rounded-sm gap-1 overflow-y-auto relative items-center"
   >
-    <Diagram from={diagram.start} />
+    <Diagram />
   </div>
 </main>

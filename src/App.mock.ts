@@ -69,6 +69,5 @@ export const EDGES = new Map<string, Edge>([
       C2_INPUT_RIGHT_NODE.id,
     ),
   ],
-
   [OUTPUT_NODE.id, Edge.create(OUTPUT_NODE.id, END_NODE.id)],
 ]);
