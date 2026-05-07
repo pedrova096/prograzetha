@@ -7,6 +7,7 @@ export type SidebarIcon = ComponentType<SvelteComponent<IconProps>>;
 export type SidebarPanel = {
   id: string;
   title?: string;
+  actions?: Snippet;
   content: Snippet;
 };
 
@@ -48,6 +49,9 @@ export interface SidebarItemProps extends HTMLButtonAttributes {
 export interface SidebarActionProps extends SidebarItemProps {
   panel?: Snippet;
   panelTitle?: string;
+  panelActions?: Snippet;
+  path?: string;
+  closePath?: string;
 }
 
 export interface SidebarCollapseTriggerProps extends HTMLButtonAttributes {

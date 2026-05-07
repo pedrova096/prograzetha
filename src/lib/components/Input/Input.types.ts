@@ -6,7 +6,7 @@ export interface InputProps extends Omit<HTMLInputAttributes, 'class'> {
   value?: string;
   class?: string;
   label?: string;
-  helper?: string | string[];
+  helper?: string | string[] | null;
   helperHint?: Snippet;
   startAdornment?: Snippet;
   error?: boolean;

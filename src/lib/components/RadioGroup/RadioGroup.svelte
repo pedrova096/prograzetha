@@ -38,48 +38,49 @@
     </span>
   {/if}
   <div
-    class={['inline-flex', classNames?.radioContainer]}
-    role="group"
+    class={[
+      'inline-flex w-fit items-center gap-1 rounded-lg bg-zinc-100 p-1',
+      classNames?.radioContainer,
+    ]}
+    role="radiogroup"
     aria-labelledby={inputLabel ? `${groupName}-label` : undefined}
   >
     {#each options as option, index}
-      <div class={['relative', classNames?.radioWrapper]}>
-        {#if optionRender}
-          {@render optionRender(option)}
-        {:else}
-          {@const [isFirst, isLast] = [
-            index === 0,
-            index === options.length - 1,
+      {@const optionId = `${groupName}-${index}`}
+      {@const optionValueResolved = option[optionValue]}
+      {@const selected = value === optionValueResolved}
+
+      <label class={['relative', classNames?.radioWrapper]} for={optionId}>
+        <input
+          type="radio"
+          id={optionId}
+          {name}
+          class={['peer sr-only', classNames?.radio]}
+          bind:group={value}
+          value={optionValueResolved}
+          {...restProps}
+        />
+        <span
+          class={[
+            'toggle-group-item inline-flex items-center justify-center rounded-md font-medium transition-all',
+            'cursor-pointer select-none',
+            'focus-within:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2',
+            error
+              ? 'peer-focus-visible:ring-red-500'
+              : 'peer-focus-visible:ring-zinc-400',
+            classNames?.radioLabel,
           ]}
-          <input
-            type="radio"
-            id={`${groupName}-${index}`}
-            {name}
-            class="sr-only"
-            bind:group={value}
-            value={option[optionValue]}
-            {...restProps}
-          />
-          <label
-            class={[
-              'button-group-item inline-flex items-center justify-center font-medium transition-all cursor-pointer focus-within:ring-2 focus-within:ring-offset-2 disabled:opacity-50',
-              {
-                'rounded-l-md': isFirst,
-                'rounded-r-md': isLast,
-                'focus-within:ring-red-500': error,
-                'focus-within:ring-teal-500': !error,
-              },
-              classNames?.radioLabel,
-            ]}
-            data-variant={variant}
-            data-size={size}
-            data-selected={value === option[optionValue]}
-            for={`${groupName}-${index}`}
-          >
+          data-variant={variant}
+          data-size={size}
+          data-selected={selected}
+        >
+          {#if optionRender}
+            {@render optionRender(option, selected)}
+          {:else}
             {option[optionLabel]}
-          </label>
-        {/if}
-      </div>
+          {/if}
+        </span>
+      </label>
     {/each}
   </div>
 
@@ -94,36 +95,36 @@
 <style lang="postcss">
   @reference "../../app.css";
 
-  .button-group-item {
+  .toggle-group-item {
     &[data-variant='default'] {
-      @apply border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50;
+      @apply text-zinc-600 hover:bg-white/60 hover:text-zinc-950;
       &[data-selected='true'] {
-        @apply border-teal-600 bg-teal-600 text-white hover:bg-teal-700;
+        @apply bg-white text-zinc-950 shadow-sm;
       }
     }
 
     &[data-variant='outline'] {
-      @apply border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50;
+      @apply border border-transparent text-zinc-600 hover:bg-white/60 hover:text-zinc-950;
       &[data-selected='true'] {
-        @apply border-teal-500 bg-teal-50 text-teal-700 hover:bg-teal-100;
+        @apply border-zinc-200 bg-white text-zinc-950 shadow-sm;
       }
     }
 
     &[data-variant='secondary'] {
-      @apply border border-zinc-200 bg-zinc-100 text-zinc-900 hover:bg-zinc-200;
+      @apply text-zinc-600 hover:bg-zinc-200 hover:text-zinc-950;
       &[data-selected='true'] {
-        @apply border-zinc-900 bg-zinc-900 text-white hover:bg-zinc-800;
+        @apply bg-zinc-900 text-white shadow-sm hover:bg-zinc-900;
       }
     }
 
     &[data-size='sm'] {
-      @apply px-3 py-1.5 text-xs;
+      @apply h-7 px-2.5 text-xs;
     }
     &[data-size='md'] {
-      @apply px-4 py-2 text-sm;
+      @apply h-8 px-3 text-sm;
     }
     &[data-size='lg'] {
-      @apply px-6 py-3 text-base;
+      @apply h-10 px-4 text-base;
     }
   }
 </style>

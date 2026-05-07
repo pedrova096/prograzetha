@@ -26,7 +26,7 @@
   aria-label={label}
   aria-expanded={!collapsed}
   class={[
-    'absolute -left-4 top-8 flex size-6 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 shadow-sm transition-colors hover:bg-zinc-50 hover:text-zinc-900',
+    'absolute -left-3 top-8 flex size-6 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 shadow-sm transition-colors hover:bg-zinc-50 hover:text-zinc-900',
     className,
   ]}
   onclick={onClickHandler}

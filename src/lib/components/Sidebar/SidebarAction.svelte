@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { navigate, useLocation } from 'svelte-routing';
   import type { MouseEventHandler } from 'svelte/elements';
   import { getSidebarContext } from './Sidebar.context';
   import type { SidebarActionProps } from './Sidebar.types';
@@ -10,27 +11,58 @@
     badge,
     panel,
     panelTitle,
+    panelActions,
+    path,
+    closePath = '/',
     onclick,
     class: className,
     ...props
   }: SidebarActionProps = $props();
 
   const sidebar = getSidebarContext();
+  const location = useLocation();
+  const pathname = $derived($location.pathname);
   const collapsed = $derived(sidebar.getCollapsed());
   const currentPanel = $derived(sidebar.getPanel());
-  const selected = $derived(active || currentPanel?.id === label);
+  const selected = $derived(active || currentPanel?.id === label || path === pathname);
+
+  const createPanel = () => {
+    if (!panel) return null;
+
+    return {
+      id: label,
+      title: panelTitle ?? label,
+      actions: panelActions,
+      content: panel,
+    };
+  };
+
+  $effect(() => {
+    if (!path || !panel) return;
+
+    if (pathname === path) {
+      sidebar.setPanel(createPanel());
+      return;
+    }
+
+    if (currentPanel?.id === label) {
+      sidebar.setPanel(null);
+    }
+  });
 
   const handleClick: MouseEventHandler<HTMLButtonElement> = (event) => {
     if (panel) {
-      sidebar.setPanel(
-        currentPanel?.id === label
-          ? null
-          : {
-              id: label,
-              title: panelTitle ?? label,
-              content: panel,
-            },
-      );
+      if (path) {
+        if (pathname === path) {
+          sidebar.setPanel(null);
+          navigate(closePath);
+        } else {
+          sidebar.setPanel(createPanel());
+          navigate(path);
+        }
+      } else {
+        sidebar.setPanel(currentPanel?.id === label ? null : createPanel());
+      }
     }
 
     onclick?.(event);

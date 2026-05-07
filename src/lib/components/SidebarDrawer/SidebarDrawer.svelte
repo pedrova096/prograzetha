@@ -1,15 +1,20 @@
 <script lang="ts">
-  import { Play, Settings, Code, GitCommitVertical } from 'lucide-svelte';
-  import { Sidebar } from '../Sidebar';
+  import { Play, Settings, Code } from 'lucide-svelte';
+  import { InputNode } from '~/lib/modules/nodes';
+  import { Sidebar, type SidebarPanel } from '../Sidebar';
+  import { ReadDrawer } from './ReadDrawer';
+  import { DrawerRoutes } from './SidebarDrawer.constants';
   import type { SidebarDrawerProps } from './SidebarDrawer.types';
 
   let { class: className, ...props }: SidebarDrawerProps = $props();
 
   let collapsed = $state(false);
+  let readNode = $state(InputNode.create());
+  let panel = $state<SidebarPanel | null>(null);
 </script>
 
 <div {...props} class={['z-10 h-full', className]}>
-  <Sidebar.Root bind:collapsed class="h-full">
+  <Sidebar.Root bind:collapsed bind:panel class="h-full">
     <Sidebar.CollapseTrigger />
 
     <Sidebar.Header>
@@ -30,15 +35,18 @@
 
     <Sidebar.Content>
       <Sidebar.Group>
-        <Sidebar.Action icon={GitCommitVertical} label="Nodo">
-          {#snippet panel()}{/snippet}
-        </Sidebar.Action>
+        <ReadDrawer node={readNode} onSave={(node) => (readNode = node)} />
       </Sidebar.Group>
 
       <Sidebar.Divider />
 
       <Sidebar.Group>
-        <Sidebar.Action icon={Code} label="Código">
+        <Sidebar.Action
+          icon={Code}
+          label="Código"
+          path={DrawerRoutes.Code}
+          closePath={DrawerRoutes.Home}
+        >
           {#snippet panel()}{/snippet}
         </Sidebar.Action>
         <Sidebar.Item icon={Play} label="Ejecutar" />

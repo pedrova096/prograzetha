@@ -16,10 +16,10 @@
   {@attach tooltip({ content: id, interactive: false })}
   {...props}
   class={[
-    'flex items-center justify-center rounded-lg border-2 border-zinc-300 bg-white px-4 py-2 shadow-md transition-shadow hover:shadow-lg z-10 w-40',
+    'flex items-center justify-center rounded-lg border-2 border-zinc-300 bg-white px-4 py-2 shadow-md transition-shadow hover:shadow-lg z-10 w-40 cursor-pointer',
     className,
   ]}
 >
   <Icon class="inline-flex mr-1 opacity-40 size-3 stroke-3 absolute left-4" />
-  <span class="text-sm font-medium text-zinc-700">{title}</span>
+  <span class="text-sm font-medium text-zinc-700 select-none">{title}</span>
 </div>
