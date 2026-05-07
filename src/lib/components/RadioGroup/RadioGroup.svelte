@@ -92,25 +92,27 @@
 </div>
 
 <style lang="postcss">
+  @reference "../../app.css";
+
   .button-group-item {
     &[data-variant='default'] {
-      @apply border border-gray-300 bg-white text-gray-700 hover:bg-gray-50;
+      @apply border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50;
       &[data-selected='true'] {
         @apply border-teal-600 bg-teal-600 text-white hover:bg-teal-700;
       }
     }
 
     &[data-variant='outline'] {
-      @apply border border-gray-300 bg-white text-gray-700 hover:bg-gray-50;
+      @apply border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50;
       &[data-selected='true'] {
         @apply border-teal-500 bg-teal-50 text-teal-700 hover:bg-teal-100;
       }
     }
 
     &[data-variant='secondary'] {
-      @apply border border-gray-200 bg-gray-100 text-gray-900 hover:bg-gray-200;
+      @apply border border-zinc-200 bg-zinc-100 text-zinc-900 hover:bg-zinc-200;
       &[data-selected='true'] {
-        @apply border-gray-900 bg-gray-900 text-white hover:bg-gray-800;
+        @apply border-zinc-900 bg-zinc-900 text-white hover:bg-zinc-800;
       }
     }
 

@@ -16,10 +16,6 @@
   let left = $derived((edges.get(node.id) as ConditionalEdge)?.left);
   let right = $derived((edges.get(node.id) as ConditionalEdge)?.right);
 
-  const onClickHandler = () => {
-    isOpen = !isOpen;
-  };
-
   const CURVE_RADIUS = 6;
   const CURVE_SIZE = 10;
   const CURVE_STROKE = 2;
@@ -67,7 +63,7 @@
   });
 </script>
 
-<Node {node} onclick={onClickHandler} />
+<Node {node} />
 
 <div class="flex flex-col -mt-1">
   {#if isOpen}
@@ -76,8 +72,8 @@
         id="connection-svg-top"
         class="w-[calc(50%+10px)] mx-auto flex flex-row"
       >
-        <div class="flex-1 flex flex-row">
-          <svg class="text-blue-500" width={CURVE_SIZE} height={CURVE_SIZE * 2}>
+        <div class="flex-1 flex flex-row text-blue-500">
+          <svg width={CURVE_SIZE} height={CURVE_SIZE * 2}>
             <path
               id="curve-bottom-left"
               class="fill-transparent stroke-2 stroke-current"
@@ -86,7 +82,7 @@
           </svg>
 
           <div class="flex-1">
-            <svg class="text-blue-500" width="100%" height={CURVE_SIZE * 2}>
+            <svg width="100%" height={CURVE_SIZE * 2}>
               <path
                 id="line-left"
                 class="fill-transparent stroke-2 stroke-current"
@@ -95,7 +91,7 @@
             </svg>
           </div>
 
-          <svg class="text-blue-500" width={CURVE_SIZE} height={CURVE_SIZE * 2}>
+          <svg width={CURVE_SIZE} height={CURVE_SIZE * 2}>
             <path
               id="curve-bottom-left"
               class="fill-transparent stroke-2 stroke-current"
@@ -104,8 +100,8 @@
           </svg>
         </div>
 
-        <div class="flex-1 flex flex-row">
-          <svg class="text-blue-500" width={CURVE_SIZE} height={CURVE_SIZE * 2}>
+        <div class="flex-1 flex flex-row text-blue-500">
+          <svg width={CURVE_SIZE} height={CURVE_SIZE * 2}>
             <path
               id="curve-bottom-left"
               class="fill-transparent stroke-2 stroke-current"
@@ -114,7 +110,7 @@
           </svg>
 
           <div class="flex-1">
-            <svg class="text-blue-500" width="100%" height={CURVE_SIZE * 2}>
+            <svg width="100%" height={CURVE_SIZE * 2}>
               <path
                 id="line-left"
                 class="fill-transparent stroke-2 stroke-current"
@@ -123,7 +119,7 @@
             </svg>
           </div>
 
-          <svg class="text-blue-500" width={CURVE_SIZE} height={CURVE_SIZE * 2}>
+          <svg width={CURVE_SIZE} height={CURVE_SIZE * 2}>
             <path
               id="curve-bottom-left"
               class="fill-transparent stroke-2 stroke-current"
@@ -136,19 +132,21 @@
       <div id="side-diagram-container" class="flex flex-row gap-4">
         {#if left}
           <div
-            class="flex-1 p-2 flex flex-col border border-red-300 rounded-sm gap-1 items-center"
+            class="flex-1 p-2 flex flex-col border-0 border-blue-300 rounded-sm gap-1 items-center"
           >
-            <AddButton circle={false} />
+            <AddButton pathMode="only-arrow" />
             <Diagram from={left} />
+            <AddButton pathMode="only-path" />
           </div>
         {/if}
 
         {#if right}
           <div
-            class="flex-1 p-2 flex flex-col border border-red-300 rounded-sm gap-1 items-center"
+            class="flex-1 p-2 flex flex-col border-0 border-blue-300 rounded-sm gap-1 items-center"
           >
-            <AddButton circle={false} />
+            <AddButton pathMode="only-arrow" />
             <Diagram from={right} />
+            <AddButton pathMode="only-path" />
           </div>
         {/if}
       </div>
@@ -157,7 +155,7 @@
         id="connection-svg-bottom"
         class="w-[calc(50%+10px)] mx-auto flex flex-row"
       >
-        <div class="flex-1 flex flex-row justify-between">
+        <div class="flex-1 flex flex-row justify-between text-blue-500">
           <svg width={CURVE_SIZE} height={CURVE_SIZE * 2}>
             <path
               id="curve-bottom-left"
@@ -183,7 +181,7 @@
           </svg>
         </div>
 
-        <div class="flex-1 flex flex-row justify-between">
+        <div class="flex-1 flex flex-row justify-between text-blue-500">
           <svg width={CURVE_SIZE} height={CURVE_SIZE * 2}>
             <path
               id="curve-bottom-left"

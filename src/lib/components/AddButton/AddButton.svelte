@@ -1,10 +1,10 @@
 <script lang="ts">
   import { Plus } from 'lucide-svelte';
-  import type { AddButtonProps } from './AddButton.types';
+  import { type AddButtonProps, PathMode } from './AddButton.types';
   import { Dropdown } from '~/lib/components/Dropdown';
   import { NodeTypes } from '~/lib/modules/nodes';
 
-  let { onSelect, circle = true }: AddButtonProps = $props();
+  let { onSelect, pathMode = PathMode.FullPath }: AddButtonProps = $props();
 
   let open = $state(false);
 
@@ -14,6 +14,14 @@
     { label: 'Condition', value: NodeTypes.Condition },
     { label: 'Operation', value: NodeTypes.Operation },
   ];
+
+  let isCircleShown = pathMode === PathMode.FullPath;
+  let isArrowShown = pathMode !== PathMode.OnlyPath;
+  let pathD = {
+    [PathMode.FullPath]: 'm5 10 l0 30',
+    [PathMode.OnlyArrow]: 'm5 0 l0 40',
+    [PathMode.OnlyPath]: 'm5 0 l0 40',
+  }[pathMode];
 </script>
 
 <div class="relative group mx-auto -mt-2 -mb-1" role="img" aria-label="Add">
@@ -22,7 +30,7 @@
     fill="currentColor"
     stroke="currentColor"
   >
-    {#if circle}
+    {#if isCircleShown}
       <circle
         id="outline-half-circle"
         class="fill-transparent stroke-2 stroke-current"
@@ -34,15 +42,17 @@
     <path
       id="outline-line"
       class="fill-transparent stroke-2 stroke-current"
-      d={circle ? 'm5 10 l0 30' : 'm5 0 l0 40'}
+      d={pathD}
     />
-    <path
-      id="chevron-down"
-      class="fill-transparent stroke-2 stroke-current"
-      d="m1 35 4 4 4-4"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
+    {#if isArrowShown}
+      <path
+        id="chevron-down"
+        class="fill-transparent stroke-2 stroke-current"
+        d="m1 35 4 4 4-4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    {/if}
   </svg>
 
   <Dropdown.Root {onSelect} bind:open>
