@@ -1,8 +1,9 @@
-import { ConditionalEdge } from '~/lib/modules/edge';
+import { BranchEdge, LoopEdge } from '~/lib/modules/edge';
 import { NodeTypes } from '~/lib/modules/nodes';
 
 import { BlockLayout } from './block';
 import { BranchLayout } from './branch';
+import { LoopLayout } from './loop';
 import type {
   GetLayoutOptions,
   LayoutBlock,
@@ -39,7 +40,7 @@ const createSequenceBlock = (
 
     visited.add(currentId);
 
-    if (node.type === NodeTypes.Condition && edge instanceof ConditionalEdge) {
+    if (node.type === NodeTypes.Condition && edge instanceof BranchEdge) {
       const condition = createNodeBlock(options, currentId);
 
       if (condition) {
@@ -57,6 +58,28 @@ const createSequenceBlock = (
               options,
               edge.right,
               edge.target,
+              new Set(visited),
+            ),
+          }),
+        );
+      }
+
+      currentId = edge.target;
+      continue;
+    }
+
+    if (node.type === NodeTypes.Loop && edge instanceof LoopEdge) {
+      const condition = createNodeBlock(options, currentId);
+
+      if (condition) {
+        children.push(
+          LoopLayout.create({
+            id: currentId,
+            condition,
+            body: createSequenceBlock(
+              options,
+              edge.body,
+              currentId,
               new Set(visited),
             ),
           }),

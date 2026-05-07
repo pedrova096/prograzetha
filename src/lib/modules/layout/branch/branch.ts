@@ -84,6 +84,10 @@ export class BranchLayout implements LayoutBlock {
       x: origin.x + size.width / 2,
       y: branchesY + Math.max(thenSize.height, elseSize.height) + this.joinGapY,
     };
+    const thenSource =
+      thenResult.nodes[thenResult.nodes.length - 1]?.id ?? this.options.id;
+    const elseSource =
+      elseResult.nodes[elseResult.nodes.length - 1]?.id ?? this.options.id;
 
     const edges: RenderEdge[] = [
       ...conditionResult.edges,
@@ -91,6 +95,7 @@ export class BranchLayout implements LayoutBlock {
       ...elseResult.edges,
       {
         id: `${this.options.id}.condition-then`,
+        source: this.options.id,
         points: elbowEdge(
           conditionResult.anchors.output,
           thenResult.anchors.input,
@@ -98,6 +103,7 @@ export class BranchLayout implements LayoutBlock {
       },
       {
         id: `${this.options.id}.condition-else`,
+        source: this.options.id,
         points: elbowEdge(
           conditionResult.anchors.output,
           elseResult.anchors.input,
@@ -105,11 +111,13 @@ export class BranchLayout implements LayoutBlock {
       },
       {
         id: `${this.options.id}.then-join`,
+        source: thenSource,
         points: joinEdge(thenResult.anchors.output, joinPoint),
         isJoin: true,
       },
       {
         id: `${this.options.id}.else-join`,
+        source: elseSource,
         points: joinEdge(elseResult.anchors.output, joinPoint),
         isJoin: true,
       },

@@ -29,6 +29,7 @@ export type RenderNode = {
 
 export type RenderEdge = {
   id: string;
+  source: string;
   points: Point[];
   isJoin?: boolean;
 };

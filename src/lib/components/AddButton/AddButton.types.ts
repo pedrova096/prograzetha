@@ -1,12 +1,8 @@
 import type { DropdownOption } from '~/lib/components/Dropdown';
+import type { HTMLAttributes } from 'svelte/elements';
 
-export enum PathMode {
-  FullPath = 'full-path',
-  OnlyArrow = 'only-arrow',
-  OnlyPath = 'only-path',
-}
-
-export interface AddButtonProps {
-  pathMode?: `${PathMode}`;
+export interface AddButtonProps extends HTMLAttributes<HTMLDivElement> {
+  open?: boolean;
+  triggerLabel?: string;
   onSelect?: (event: MouseEvent, option: DropdownOption) => void;
 }

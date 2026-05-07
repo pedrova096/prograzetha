@@ -9,19 +9,14 @@ export class Edge {
   }
 }
 
-export class ConditionalEdge extends Edge {
-  left: string;
-  right: string;
-
-  private constructor(
+export class BranchEdge extends Edge {
+  constructor(
     source: string,
     target: string,
-    left: string,
-    right: string,
+    public left: string,
+    public right: string,
   ) {
     super(source, target);
-    this.left = left;
-    this.right = right;
   }
 
   static override create(source: string, target: string): Edge;
@@ -30,7 +25,7 @@ export class ConditionalEdge extends Edge {
     target: string,
     left: string,
     right: string,
-  ): ConditionalEdge;
+  ): BranchEdge;
   static override create(
     source: string,
     target: string,
@@ -41,6 +36,34 @@ export class ConditionalEdge extends Edge {
       return Edge.create(source, target);
     }
 
-    return new ConditionalEdge(source, target, left, right);
+    return new BranchEdge(source, target, left, right);
+  }
+}
+
+export class LoopEdge extends Edge {
+  constructor(
+    source: string,
+    target: string,
+    public body: string,
+  ) {
+    super(source, target);
+  }
+
+  static override create(source: string, target: string): Edge;
+  static override create(
+    source: string,
+    target: string,
+    body: string,
+  ): LoopEdge;
+  static override create(
+    source: string,
+    target: string,
+    body?: string,
+  ): Edge {
+    if (body === undefined) {
+      return Edge.create(source, target);
+    }
+
+    return new LoopEdge(source, target, body);
   }
 }

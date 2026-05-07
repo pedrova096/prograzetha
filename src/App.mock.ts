@@ -7,7 +7,7 @@ import {
   OutputNode,
   StartNode,
 } from '~/lib/modules/nodes';
-import { ConditionalEdge, Edge } from './lib/modules/edge';
+import { BranchEdge, Edge } from './lib/modules/edge';
 
 export const START_NODE = StartNode.create();
 export const INPUT_NODE = InputNode.create();
@@ -45,7 +45,7 @@ export const EDGES = new Map<string, Edge>([
   [OPERATION_NODE.id, Edge.create(OPERATION_NODE.id, CONDITION_NODE.id)],
   [
     CONDITION_NODE.id,
-    ConditionalEdge.create(
+    BranchEdge.create(
       CONDITION_NODE.id,
       OUTPUT_NODE.id,
       CONDITION_INPUT_LEFT_NODE.id,
@@ -62,7 +62,7 @@ export const EDGES = new Map<string, Edge>([
   ],
   [
     C2_NODE.id,
-    ConditionalEdge.create(
+    BranchEdge.create(
       C2_NODE.id,
       '',
       C2_INPUT_LEFT_NODE.id,

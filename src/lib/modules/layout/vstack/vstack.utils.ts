@@ -10,9 +10,11 @@ export function connectVertical(
   for (let index = 0; index < results.length - 1; index += 1) {
     const current = results[index];
     const next = results[index + 1];
+    const source = current.nodes[current.nodes.length - 1]?.id ?? id;
 
     edges.push({
       id: `${id}.${index}-${index + 1}`,
+      source,
       points: verticalEdge(current.anchors.output, next.anchors.input),
     });
   }

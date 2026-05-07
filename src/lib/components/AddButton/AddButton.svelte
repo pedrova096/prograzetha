@@ -1,68 +1,40 @@
 <script lang="ts">
   import { Plus } from 'lucide-svelte';
-  import { type AddButtonProps, PathMode } from './AddButton.types';
   import { Dropdown } from '~/lib/components/Dropdown';
   import { NodeTypes } from '~/lib/modules/nodes';
 
-  let { onSelect, pathMode = PathMode.FullPath }: AddButtonProps = $props();
+  import { TITLE_BY_TYPE } from '../Node';
+  import type { AddButtonProps } from './AddButton.types';
 
-  let open = $state(false);
+  let {
+    onSelect,
+    open = $bindable(false),
+    triggerLabel = 'Add node',
+    class: className,
+    ...props
+  }: AddButtonProps = $props();
 
   const options = [
-    { label: 'Input', value: NodeTypes.Input },
-    { label: 'Output', value: NodeTypes.Output },
-    { label: 'Condition', value: NodeTypes.Condition },
-    { label: 'Operation', value: NodeTypes.Operation },
-  ];
-
-  let isCircleShown = pathMode === PathMode.FullPath;
-  let isArrowShown = pathMode !== PathMode.OnlyPath;
-  let pathD = {
-    [PathMode.FullPath]: 'm5 10 l0 30',
-    [PathMode.OnlyArrow]: 'm5 0 l0 40',
-    [PathMode.OnlyPath]: 'm5 0 l0 40',
-  }[pathMode];
+    NodeTypes.Input,
+    NodeTypes.Output,
+    NodeTypes.Condition,
+    NodeTypes.Operation,
+  ].map((type) => ({
+    label: TITLE_BY_TYPE[type],
+    value: type,
+  }));
 </script>
 
-<div class="relative group mx-auto -mt-2 -mb-1" role="img" aria-label="Add">
-  <svg
-    class="w-[10px] h-[40px] text-blue-500"
-    fill="currentColor"
-    stroke="currentColor"
-  >
-    {#if isCircleShown}
-      <circle
-        id="outline-half-circle"
-        class="fill-transparent stroke-2 stroke-current"
-        cx="5"
-        cy="5"
-        r="4"
-      />
-    {/if}
-    <path
-      id="outline-line"
-      class="fill-transparent stroke-2 stroke-current"
-      d={pathD}
-    />
-    {#if isArrowShown}
-      <path
-        id="chevron-down"
-        class="fill-transparent stroke-2 stroke-current"
-        d="m1 35 4 4 4-4"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
-    {/if}
-  </svg>
-
+<div {...props} class={className}>
   <Dropdown.Root {onSelect} bind:open>
     <Dropdown.Trigger
       class={[
-        'opacity-0 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white size-4 flex items-center justify-center rounded-full mx-auto cursor-pointer',
-        open ? 'opacity-100' : 'group-hover:opacity-100',
+        'flex size-5 items-center justify-center rounded-full border border-blue-400 bg-blue-500 text-white shadow-md transition-transform hover:scale-105',
+        open && 'scale-105',
       ]}
+      aria-label={triggerLabel}
     >
-      <Plus class="size-4" />
+      <Plus class="size-3.5" />
     </Dropdown.Trigger>
     <Dropdown.Content {options} searchable clearable />
   </Dropdown.Root>
