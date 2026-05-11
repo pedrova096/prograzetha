@@ -2,57 +2,56 @@
   import { validator } from '@felte/validator-yup';
   import { createForm } from 'felte';
   import { GitCommitVertical, Save } from 'lucide-svelte';
-  import { navigate } from 'svelte-routing';
 
   import { Input } from '../../Input';
   import { RadioGroup } from '../../RadioGroup';
   import { Sidebar } from '../../Sidebar';
 
-  import { DrawerRoutes } from '../SidebarDrawer.constants';
-  import { READ_TYPE_OPTIONS } from './ReadDrawer.constants';
+  import { INPUT_TYPE_OPTIONS } from './InputDrawer.constants';
   import {
     FormFields,
-    type ReadDrawerForm,
-    type ReadDrawerProps,
-  } from './ReadDrawer.types';
-  import { createReadDrawerData, schema } from './ReadDrawer.utils';
+    type InputDrawerForm,
+    type InputDrawerProps,
+  } from './InputDrawer.types';
+  import { createInputDrawerData, schema } from './InputDrawer.utils';
 
-  let { node, onSave }: ReadDrawerProps = $props();
+  let { node, onSave, onClose }: InputDrawerProps = $props();
 
-  const { form, errors, touched, data, setData } = createForm<ReadDrawerForm>({
+  const { form, errors, touched, data, setData } = createForm<InputDrawerForm>({
     extend: validator({ schema }),
     onSubmit: (values) => {
       if (!node) return;
 
-      onSave(node.withData(values));
+      onSave(node.withUpdate(values));
     },
-    initialValues: createReadDrawerData(node?.data),
+    // svelte-ignore state_referenced_locally
+    initialValues: createInputDrawerData(node?.data),
   });
 
   $effect(() => {
-    setData(createReadDrawerData(node?.data));
+    setData(createInputDrawerData(node?.data));
   });
 </script>
 
 <Sidebar.Action
   icon={GitCommitVertical}
+  id="node-input"
   label="Nodo"
   panelTitle="Leer variable"
-  path={DrawerRoutes.Node}
-  closePath={DrawerRoutes.Home}
+  defaultOpenPanel
 >
   {#snippet panelActions()}
     <div class="flex items-center gap-2">
       <button
         type="button"
         class="rounded-md px-2 py-1.5 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
-        onclick={() => navigate(DrawerRoutes.Home)}
+        onclick={onClose}
       >
         Cerrar
       </button>
       <button
         type="submit"
-        form="read-drawer-form"
+        form="input-drawer-form"
         class="inline-flex items-center gap-2 rounded-md bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-800"
       >
         <Save class="size-3.5" />
@@ -63,7 +62,7 @@
 
   {#snippet panel()}
     <form
-      id="read-drawer-form"
+      id="input-drawer-form"
       use:form
       class="flex h-full min-h-0 flex-col gap-4"
     >
@@ -84,7 +83,7 @@
         <RadioGroup
           name={FormFields.Type}
           label="Tipo de variable"
-          options={READ_TYPE_OPTIONS}
+          options={INPUT_TYPE_OPTIONS}
           optionLabel="label"
           optionValue="value"
           error={!!$errors[FormFields.Type]}

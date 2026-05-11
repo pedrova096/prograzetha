@@ -1,21 +1,32 @@
 <script lang="ts">
   import { setSidebarContext } from './Sidebar.context';
-  import type { SidebarRootProps } from './Sidebar.types';
+  import type { SidebarPanel, SidebarRootProps } from './Sidebar.types';
 
   let {
     collapsed = $bindable(false),
-    panel = $bindable(null),
+    actionId = $bindable(null),
     children,
     class: className,
     ...props
   }: SidebarRootProps = $props();
 
+  let panels = $state<Record<string, SidebarPanel>>({});
+  const panel = $derived(actionId ? panels[actionId] : null);
+
   setSidebarContext({
     getCollapsed: () => collapsed,
     setCollapsed: (value) => (collapsed = value),
     toggleCollapsed: () => (collapsed = !collapsed),
-    getPanel: () => panel,
-    setPanel: (value) => (panel = value),
+    getActionId: () => actionId,
+    setActionId: (value) => (actionId = value),
+    registerPanel: (id, value) => {
+      panels[id] = value;
+
+      return () => {
+        delete panels[id];
+        if (actionId === id) actionId = null;
+      };
+    },
   });
 </script>
 

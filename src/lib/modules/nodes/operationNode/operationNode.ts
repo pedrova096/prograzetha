@@ -5,7 +5,7 @@ import type {
   VariableDeclaration,
 } from 'estree';
 
-import { Node, NodeTypes } from '../base';
+import { Node, NodeTypes, type NodeState } from '../base';
 import type {
   OperationNodeData,
   OperationNodeOptions,
@@ -15,6 +15,7 @@ const DEFAULT_OPERATION_DATA: OperationNodeData = {
   leftSide: '',
   rightSide: '',
   tree: null,
+  isNewVariable: false,
 };
 
 export class OperationNode extends Node<OperationNodeData> {
@@ -22,19 +23,24 @@ export class OperationNode extends Node<OperationNodeData> {
     id = createId(),
     type = NodeTypes.Operation,
     data = DEFAULT_OPERATION_DATA,
+    state?: NodeState,
   ) {
-    super(id, type, data);
+    super(id, type, data, undefined, state);
   }
 
   public static create() {
     return new OperationNode();
   }
 
+  public static nodeIs(node: Node): node is OperationNode {
+    return node.type === NodeTypes.Operation;
+  }
+
   toAST(
     options: OperationNodeOptions = { variables: [] },
   ): ExpressionStatement | VariableDeclaration {
     const { variables } = options;
-    if (!variables.includes(this.data.leftSide)) {
+    if (this.data.isNewVariable || !variables.includes(this.data.leftSide)) {
       return {
         type: 'VariableDeclaration',
         declarations: [
@@ -65,7 +71,7 @@ export class OperationNode extends Node<OperationNodeData> {
     };
   }
 
-  public withData(data: OperationNodeData) {
-    return new OperationNode(this.id, this.type, data);
+  public withUpdate(data = this.data, state = this.state) {
+    return new OperationNode(this.id, this.type, data, state);
   }
 }

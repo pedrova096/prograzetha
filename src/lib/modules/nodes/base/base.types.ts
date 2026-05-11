@@ -7,3 +7,11 @@ export enum NodeTypes {
   Operation = 'operation',
   Loop = 'loop',
 }
+
+export enum NodeStates {
+  Ok = 'ok',
+  New = 'new',
+  Error = 'error',
+}
+
+export type NodeState = `${NodeStates}`;

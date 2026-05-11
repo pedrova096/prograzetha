@@ -5,3 +5,4 @@ export * from './inputNode';
 export * from './operationNode';
 export * from './outputNode';
 export * from './startNode';
+export * from './nodes.utils';

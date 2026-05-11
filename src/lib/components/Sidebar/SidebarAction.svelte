@@ -1,36 +1,33 @@
 <script lang="ts">
-  import { navigate, useLocation } from 'svelte-routing';
   import type { MouseEventHandler } from 'svelte/elements';
   import { getSidebarContext } from './Sidebar.context';
   import type { SidebarActionProps } from './Sidebar.types';
 
   let {
     icon: Icon,
+    id,
     label,
     active = false,
     badge,
     panel,
     panelTitle,
     panelActions,
-    path,
-    closePath = '/',
+    defaultOpenPanel = false,
     onclick,
     class: className,
     ...props
   }: SidebarActionProps = $props();
 
   const sidebar = getSidebarContext();
-  const location = useLocation();
-  const pathname = $derived($location.pathname);
   const collapsed = $derived(sidebar.getCollapsed());
-  const currentPanel = $derived(sidebar.getPanel());
-  const selected = $derived(active || currentPanel?.id === label || path === pathname);
+  const currentActionId = $derived(sidebar.getActionId());
+  const isActive = $derived(active || currentActionId === id);
+  let openedDefaultPanel = $state(false);
 
   const createPanel = () => {
     if (!panel) return null;
 
     return {
-      id: label,
       title: panelTitle ?? label,
       actions: panelActions,
       content: panel,
@@ -38,31 +35,32 @@
   };
 
   $effect(() => {
-    if (!path || !panel) return;
+    const nextPanel = createPanel();
 
-    if (pathname === path) {
-      sidebar.setPanel(createPanel());
+    if (!nextPanel) return;
+
+    return sidebar.registerPanel(id, nextPanel);
+  });
+
+  $effect(() => {
+    if (!defaultOpenPanel) {
+      openedDefaultPanel = false;
       return;
     }
 
-    if (currentPanel?.id === label) {
-      sidebar.setPanel(null);
+    if (!panel || openedDefaultPanel || currentActionId) {
+      return;
     }
+
+    sidebar.setActionId(id);
+    openedDefaultPanel = true;
   });
 
   const handleClick: MouseEventHandler<HTMLButtonElement> = (event) => {
     if (panel) {
-      if (path) {
-        if (pathname === path) {
-          sidebar.setPanel(null);
-          navigate(closePath);
-        } else {
-          sidebar.setPanel(createPanel());
-          navigate(path);
-        }
-      } else {
-        sidebar.setPanel(currentPanel?.id === label ? null : createPanel());
-      }
+      const isOpen = currentActionId === id;
+
+      sidebar.setActionId(isOpen ? null : id);
     }
 
     onclick?.(event);
@@ -74,12 +72,12 @@
   type="button"
   title={collapsed ? label : undefined}
   aria-label={label}
-  aria-expanded={panel ? selected : undefined}
-  data-active={selected}
+  aria-expanded={panel ? isActive : undefined}
+  data-active={isActive}
   class={[
     'flex h-9 w-full items-center gap-2 rounded-md px-2 text-sm text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-950',
     collapsed ? 'justify-center' : 'justify-start',
-    selected && 'bg-zinc-100 font-medium text-zinc-950',
+    isActive && 'bg-zinc-100 font-medium text-zinc-950',
     className,
   ]}
   onclick={handleClick}

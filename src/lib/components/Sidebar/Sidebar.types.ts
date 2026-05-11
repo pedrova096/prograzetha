@@ -5,7 +5,6 @@ import type { IconProps } from 'lucide-svelte';
 export type SidebarIcon = ComponentType<SvelteComponent<IconProps>>;
 
 export type SidebarPanel = {
-  id: string;
   title?: string;
   actions?: Snippet;
   content: Snippet;
@@ -15,13 +14,14 @@ export type SidebarContextValue = {
   getCollapsed: () => boolean;
   setCollapsed: (collapsed: boolean) => void;
   toggleCollapsed: () => void;
-  getPanel: () => SidebarPanel | null;
-  setPanel: (panel: SidebarPanel | null) => void;
+  getActionId: () => string | null;
+  setActionId: (actionId: string | null) => void;
+  registerPanel: (actionId: string, panel: SidebarPanel) => () => void;
 };
 
 export interface SidebarRootProps extends HTMLAttributes<HTMLDivElement> {
   collapsed?: boolean;
-  panel?: SidebarPanel | null;
+  actionId?: string | null;
   children: Snippet;
 }
 
@@ -47,11 +47,11 @@ export interface SidebarItemProps extends HTMLButtonAttributes {
 }
 
 export interface SidebarActionProps extends SidebarItemProps {
+  id: string;
   panel?: Snippet;
   panelTitle?: string;
   panelActions?: Snippet;
-  path?: string;
-  closePath?: string;
+  defaultOpenPanel?: boolean;
 }
 
 export interface SidebarCollapseTriggerProps extends HTMLButtonAttributes {

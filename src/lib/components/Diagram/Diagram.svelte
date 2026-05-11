@@ -1,10 +1,14 @@
 <script lang="ts">
-  import { getDiagramContext } from '~/App.context.svelte';
+  import { attachNewNode, getDiagramContext } from '~/App.context.svelte';
   import { getLayout } from '~/lib/modules/layout';
   import type { RenderEdge, RenderNode } from '~/lib/modules/layout';
   import { AddButton, type AddButtonProps } from '../AddButton';
-  import { Node } from './Node';
+  import { Node, type NodeProps } from './Node';
   import { edgeMidpoint, roundedEdgePath } from './Diagram.utils';
+  import type { NodeTypes } from '~/lib/modules/nodes';
+  import { navigate } from 'svelte-routing';
+  import { generatePath } from '~/utils';
+  import { DrawerRoutes } from '../SidebarDrawer';
 
   let {
     diagram: { nodes, edges, start },
@@ -45,8 +49,41 @@
   };
 
   const onSelectHandler: AddButtonProps['onSelect'] = (_, option) => {
-    console.log('hover', hoveredEdgeId, layoutEdgesById.get(hoveredEdgeId));
-    console.log('node', nodes.get(layoutEdgesById.get(hoveredEdgeId).source));
+    const layoutEdge = hoveredEdgeId
+      ? layoutEdgesById.get(hoveredEdgeId)
+      : undefined;
+
+    if (!layoutEdge) {
+      console.error('Not edge found');
+      return;
+    }
+
+    const sourceNode = nodes.get(layoutEdge.source);
+
+    if (!sourceNode) {
+      console.error('Invalid source node', layoutEdge.source);
+      return;
+    }
+
+    // TODO: validate if is branch edge
+
+    const newNode = attachNewNode(sourceNode, option.value as NodeTypes);
+
+    navigate(
+      generatePath(DrawerRoutes.NodeTypeId, {
+        id: newNode.id,
+        type: newNode.type,
+      }),
+    );
+  };
+
+  const onNodeClickHandler = (node: NodeProps['node']) => {
+    navigate(
+      generatePath(DrawerRoutes.NodeTypeId, {
+        id: node.id,
+        type: node.type,
+      }),
+    );
   };
 </script>
 
@@ -138,7 +175,12 @@
     {@const node = nodes.get(renderNode.id)}
 
     {#if node}
-      <Node {node} class="absolute" style={nodeStyle(renderNode)} />
+      <Node
+        {node}
+        class="absolute"
+        style={nodeStyle(renderNode)}
+        onclick={() => onNodeClickHandler(node)}
+      />
     {/if}
   {/each}
 </div>

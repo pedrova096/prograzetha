@@ -6,12 +6,13 @@ export enum FormFields {
   Type = 'type',
 }
 
-export type ReadDrawerForm = {
+export type InputDrawerForm = {
   [FormFields.Variable]: string;
   [FormFields.Type]: InputType;
 };
 
-export type ReadDrawerProps = {
+export type InputDrawerProps = {
   node: InputNode | null;
   onSave: (node: InputNode) => void;
+  onClose?: () => void;
 };

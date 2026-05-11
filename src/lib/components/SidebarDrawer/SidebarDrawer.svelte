@@ -1,20 +1,86 @@
 <script lang="ts">
   import { Play, Settings, Code } from 'lucide-svelte';
-  import { InputNode } from '~/lib/modules/nodes';
-  import { Sidebar, type SidebarPanel } from '../Sidebar';
-  import { ReadDrawer } from './ReadDrawer';
-  import { DrawerRoutes } from './SidebarDrawer.constants';
+  import { getDiagramContext, updateNode } from '~/App.context.svelte';
+  import {
+    InputNode,
+    OperationNode,
+    OutputNode,
+    type Node,
+  } from '~/lib/modules/nodes';
+  import { Sidebar } from '../Sidebar';
+  import { InputDrawer } from './InputDrawer';
+  import { OperationDrawer } from './OperationDrawer';
+  import { OutputDrawer } from './OutputDrawer';
+  import { DrawerRoutes, NodeRoutes } from './SidebarDrawer.constants';
   import type { SidebarDrawerProps } from './SidebarDrawer.types';
+  import { navigate, Route, useLocation } from 'svelte-routing';
 
   let { class: className, ...props }: SidebarDrawerProps = $props();
 
+  let {
+    diagram: { nodes },
+  } = $derived(getDiagramContext());
+
   let collapsed = $state(false);
-  let readNode = $state(InputNode.create());
-  let panel = $state<SidebarPanel | null>(null);
+  let actionId = $state<string | null>(null);
+  const location = useLocation();
+  const pathname = $derived($location.pathname);
+  let previousPathname = $state(pathname);
+
+  const closePanel = () => {
+    actionId = null;
+  };
+
+  $effect(() => {
+    if (pathname === previousPathname) return;
+
+    closePanel();
+    previousPathname = pathname;
+  });
+
+  const getInputNode = (id: string): InputNode | null => {
+    const node = nodes.get(id);
+
+    if (!node || !InputNode.nodeIs(node)) return null;
+
+    return node;
+  };
+
+  const getOperationNode = (id: string): OperationNode | null => {
+    const node = nodes.get(id);
+
+    if (!node || !OperationNode.nodeIs(node)) return null;
+
+    return node;
+  };
+
+  const getOutputNode = (id: string): OutputNode | null => {
+    const node = nodes.get(id);
+
+    if (!node || !OutputNode.nodeIs(node)) return null;
+
+    return node;
+  };
+
+  const onSaveHandler = (node: Node) => {
+    updateNode(node);
+    closePanel();
+    navigate(DrawerRoutes.Home);
+  };
+  const onCloseNodePanelHandler = () => {
+    closePanel();
+    navigate(DrawerRoutes.Home);
+  };
+
+  const toggleCodePanelRoute = () => {
+    navigate(
+      pathname === DrawerRoutes.Code ? DrawerRoutes.Home : DrawerRoutes.Code,
+    );
+  };
 </script>
 
 <div {...props} class={['z-10 h-full', className]}>
-  <Sidebar.Root bind:collapsed bind:panel class="h-full">
+  <Sidebar.Root bind:collapsed bind:actionId class="h-full">
     <Sidebar.CollapseTrigger />
 
     <Sidebar.Header>
@@ -35,7 +101,33 @@
 
     <Sidebar.Content>
       <Sidebar.Group>
-        <ReadDrawer node={readNode} onSave={(node) => (readNode = node)} />
+        <Route path={NodeRoutes.InputId} let:params>
+          {#key params.id}
+            <InputDrawer
+              node={getInputNode(params.id)}
+              onSave={onSaveHandler}
+              onClose={onCloseNodePanelHandler}
+            />
+          {/key}
+        </Route>
+        <Route path={NodeRoutes.OperationId} let:params>
+          {#key params.id}
+            <OperationDrawer
+              node={getOperationNode(params.id)}
+              onSave={onSaveHandler}
+              onClose={onCloseNodePanelHandler}
+            />
+          {/key}
+        </Route>
+        <Route path={NodeRoutes.OutputId} let:params>
+          {#key params.id}
+            <OutputDrawer
+              node={getOutputNode(params.id)}
+              onSave={onSaveHandler}
+              onClose={onCloseNodePanelHandler}
+            />
+          {/key}
+        </Route>
       </Sidebar.Group>
 
       <Sidebar.Divider />
@@ -43,9 +135,11 @@
       <Sidebar.Group>
         <Sidebar.Action
           icon={Code}
+          id="code"
           label="Código"
-          path={DrawerRoutes.Code}
-          closePath={DrawerRoutes.Home}
+          active={pathname === DrawerRoutes.Code}
+          defaultOpenPanel={pathname === DrawerRoutes.Code}
+          onclick={toggleCodePanelRoute}
         >
           {#snippet panel()}{/snippet}
         </Sidebar.Action>

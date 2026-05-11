@@ -1,11 +1,11 @@
 import * as yup from 'yup';
 
 import { InputType } from '~/lib/modules/nodes/inputNode/inputNode.types';
-import { FormFields, type ReadDrawerForm } from './ReadDrawer.types';
+import { FormFields, type InputDrawerForm } from './InputDrawer.types';
 
-export const createReadDrawerData = (
-  data?: Partial<ReadDrawerForm>,
-): ReadDrawerForm => ({
+export const createInputDrawerData = (
+  data?: Partial<InputDrawerForm>,
+): InputDrawerForm => ({
   [FormFields.Variable]: data?.[FormFields.Variable] ?? '',
   [FormFields.Type]: data?.[FormFields.Type] ?? InputType.String,
 });

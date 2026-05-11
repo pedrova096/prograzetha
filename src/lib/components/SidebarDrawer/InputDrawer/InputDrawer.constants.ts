@@ -1,6 +1,6 @@
 import { InputType } from '~/lib/modules/nodes/inputNode/inputNode.types';
 
-export const READ_TYPE_OPTIONS = [
+export const INPUT_TYPE_OPTIONS = [
   {
     label: 'Número',
     value: InputType.Number,

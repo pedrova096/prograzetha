@@ -11,7 +11,7 @@ import type {
 import type { Recordable } from '~/lib/types';
 import { OutputTraceCallbackNode } from './outputNode.trace';
 
-import { Node, NodeTypes } from '../base';
+import { Node, NodeTypes, type NodeState } from '../base';
 import type { OutputNodeData, OutputNodeOptions } from './outputNode.types';
 
 export class OutputNode extends Node<OutputNodeData> {
@@ -19,12 +19,17 @@ export class OutputNode extends Node<OutputNodeData> {
     id = createId(),
     type = NodeTypes.Output,
     data = { text: '', tree: null } as OutputNodeData,
+    state?: NodeState,
   ) {
-    super(id, type, data);
+    super(id, type, data, undefined, state);
   }
 
   public static create() {
     return new OutputNode();
+  }
+
+  public static nodeIs(node: Node): node is OutputNode {
+    return node.type === NodeTypes.Output;
   }
 
   private getTemplateLiteral() {
@@ -98,8 +103,8 @@ export class OutputNode extends Node<OutputNodeData> {
     };
   }
 
-  public withData(data: OutputNodeData) {
-    return new OutputNode(this.id, this.type, data);
+  public withUpdate(data = this.data, state = this.state) {
+    return new OutputNode(this.id, this.type, data, state);
   }
 
   public getTrace(env: Recordable): OutputTraceCallbackNode {
