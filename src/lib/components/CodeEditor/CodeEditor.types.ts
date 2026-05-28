@@ -1,11 +1,16 @@
-import type { CompletionSource, Completion } from "@codemirror/autocomplete";
-import type { EditorView } from "codemirror";
-import type { Snippet } from "svelte";
-import type { HTMLAttributes } from "svelte/elements";
+import type {
+  CompletionSource,
+  Completion,
+  autocompletion,
+} from '@codemirror/autocomplete';
+import type { Extension } from '@codemirror/state';
+import type { EditorView } from 'codemirror';
+import type { Snippet } from 'svelte';
+import type { HTMLAttributes } from 'svelte/elements';
 
 export enum Language {
-  JavaScript = "javascript",
-  Json = "json",
+  JavaScript = 'javascript',
+  Json = 'json',
 }
 
 export type CodeEditorChangeEvent = CustomEvent<{
@@ -14,8 +19,12 @@ export type CodeEditorChangeEvent = CustomEvent<{
 }>;
 
 export type AutocompleteConfig = {
+  addToOptions?: NonNullable<
+    Parameters<typeof autocompletion>[0]
+  >['addToOptions'];
   completions?: Completion[] | CompletionSource;
   highlightClass?: string;
+  icons?: boolean;
   maxRenderedOptions?: number;
   defaultKeymap?: boolean;
   matcher?: RegExp;
@@ -23,11 +32,11 @@ export type AutocompleteConfig = {
 
 export type CodeEditorProps = Omit<
   HTMLAttributes<HTMLDivElement>,
-  "value" | "onchange" | "class"
+  'value' | 'onchange'
 > & {
   autocomplete?: AutocompleteConfig;
-  class?: string;
   error?: boolean;
+  extensions?: Extension[];
   helper?: string[] | null;
   helperHint?: Snippet<[]>;
   label?: string;

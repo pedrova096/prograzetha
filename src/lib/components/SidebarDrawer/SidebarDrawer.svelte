@@ -2,6 +2,7 @@
   import { Play, Settings, Code } from 'lucide-svelte';
   import { getDiagramContext, updateNode } from '~/App.context.svelte';
   import {
+    ConditionalNode,
     InputNode,
     OperationNode,
     OutputNode,
@@ -9,6 +10,7 @@
   } from '~/lib/modules/nodes';
   import { Sidebar } from '../Sidebar';
   import { InputDrawer } from './InputDrawer';
+  import { ConditionalDrawer } from './ConditionalDrawer';
   import { OperationDrawer } from './OperationDrawer';
   import { OutputDrawer } from './OutputDrawer';
   import { DrawerRoutes, NodeRoutes } from './SidebarDrawer.constants';
@@ -42,6 +44,14 @@
     const node = nodes.get(id);
 
     if (!node || !InputNode.nodeIs(node)) return null;
+
+    return node;
+  };
+
+  const getConditionalNode = (id: string): ConditionalNode | null => {
+    const node = nodes.get(id);
+
+    if (!node || !ConditionalNode.nodeIs(node)) return null;
 
     return node;
   };
@@ -105,6 +115,15 @@
           {#key params.id}
             <InputDrawer
               node={getInputNode(params.id)}
+              onSave={onSaveHandler}
+              onClose={onCloseNodePanelHandler}
+            />
+          {/key}
+        </Route>
+        <Route path={NodeRoutes.ConditionId} let:params>
+          {#key params.id}
+            <ConditionalDrawer
+              node={getConditionalNode(params.id)}
               onSave={onSaveHandler}
               onClose={onCloseNodePanelHandler}
             />

@@ -1,12 +1,9 @@
 import type jsep from 'jsep';
+import type { LiteralVariants } from '~/lib/constants';
 
 export type OperationNodeData = {
   leftSide: string;
   rightSide: string;
   tree: null | jsep.Expression;
-  isNewVariable: boolean;
-};
-
-export type OperationNodeOptions = {
-  variables: string[];
+  leftMeta: { isDeclaration: boolean; type: `${LiteralVariants}` };
 };

@@ -3,10 +3,11 @@
   import { Dropdown } from '~/lib/components/Dropdown';
   import { NodeTypes } from '~/lib/modules/nodes';
 
-  import { TITLE_BY_TYPE } from '../Diagram/Node';
+  import { ICON_BY_TYPE, TITLE_BY_TYPE } from '../Diagram/Node';
   import type { AddButtonProps } from './AddButton.types';
 
   let {
+    icon: Icon = Plus,
     onSelect,
     open = $bindable(false),
     triggerLabel = 'Add node',
@@ -22,6 +23,7 @@
   ].map((type) => ({
     label: TITLE_BY_TYPE[type],
     value: type,
+    icon: ICON_BY_TYPE[type],
   }));
 </script>
 
@@ -34,7 +36,7 @@
       ]}
       aria-label={triggerLabel}
     >
-      <Plus class="size-3.5" />
+      <Icon class="size-3.5" />
     </Dropdown.Trigger>
     <Dropdown.Content {options} searchable clearable />
   </Dropdown.Root>

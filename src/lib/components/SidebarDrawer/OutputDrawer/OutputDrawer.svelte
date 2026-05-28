@@ -4,7 +4,6 @@
   import { GitCommitVertical, Save } from 'lucide-svelte';
 
   import { getDiagramContext } from '~/App.context.svelte';
-  import { CodeEditor } from '../../CodeEditor';
   import { Sidebar } from '../../Sidebar';
 
   import {
@@ -17,6 +16,8 @@
     type OutputDrawerForm,
     type OutputDrawerProps,
   } from './OutputDrawer.types';
+  import MentionInput from '../../MentionInput/MentionInput.svelte';
+  import { LITERAL_VARIANT_MAP } from '~/lib/constants';
 
   let { node, onSave, onClose }: OutputDrawerProps = $props();
 
@@ -24,25 +25,27 @@
     diagram: { nodes, edges },
   } = $derived(getDiagramContext());
 
-  let completions = $derived(
-    node
-      ? getPreviousVariables({ nodes, edges }, node).map((variable) => ({
-          label: `@${variable}`,
-          type: 'variable',
-        }))
-      : [],
-  );
+  let options = $derived.by(() => {
+    if (!node) return [];
+    const variables = getPreviousVariables({ nodes, edges }, node);
 
-  let autocompleteConfig = $derived({
-    completions,
-    highlightClass: 'cm-completion-highlighted',
-    maxRenderedOptions: 8,
-    defaultKeymap: true,
-    matcher: /@(\w+\.?)+/,
+    return variables.map((variable) => {
+      const variant = variable.type;
+      const meta = LITERAL_VARIANT_MAP[variant];
+
+      return {
+        value: `${variable.name}`,
+        label: `${variable.name}`,
+        type: variant,
+        icon: meta.svg,
+        colorClass: meta.class,
+        detail: meta.label,
+      };
+    });
   });
 
-  const { form, errors, touched, data, setData } = createForm<OutputDrawerForm>(
-    {
+  const { form, errors, touched, data, setData, setFields } =
+    createForm<OutputDrawerForm>({
       extend: validator({ schema }),
       onSubmit: (values) => {
         if (!node) return;
@@ -51,8 +54,7 @@
       },
       // svelte-ignore state_referenced_locally
       initialValues: createOutputDrawerData(node?.data),
-    },
-  );
+    });
 
   $effect(() => {
     setData(createOutputDrawerData(node?.data));
@@ -92,16 +94,19 @@
       use:form
       class="flex h-full min-h-0 flex-col gap-4"
     >
-      <CodeEditor
+      <MentionInput
         name={FormFields.Text}
         label="Texto"
         placeholder="Texto"
-        bind:value={$data[FormFields.Text]}
         error={!!$errors[FormFields.Text]}
         helper={$touched[FormFields.Text]
           ? $errors[FormFields.Text]
           : undefined}
-        autocomplete={autocompleteConfig}
+        bind:value={
+          () => $data[FormFields.Text] || '',
+          (value) => setFields(FormFields.Text, value)
+        }
+        {options}
       />
     </form>
   {/snippet}

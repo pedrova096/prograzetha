@@ -1,8 +1,6 @@
-import type { ComponentType, Snippet, SvelteComponent } from 'svelte';
+import type { Snippet } from 'svelte';
 import type { HTMLAttributes, HTMLButtonAttributes } from 'svelte/elements';
-import type { IconProps } from 'lucide-svelte';
-
-export type SidebarIcon = ComponentType<SvelteComponent<IconProps>>;
+import type { LucideIconProps } from '~/lib/types';
 
 export type SidebarPanel = {
   title?: string;
@@ -40,7 +38,7 @@ export interface SidebarGroupProps extends HTMLAttributes<HTMLDivElement> {
 export interface SidebarDividerProps extends HTMLAttributes<HTMLDivElement> {}
 
 export interface SidebarItemProps extends HTMLButtonAttributes {
-  icon?: SidebarIcon;
+  icon?: LucideIconProps;
   label: string;
   active?: boolean;
   badge?: string | number;

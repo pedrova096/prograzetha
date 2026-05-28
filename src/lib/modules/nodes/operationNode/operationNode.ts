@@ -1,21 +1,13 @@
 import { createId } from '@paralleldrive/cuid2';
-import type {
-  Expression,
-  ExpressionStatement,
-  VariableDeclaration,
-} from 'estree';
 
 import { Node, NodeTypes, type NodeState } from '../base';
-import type {
-  OperationNodeData,
-  OperationNodeOptions,
-} from './operationNode.types';
+import type { OperationNodeData } from './operationNode.types';
 
 const DEFAULT_OPERATION_DATA: OperationNodeData = {
   leftSide: '',
   rightSide: '',
   tree: null,
-  isNewVariable: false,
+  leftMeta: { isDeclaration: false, type: 'null' },
 };
 
 export class OperationNode extends Node<OperationNodeData> {
@@ -36,11 +28,12 @@ export class OperationNode extends Node<OperationNodeData> {
     return node.type === NodeTypes.Operation;
   }
 
+  /*
   toAST(
     options: OperationNodeOptions = { variables: [] },
   ): ExpressionStatement | VariableDeclaration {
     const { variables } = options;
-    if (this.data.isNewVariable || !variables.includes(this.data.leftSide)) {
+    if (this.data.leftMeta.isNew || !variables.includes(this.data.leftSide)) {
       return {
         type: 'VariableDeclaration',
         declarations: [
@@ -70,6 +63,7 @@ export class OperationNode extends Node<OperationNodeData> {
       },
     };
   }
+  */
 
   public withUpdate(data = this.data, state = this.state) {
     return new OperationNode(this.id, this.type, data, state);

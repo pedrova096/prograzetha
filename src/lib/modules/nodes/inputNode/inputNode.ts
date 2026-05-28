@@ -2,14 +2,13 @@ import { createId } from '@paralleldrive/cuid2';
 import type { VariableDeclaration } from 'estree';
 
 import { Node, NodeTypes, type NodeState } from '../base';
-import { InputTraceCallbackNode } from './inputNode.trace';
 import type { InputNodeData } from './inputNode.types';
 
 export class InputNode extends Node<InputNodeData> {
   constructor(
     id = createId(),
     type = NodeTypes.Input,
-    data = { variable: '' } as InputNodeData,
+    data = { variable: '', type: 'string' } as InputNodeData,
     state?: NodeState,
   ) {
     super(id, type, data, undefined, state);
@@ -23,6 +22,7 @@ export class InputNode extends Node<InputNodeData> {
     return node.type === NodeTypes.Input;
   }
 
+  /*
   toAST(value?: unknown): VariableDeclaration {
     return {
       type: 'VariableDeclaration',
@@ -42,12 +42,9 @@ export class InputNode extends Node<InputNodeData> {
       kind: 'let',
     };
   }
+  */
 
   public withUpdate(data = this.data, state = this.state) {
     return new InputNode(this.id, this.type, data, state);
-  }
-
-  public getTrace(): InputTraceCallbackNode {
-    return new InputTraceCallbackNode(this.data);
   }
 }

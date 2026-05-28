@@ -5,7 +5,7 @@
   import { AddButton, type AddButtonProps } from '../AddButton';
   import { Node, type NodeProps } from './Node';
   import { edgeMidpoint, roundedEdgePath } from './Diagram.utils';
-  import type { NodeTypes } from '~/lib/modules/nodes';
+  import { NodeTypes } from '~/lib/modules/nodes';
   import { navigate } from 'svelte-routing';
   import { generatePath } from '~/utils';
   import { DrawerRoutes } from '../SidebarDrawer';
@@ -78,6 +78,8 @@
   };
 
   const onNodeClickHandler = (node: NodeProps['node']) => {
+    if (node.type === NodeTypes.Start || node.type === NodeTypes.End) return;
+
     navigate(
       generatePath(DrawerRoutes.NodeTypeId, {
         id: node.id,

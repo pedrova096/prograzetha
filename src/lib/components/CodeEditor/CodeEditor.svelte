@@ -1,5 +1,6 @@
 <script lang="ts">
   import { javascript } from '@codemirror/lang-javascript';
+  import { Prec } from '@codemirror/state';
   import { minimalSetup, EditorView } from 'codemirror';
   import { onMount } from 'svelte';
   import {
@@ -14,6 +15,7 @@
   } from '@codemirror/autocomplete';
 
   import { Language, type CodeEditorProps } from './CodeEditor.types';
+  import { javascriptTheme } from './CodeEditor.theme';
 
   let editor = $state<EditorView | null>(null);
 
@@ -21,6 +23,7 @@
     autocomplete: autocompleteConfig,
     class: className,
     error,
+    extensions: extensionConfig = [],
     helper,
     helperHint,
     id,
@@ -86,62 +89,82 @@
     };
   }
 
+  const preventEditorDrop = (event: DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    return true;
+  };
+
   onMount(() => {
-    if (ref) {
-      const extensions = [
-        minimalSetup,
-        EditorView.editorAttributes.of({
-          class: ['editor-Ω', className].filter(Boolean).join(' '),
-        }),
-        EditorView.updateListener.of((update) => {
-          if (update.docChanged && update.view.hasFocus) {
-            value = update.state.doc.toString();
-            const changeEvent = new CustomEvent('docChange', {
-              detail: { value, editor },
-            });
-            onchange?.(changeEvent);
-          }
-        }),
-      ];
+    if (!ref) return;
 
-      if (language === Language.JavaScript) {
-        extensions.push(javascript());
-      }
+    const extensions = [
+      minimalSetup,
+      EditorView.lineWrapping,
+      EditorView.editorAttributes.of({
+        class: ['editor-Ω', className].filter(Boolean).join(' '),
+      }),
+      EditorView.domEventHandlers({
+        dragenter: preventEditorDrop,
+        dragover: preventEditorDrop,
+        drop: preventEditorDrop,
+      }),
+      EditorView.updateListener.of((update) => {
+        if (update.docChanged && update.view.hasFocus) {
+          value = update.state.doc.toString();
 
-      // Add autocomplete if configured
-      if (autocompleteConfig) {
-        const completionSource = createCompletionSource();
-
-        if (completionSource) {
-          extensions.push(
-            keymap.of([
-              ...completionKeymap,
-              { key: 'Ctrl-Space', run: startCompletion },
-            ]),
-            autocompletion({
-              override: [completionSource],
-              maxRenderedOptions: autocompleteConfig.maxRenderedOptions ?? 10,
-              defaultKeymap: autocompleteConfig.defaultKeymap ?? true,
-              // TODO: addToOptions:
-            }),
-          );
+          const changeEvent = new CustomEvent('docChange', {
+            detail: { value, editor },
+          });
+          onchange?.(changeEvent);
         }
-      }
+      }),
+      ...extensionConfig,
+    ];
 
-      if (readonly) {
-        extensions.push(EditorView.editable.of(false));
-      }
-
-      if (placeholder) {
-        extensions.push(placeholderExtension(placeholder));
-      }
-
-      editor = new EditorView({
-        doc: value,
-        extensions,
-        parent: ref,
-      });
+    if (language === Language.JavaScript) {
+      extensions.push(javascript(), javascriptTheme);
     }
+
+    // Add autocomplete if configured
+    if (autocompleteConfig) {
+      const completionSource = createCompletionSource();
+
+      if (completionSource) {
+        extensions.push(
+          keymap.of([
+            ...completionKeymap,
+            { key: 'Ctrl-Space', run: startCompletion },
+          ]),
+          autocompletion({
+            override: [completionSource],
+            addToOptions: autocompleteConfig.addToOptions,
+            icons: autocompleteConfig.icons,
+            maxRenderedOptions: autocompleteConfig.maxRenderedOptions ?? 10,
+            defaultKeymap: autocompleteConfig.defaultKeymap ?? true,
+          }),
+        );
+      }
+    }
+
+    if (readonly) {
+      extensions.push(EditorView.editable.of(false));
+    }
+
+    if (placeholder) {
+      extensions.push(placeholderExtension(placeholder));
+    }
+
+    editor = new EditorView({
+      doc: value,
+      extensions,
+      parent: ref,
+    });
+
+    return () => {
+      editor?.destroy();
+      editor = null;
+    };
   });
 
   $effect(() => {
@@ -166,7 +189,7 @@
   @reference "../../app.css";
 
   :global(.editor-Ω) {
-    @apply flex w-full rounded-md border border-zinc-200 bg-zinc-50 px-1 py-1 text-sm ring-offset-zinc-50 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply flex w-full rounded-md border border-zinc-200 bg-zinc-50 px-0.5 py-0.5 text-sm ring-offset-zinc-50 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50;
 
     & :global(.cm-line) {
     }
@@ -205,5 +228,9 @@
 
   :global(.cm-completion-keyword) {
     @apply bg-purple-50 text-purple-600;
+  }
+
+  :global(.cm-mention-token) {
+    @apply inline-flex items-center gap-1 rounded border px-1 font-semibold;
   }
 </style>

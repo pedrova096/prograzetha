@@ -29,6 +29,7 @@
   });
 
   $effect(() => {
+    // Re-initialize
     setData(createInputDrawerData(node?.data));
   });
 </script>

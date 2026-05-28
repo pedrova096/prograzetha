@@ -1,0 +1,81 @@
+<script lang="ts">
+  import { createForm } from 'felte';
+  import { GitCommitVertical, Save } from 'lucide-svelte';
+
+  import { Sidebar } from '../../Sidebar';
+  import {
+    FormFields,
+    type ConditionalDrawerForm,
+    type ConditionalDrawerProps,
+  } from './ConditionalDrawer.types';
+  import {
+    createConditionDrawerData,
+    normalizeConditions,
+  } from './ConditionalDrawer.utils';
+  import { ConditionalComposer } from './ConditionalComposer';
+
+  let { node, onSave, onClose }: ConditionalDrawerProps = $props();
+
+  const { form, data, setData } = createForm<ConditionalDrawerForm>({
+    onSubmit: (values) => {
+      if (!node) return;
+
+      onSave(
+        node.withUpdate({
+          ...values,
+          [FormFields.Conditions]: normalizeConditions(
+            values[FormFields.Conditions],
+          ),
+        }),
+      );
+    },
+    // svelte-ignore state_referenced_locally
+    initialValues: createConditionDrawerData(node?.data),
+  });
+
+  $effect(() => {
+    console.log('CONDITION_DRAWER_TRIGGER');
+    setData(createConditionDrawerData(node?.data));
+  });
+</script>
+
+<Sidebar.Action
+  icon={GitCommitVertical}
+  id="node-condition"
+  label="Nodo"
+  panelTitle="Condicion"
+  defaultOpenPanel
+>
+  {#snippet panelActions()}
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        class="rounded-md px-2 py-1.5 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+        onclick={onClose}
+      >
+        Cerrar
+      </button>
+      <button
+        type="submit"
+        form="conditional-drawer-form"
+        class="inline-flex items-center gap-2 rounded-md bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-800"
+      >
+        <Save class="size-3.5" />
+        Guardar
+      </button>
+    </div>
+  {/snippet}
+
+  {#snippet panel()}
+    <form
+      id="conditional-drawer-form"
+      use:form
+      class="flex h-full min-h-0 flex-col gap-4"
+    >
+      <ConditionalComposer
+        name={FormFields.Conditions}
+        bind:value={$data[FormFields.Conditions]}
+      />
+    </form>
+  {/snippet}
+</Sidebar.Action>

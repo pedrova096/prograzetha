@@ -8,7 +8,7 @@ export enum FormFields {
 
 export type InputDrawerForm = {
   [FormFields.Variable]: string;
-  [FormFields.Type]: InputType;
+  [FormFields.Type]: `${InputType}`;
 };
 
 export type InputDrawerProps = {

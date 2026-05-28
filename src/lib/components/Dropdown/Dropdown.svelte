@@ -44,6 +44,7 @@
     close: () => instance?.hide(),
     toggle: () => (open ? instance?.hide() : instance?.show()),
     onSelect: (event, option) => {
+      option.onclick?.(event, option);
       onSelect?.(event, option);
       instance?.hide();
     },

@@ -12,15 +12,20 @@
 
   import {
     createOperationDrawerData,
+    createOperationNodeData,
+    createSchema,
     getPreviousVariables,
-    isVariableFromList,
-    schema,
+    inferOperationType,
+    isDeclarationVariable,
   } from './OperationDrawer.utils';
   import {
     FormFields,
     type OperationDrawerForm,
     type OperationDrawerProps,
   } from './OperationDrawer.types';
+  import { untrack } from 'svelte';
+  import { derived } from 'svelte/store';
+  import { LiteralVariantBadge } from '../../LiteralVariantBadge';
 
   let { node, onSave, onClose }: OperationDrawerProps = $props();
 
@@ -29,6 +34,9 @@
   } = $derived(getDiagramContext());
 
   let variablesList = $derived(getPreviousVariables({ nodes, edges }, node));
+  let variablesSet = $derived(
+    new Set(variablesList.map((variable) => variable.name)),
+  );
 
   const {
     form,
@@ -40,52 +48,52 @@
     setTouched,
     isValid,
   } = createForm<OperationDrawerForm>({
-    extend: validator({ schema }),
+    // svelte-ignore state_referenced_locally
+    extend: validator({ schema: createSchema({ variablesSet }) }),
     onSubmit: (values) => {
       if (!node) return;
 
-      const isNewVariable = !variablesList.some(
-        (variable) => variable.name === values[FormFields.LeftSide],
-      );
-
-      onSave(
-        node.withUpdate(
-          {
-            ...values,
-            isNewVariable,
-          },
-          NodeStates.Ok,
-        ),
-      );
+      onSave(node.withUpdate(createOperationNodeData(values), NodeStates.Ok));
     },
     // svelte-ignore state_referenced_locally
     initialValues: createOperationDrawerData(node?.data),
   });
 
+  let leftFromList = $derived(
+    isDeclarationVariable(
+      {
+        variablesSet,
+        hasError: !!$errors[FormFields.LeftSide],
+      },
+      $data[FormFields.LeftSide],
+    ),
+  );
+
   $effect(() => {
-    setData(createOperationDrawerData(node?.data));
+    setData(FormFields.IsDeclaration, leftFromList);
   });
 
+  $effect(() => {
+    // Re-initialize
+    setFields(createOperationDrawerData(node?.data));
+  });
   const onCodeEditorChangeHandler: CodeEditorProps['onchange'] = (event) => {
     setTouched(FormFields.RightSide, true);
 
     try {
-      setFields(FormFields.Tree, jsep(event.detail.value));
+      const newTree = jsep(event.detail.value);
+      setFields(FormFields.Tree, newTree);
+      setFields(FormFields.InferType, inferOperationType(newTree));
     } catch {
       setFields(FormFields.Tree, null);
     }
   };
 
-  let leftFromList = $derived(
-    isVariableFromList(
-      {
-        list: variablesList,
-        hasError: !!$errors[FormFields.LeftSide],
-        isTouched: $touched[FormFields.LeftSide],
-      },
-      $data[FormFields.LeftSide],
-    ),
-  );
+  $inspect($data[FormFields.IsDeclaration], {
+    variablesSet,
+    hasError: !!$errors[FormFields.LeftSide],
+    isTouched: $touched[FormFields.LeftSide],
+  });
 </script>
 
 <Sidebar.Action
@@ -134,37 +142,28 @@
         clearable
       />
 
-      {#if leftFromList !== null && !leftFromList}
+      {#if $data[FormFields.InferType] && $touched[FormFields.RightSide]}
+        <LiteralVariantBadge value={$data[FormFields.InferType]} />
+      {/if}
+      {#if $data[FormFields.IsDeclaration]}
         <div
           class="flex self-start rounded-md bg-amber-100 px-2 py-1 text-xs font-medium text-amber-900"
         >
           <Lightbulb class="mr-1 inline size-3.5" />
-          Variable nueva
+          Declaración de variable
         </div>
       {/if}
 
       <CodeEditor
         name={FormFields.RightSide}
         label="Operación"
+        language="javascript"
         placeholder="1 + 1"
         bind:value={$data[FormFields.RightSide]}
         onchange={onCodeEditorChangeHandler}
         error={!!$errors[FormFields.RightSide]}
         helper={$errors[FormFields.RightSide]}
       />
-
-      {#if $isValid && $data[FormFields.Tree]}
-        {@const fullOperation = `${leftFromList ? '' : 'let '}${$data[FormFields.LeftSide]} = ${$data[FormFields.RightSide]}`}
-
-        <CodeEditor
-          name={FormFields.Tree}
-          value={fullOperation}
-          error={!!$errors[FormFields.Tree]}
-          helper={$errors[FormFields.Tree]}
-          readonly
-          class="!bg-zinc-100 !text-xs"
-        />
-      {/if}
     </form>
   {/snippet}
 </Sidebar.Action>

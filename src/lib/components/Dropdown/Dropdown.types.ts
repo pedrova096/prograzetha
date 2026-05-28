@@ -1,11 +1,13 @@
 import type { Snippet } from 'svelte';
 import type { HTMLButtonAttributes } from 'svelte/elements';
 import type { Props as TippyProps } from 'tippy.js';
+import type { LucideIconProps } from '~/lib/types';
 
 export interface DropdownOption<T = string> {
   label: string;
   value: T;
-  icon?: string;
+  icon?: LucideIconProps;
+  onclick?: (event: MouseEvent, option: DropdownOption<T>) => void;
   disabled?: boolean;
 }
 
@@ -31,6 +33,8 @@ export interface ContentProps<T = string> {
 export interface ItemProps<T = string> {
   value: T;
   label: string;
+  icon?: LucideIconProps;
+  onclick?: (event: MouseEvent, option: DropdownOption<T>) => void;
   disabled?: boolean;
   children?: Snippet;
 }

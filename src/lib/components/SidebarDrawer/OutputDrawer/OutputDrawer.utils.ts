@@ -6,6 +6,7 @@ import {
   type GetVariablesUntilOptions,
   type OutputDrawerForm,
 } from './OutputDrawer.types';
+import type { LiteralVariants } from '~/lib/constants';
 
 export const createOutputDrawerData = (
   data?: Partial<OutputDrawerForm>,
@@ -21,7 +22,7 @@ export const getPreviousVariables = (
   options: GetVariablesUntilOptions,
   node: Node,
 ) => {
-  const variables: string[] = [];
+  const variables: { name: string; type: `${LiteralVariants}` }[] = [];
 
   let currentId: string | undefined = node.id;
 
@@ -30,11 +31,17 @@ export const getPreviousVariables = (
     const edge = options.edges.get(currentId);
 
     if (node instanceof InputNode && node.data.variable) {
-      variables.push(node.data.variable);
+      variables.push({
+        name: node.data.variable,
+        type: node.data.type,
+      });
     }
 
-    if (node instanceof OperationNode && node.data.isNewVariable) {
-      variables.push(node.data.leftSide);
+    if (node instanceof OperationNode && node.data.leftMeta.isDeclaration) {
+      variables.push({
+        name: node.data.leftSide,
+        type: node.data.leftMeta.type,
+      });
     }
 
     currentId = edge?.previous;

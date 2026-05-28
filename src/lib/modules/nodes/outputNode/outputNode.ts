@@ -1,18 +1,13 @@
 import { createId } from '@paralleldrive/cuid2';
 import type {
-  ExpressionStatement,
   Identifier,
   Literal,
   TemplateElement,
   TemplateLiteral,
-  VariableDeclaration,
 } from 'estree';
 
-import type { Recordable } from '~/lib/types';
-import { OutputTraceCallbackNode } from './outputNode.trace';
-
 import { Node, NodeTypes, type NodeState } from '../base';
-import type { OutputNodeData, OutputNodeOptions } from './outputNode.types';
+import type { OutputNodeData } from './outputNode.types';
 
 export class OutputNode extends Node<OutputNodeData> {
   constructor(
@@ -89,6 +84,7 @@ export class OutputNode extends Node<OutputNodeData> {
     }
   }
 
+  /*
   toAST(options: OutputNodeOptions): ExpressionStatement | VariableDeclaration {
     const templateLiteral = this.getTemplateLiteral();
 
@@ -102,12 +98,9 @@ export class OutputNode extends Node<OutputNodeData> {
       },
     };
   }
+  */
 
   public withUpdate(data = this.data, state = this.state) {
     return new OutputNode(this.id, this.type, data, state);
-  }
-
-  public getTrace(env: Recordable): OutputTraceCallbackNode {
-    return new OutputTraceCallbackNode(this.data, env);
   }
 }

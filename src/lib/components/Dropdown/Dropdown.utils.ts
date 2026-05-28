@@ -5,7 +5,7 @@ import tippy from 'tippy.js';
 
 export const getFilteredOptions = (
   searchQuery: string,
-  options: DropdownOption[],
+  options: DropdownOption<any>[],
 ) => {
   const searchQueryTrimmed = searchQuery.trim().toLowerCase();
   if (!searchQueryTrimmed) return options;

@@ -3,7 +3,8 @@
   import { getDropdownContext } from './Dropdown.context';
   import { getFilteredOptions } from './Dropdown.utils';
   import { Input } from '~/lib/components/Input';
-  import type { ContentProps, DropdownOption } from './Dropdown.types';
+  import DropdownItem from './DropdownItem.svelte';
+  import type { ContentProps } from './Dropdown.types';
 
   let {
     options = [],
@@ -13,13 +14,11 @@
     emptyText = 'No results found',
   }: ContentProps<T> = $props();
 
-  const { setContentRef, onSelect } = getDropdownContext();
+  const { setContentRef } = getDropdownContext();
 
   let searchQuery = $state('');
 
-  const filteredOptions = $derived(
-    getFilteredOptions(searchQuery, options as DropdownOption[]),
-  );
+  const filteredOptions = $derived(getFilteredOptions(searchQuery, options));
 </script>
 
 <div
@@ -44,22 +43,13 @@
     {:else}
       <ul class="space-y-0.5">
         {#each filteredOptions as option (option.value)}
-          <li>
-            <button
-              type="button"
-              onclick={(event) => onSelect(event, option)}
-              disabled={option.disabled}
-              class={[
-                'w-full px-3 py-2 text-left text-sm rounded-lg transition-all duration-100',
-                'flex items-center gap-2',
-                option.disabled
-                  ? 'text-slate-300 cursor-not-allowed'
-                  : 'text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 cursor-pointer',
-              ]}
-            >
-              <span class="flex-1">{option.label}</span>
-            </button>
-          </li>
+          <DropdownItem
+            value={option.value}
+            label={option.label}
+            icon={option.icon}
+            onclick={option.onclick}
+            disabled={option.disabled}
+          />
         {/each}
       </ul>
     {/if}

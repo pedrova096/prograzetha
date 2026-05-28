@@ -5,5 +5,5 @@ export enum InputType {
 
 export type InputNodeData = {
   variable: string;
-  type?: InputType;
+  type: `${InputType}`;
 };
