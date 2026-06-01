@@ -1,5 +1,5 @@
-import type { InputNode } from '~/lib/modules/nodes/inputNode/inputNode';
-import type { InputType } from '~/lib/modules/nodes/inputNode/inputNode.types';
+import type { InputNode, InputType } from '~/lib/modules/nodes';
+import type { FormNodeDrawer } from '../SidebarDrawer.types';
 
 export enum FormFields {
   Variable = 'variable',
@@ -11,8 +11,4 @@ export type InputDrawerForm = {
   [FormFields.Type]: `${InputType}`;
 };
 
-export type InputDrawerProps = {
-  node: InputNode | null;
-  onSave: (node: InputNode) => void;
-  onClose?: () => void;
-};
+export interface InputDrawerProps extends FormNodeDrawer<InputNode> {}

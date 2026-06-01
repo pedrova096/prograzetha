@@ -8,7 +8,7 @@
 
   let {
     icon: Icon = Plus,
-    onSelect,
+    onSelected,
     open = $bindable(false),
     triggerLabel = 'Add node',
     class: className,
@@ -28,7 +28,7 @@
 </script>
 
 <div {...props} class={className}>
-  <Dropdown.Root {onSelect} bind:open>
+  <Dropdown.Root {onSelected} bind:open>
     <Dropdown.Trigger
       class={[
         'flex size-5 items-center justify-center rounded-full border border-blue-400 bg-blue-500 text-white shadow-md transition-transform hover:scale-105',

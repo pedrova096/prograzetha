@@ -20,9 +20,10 @@
   {@attach tooltip({ content: id, interactive: false })}
   {...props}
   class={[
-    'flex items-center justify-center rounded-lg border-2 bg-white px-4 py-2 shadow-md transition-shadow hover:shadow-lg z-10 w-40 cursor-pointer border-zinc-300',
+    'flex items-center justify-center rounded-lg border-2 bg-white px-4 py-2 shadow-md transition-shadow hover:shadow-lg z-10 w-40 cursor-pointer',
     state === NodeStates.New && 'border-dashed',
-    state === NodeStates.Error && 'border-red-500',
+    state === NodeStates.Error && 'border-rose-300 shadow-rose-100',
+    state !== NodeStates.Error && 'border-zinc-300',
     className,
   ]}
 >
@@ -32,7 +33,7 @@
       class={[
         'absolute -left-1.5 top-1/2 size-2.5 -translate-y-1/2 rounded-full',
         state === NodeStates.New && 'bg-sky-500',
-        state === NodeStates.Error && 'bg-red-500',
+        state === NodeStates.Error && 'bg-rose-400',
       ]}
     ></span>
   {/if}

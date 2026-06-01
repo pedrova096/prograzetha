@@ -71,8 +71,7 @@ export class LoopLayout implements LayoutBlock {
     };
     const exitX = origin.x + this.backGapX / 2;
     const backX = origin.x + this.backGapX + contentWidth + this.backGapX / 2;
-    const bodySource =
-      bodyResult.nodes[bodyResult.nodes.length - 1]?.id ?? this.options.id;
+    const bodySource = bodyResult.outputSource || this.options.id;
 
     const edges: RenderEdge[] = [
       ...conditionResult.edges,
@@ -115,6 +114,7 @@ export class LoopLayout implements LayoutBlock {
         input: conditionResult.anchors.input,
         output,
       },
+      outputSource: this.options.id,
     };
   }
 }

@@ -15,7 +15,7 @@ export interface RootProps<T = string> {
   children: Snippet;
   open?: boolean;
   offset?: TippyProps['offset'];
-  onSelect?: (event: MouseEvent, option: DropdownOption<T>) => void;
+  onSelected?: (event: MouseEvent, option: DropdownOption<T>) => void;
 }
 
 export interface TriggerProps extends HTMLButtonAttributes {

@@ -68,6 +68,7 @@ export class VStackLayout implements LayoutBlock {
         input: results[0]?.anchors.input ?? origin,
         output: results[results.length - 1]?.anchors.output ?? origin,
       },
+      outputSource: results[results.length - 1]?.outputSource ?? this.options.id,
     };
   }
 }

@@ -4,6 +4,7 @@
   import {
     ConditionalNode,
     InputNode,
+    NodeStates,
     OperationNode,
     OutputNode,
     type Node,
@@ -16,6 +17,7 @@
   import { DrawerRoutes, NodeRoutes } from './SidebarDrawer.constants';
   import type { SidebarDrawerProps } from './SidebarDrawer.types';
   import { navigate, Route, useLocation } from 'svelte-routing';
+  import { tick } from 'svelte';
 
   let { class: className, ...props }: SidebarDrawerProps = $props();
 
@@ -72,12 +74,12 @@
     return node;
   };
 
-  const onSaveHandler = (node: Node) => {
+  const onSave = (node: Node) => {
     updateNode(node);
     closePanel();
     navigate(DrawerRoutes.Home);
   };
-  const onCloseNodePanelHandler = () => {
+  const onCloseNodePanel = () => {
     closePanel();
     navigate(DrawerRoutes.Home);
   };
@@ -86,6 +88,14 @@
     navigate(
       pathname === DrawerRoutes.Code ? DrawerRoutes.Home : DrawerRoutes.Code,
     );
+  };
+
+  const onDismiss = async (nodeFromOption: Node) => {
+    await tick();
+    const node = nodes.get(nodeFromOption.id)!;
+    if (node.state === NodeStates.New) {
+      updateNode(node.withUpdate(node.data, NodeStates.Error));
+    }
   };
 </script>
 
@@ -115,8 +125,9 @@
           {#key params.id}
             <InputDrawer
               node={getInputNode(params.id)}
-              onSave={onSaveHandler}
-              onClose={onCloseNodePanelHandler}
+              {onSave}
+              onClose={onCloseNodePanel}
+              {onDismiss}
             />
           {/key}
         </Route>
@@ -124,8 +135,9 @@
           {#key params.id}
             <ConditionalDrawer
               node={getConditionalNode(params.id)}
-              onSave={onSaveHandler}
-              onClose={onCloseNodePanelHandler}
+              {onSave}
+              onClose={onCloseNodePanel}
+              {onDismiss}
             />
           {/key}
         </Route>
@@ -133,8 +145,9 @@
           {#key params.id}
             <OperationDrawer
               node={getOperationNode(params.id)}
-              onSave={onSaveHandler}
-              onClose={onCloseNodePanelHandler}
+              {onSave}
+              onClose={onCloseNodePanel}
+              {onDismiss}
             />
           {/key}
         </Route>
@@ -142,8 +155,9 @@
           {#key params.id}
             <OutputDrawer
               node={getOutputNode(params.id)}
-              onSave={onSaveHandler}
-              onClose={onCloseNodePanelHandler}
+              {onSave}
+              onClose={onCloseNodePanel}
+              {onDismiss}
             />
           {/key}
         </Route>

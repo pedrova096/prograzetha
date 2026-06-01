@@ -1,4 +1,4 @@
-import type { Point, RenderEdge } from '~/lib/modules/layout';
+import type { Point } from '~/lib/modules/layout';
 
 const DEFAULT_CORNER_RADIUS = 8;
 

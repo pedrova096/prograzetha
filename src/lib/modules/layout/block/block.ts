@@ -49,6 +49,7 @@ export class BlockLayout implements LayoutBlock {
           y: origin.y + height,
         },
       },
+      outputSource: this.id,
     };
   }
 }

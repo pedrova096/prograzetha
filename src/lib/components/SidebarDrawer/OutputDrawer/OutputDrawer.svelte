@@ -4,6 +4,7 @@
   import { GitCommitVertical, Save } from 'lucide-svelte';
 
   import { getDiagramContext } from '~/App.context.svelte';
+  import { NodeStates } from '~/lib/modules/nodes';
   import { Sidebar } from '../../Sidebar';
 
   import {
@@ -18,8 +19,9 @@
   } from './OutputDrawer.types';
   import MentionInput from '../../MentionInput/MentionInput.svelte';
   import { LITERAL_VARIANT_MAP } from '~/lib/constants';
+  import { onMount } from 'svelte';
 
-  let { node, onSave, onClose }: OutputDrawerProps = $props();
+  let { node, onSave, onClose, onDismiss }: OutputDrawerProps = $props();
 
   let {
     diagram: { nodes, edges },
@@ -50,7 +52,7 @@
       onSubmit: (values) => {
         if (!node) return;
 
-        onSave(node.withUpdate(values));
+        onSave(node.withUpdate(values, NodeStates.Ok));
       },
       // svelte-ignore state_referenced_locally
       initialValues: createOutputDrawerData(node?.data),
@@ -59,6 +61,8 @@
   $effect(() => {
     setData(createOutputDrawerData(node?.data));
   });
+
+  onMount(() => () => node && onDismiss?.(node));
 </script>
 
 <Sidebar.Action

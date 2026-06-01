@@ -5,6 +5,8 @@ import type {
   RenderEdge,
   Size,
 } from '../layout.types';
+import type { EdgeInsertionTarget } from '~/lib/modules/edge';
+import { BranchEdgeSide, EdgeInsertionTargetType } from '~/lib/modules/edge';
 import {
   BRANCH_GAP_X,
   BRANCH_GAP_Y,
@@ -84,10 +86,19 @@ export class BranchLayout implements LayoutBlock {
       x: origin.x + size.width / 2,
       y: branchesY + Math.max(thenSize.height, elseSize.height) + this.joinGapY,
     };
-    const thenSource =
-      thenResult.nodes[thenResult.nodes.length - 1]?.id ?? this.options.id;
-    const elseSource =
-      elseResult.nodes[elseResult.nodes.length - 1]?.id ?? this.options.id;
+    const thenSource = thenResult.outputSource || this.options.id;
+    const elseSource = elseResult.outputSource || this.options.id;
+
+    const thenInsertTarget: EdgeInsertionTarget = {
+      type: EdgeInsertionTargetType.Branch,
+      source: this.options.id,
+      side: BranchEdgeSide.Left,
+    };
+    const elseInsertTarget: EdgeInsertionTarget = {
+      type: EdgeInsertionTargetType.Branch,
+      source: this.options.id,
+      side: BranchEdgeSide.Right,
+    };
 
     const edges: RenderEdge[] = [
       ...conditionResult.edges,
@@ -96,6 +107,7 @@ export class BranchLayout implements LayoutBlock {
       {
         id: `${this.options.id}.condition-then`,
         source: this.options.id,
+        insertTarget: thenInsertTarget,
         points: elbowEdge(
           conditionResult.anchors.output,
           thenResult.anchors.input,
@@ -104,6 +116,7 @@ export class BranchLayout implements LayoutBlock {
       {
         id: `${this.options.id}.condition-else`,
         source: this.options.id,
+        insertTarget: elseInsertTarget,
         points: elbowEdge(
           conditionResult.anchors.output,
           elseResult.anchors.input,
@@ -112,12 +125,16 @@ export class BranchLayout implements LayoutBlock {
       {
         id: `${this.options.id}.then-join`,
         source: thenSource,
+        insertTarget:
+          thenSource === this.options.id ? thenInsertTarget : undefined,
         points: joinEdge(thenResult.anchors.output, joinPoint),
         isJoin: true,
       },
       {
         id: `${this.options.id}.else-join`,
         source: elseSource,
+        insertTarget:
+          elseSource === this.options.id ? elseInsertTarget : undefined,
         points: joinEdge(elseResult.anchors.output, joinPoint),
         isJoin: true,
       },
@@ -140,6 +157,7 @@ export class BranchLayout implements LayoutBlock {
         input: conditionResult.anchors.input,
         output: joinPoint,
       },
+      outputSource: this.options.id,
     };
   }
 }

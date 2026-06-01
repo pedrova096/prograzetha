@@ -6,5 +6,5 @@ export interface AddButtonProps extends HTMLAttributes<HTMLDivElement> {
   icon?: LucideIconProps;
   open?: boolean;
   triggerLabel?: string;
-  onSelect?: (event: MouseEvent, option: DropdownOption) => void;
+  onSelected?: (event: MouseEvent, option: DropdownOption) => void;
 }

@@ -2,6 +2,7 @@
   import { attachNewNode, getDiagramContext } from '~/App.context.svelte';
   import { getLayout } from '~/lib/modules/layout';
   import type { RenderEdge, RenderNode } from '~/lib/modules/layout';
+  import { EdgeInsertionTargetType } from '~/lib/modules/edge';
   import { AddButton, type AddButtonProps } from '../AddButton';
   import { Node, type NodeProps } from './Node';
   import { edgeMidpoint, roundedEdgePath } from './Diagram.utils';
@@ -48,7 +49,7 @@
     hoveredEdgeId = null;
   };
 
-  const onSelectHandler: AddButtonProps['onSelect'] = (_, option) => {
+  const onNewNodeSelected: AddButtonProps['onSelected'] = (_, option) => {
     const layoutEdge = hoveredEdgeId
       ? layoutEdgesById.get(hoveredEdgeId)
       : undefined;
@@ -58,16 +59,14 @@
       return;
     }
 
-    const sourceNode = nodes.get(layoutEdge.source);
+    const insertTarget = layoutEdge.insertTarget ?? {
+      type: EdgeInsertionTargetType.Edge,
+      source: layoutEdge.source,
+    };
 
-    if (!sourceNode) {
-      console.error('Invalid source node', layoutEdge.source);
-      return;
-    }
+    const newNode = attachNewNode(insertTarget, option.value as NodeTypes);
 
-    // TODO: validate if is branch edge
-
-    const newNode = attachNewNode(sourceNode, option.value as NodeTypes);
+    if (!newNode) return;
 
     navigate(
       generatePath(DrawerRoutes.NodeTypeId, {
@@ -169,7 +168,7 @@
       style={edgeButtonStyle(hoveredEdge)}
       triggerLabel={`Add node on connection ${hoveredEdge.id}`}
       onpointerenter={() => (hoveredEdgeId = hoveredEdge.id)}
-      onSelect={onSelectHandler}
+      onSelected={onNewNodeSelected}
     />
   {/if}
 

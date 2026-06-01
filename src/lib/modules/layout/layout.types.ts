@@ -1,5 +1,5 @@
 import type { Node } from '~/lib/modules/nodes';
-import type { Edge } from '~/lib/modules/edge';
+import type { Edge, EdgeInsertionTarget } from '~/lib/modules/edge';
 
 export type Size = {
   width: number;
@@ -31,6 +31,7 @@ export type RenderEdge = {
   id: string;
   source: string;
   points: Point[];
+  insertTarget?: EdgeInsertionTarget;
   isJoin?: boolean;
 };
 
@@ -44,6 +45,7 @@ export type LayoutResult = {
   nodes: RenderNode[];
   edges: RenderEdge[];
   anchors: Anchors;
+  outputSource: string;
 };
 
 export interface LayoutBlock {

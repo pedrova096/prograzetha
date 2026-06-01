@@ -3,7 +3,6 @@
   import { Diagram, Background, SidebarDrawer } from '~/lib/components';
   import { setDiagramContext } from './App.context.svelte';
   import { Router } from 'svelte-routing';
-  import { MentionInputExample } from './lib/components/MentionInput';
 
   setDiagramContext();
 </script>

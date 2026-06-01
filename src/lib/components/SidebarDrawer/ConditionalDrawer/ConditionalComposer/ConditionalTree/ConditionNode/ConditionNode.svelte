@@ -9,7 +9,6 @@
   import { Dropdown } from '~/lib/components/Dropdown';
   import CodeEditor from '~/lib/components/CodeEditor/CodeEditor.svelte';
   import { classifyInput, isLiteralKind } from './ConditionNode.utils';
-  import { InputKind } from './ConditionNode.types';
 
   let { name, value, classNames, onchange, onremove }: ConditionNodeProps =
     $props();

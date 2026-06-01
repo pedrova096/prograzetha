@@ -3,6 +3,7 @@
   import { createForm } from 'felte';
   import { GitCommitVertical, Save } from 'lucide-svelte';
 
+  import { NodeStates } from '~/lib/modules/nodes';
   import { Input } from '../../Input';
   import { RadioGroup } from '../../RadioGroup';
   import { Sidebar } from '../../Sidebar';
@@ -14,24 +15,22 @@
     type InputDrawerProps,
   } from './InputDrawer.types';
   import { createInputDrawerData, schema } from './InputDrawer.utils';
+  import { onMount } from 'svelte';
 
-  let { node, onSave, onClose }: InputDrawerProps = $props();
+  let { node, onSave, onClose, onDismiss }: InputDrawerProps = $props();
 
   const { form, errors, touched, data, setData } = createForm<InputDrawerForm>({
     extend: validator({ schema }),
     onSubmit: (values) => {
       if (!node) return;
 
-      onSave(node.withUpdate(values));
+      onSave(node.withUpdate(values, NodeStates.Ok));
     },
     // svelte-ignore state_referenced_locally
     initialValues: createInputDrawerData(node?.data),
   });
 
-  $effect(() => {
-    // Re-initialize
-    setData(createInputDrawerData(node?.data));
-  });
+  onMount(() => () => node && onDismiss?.(node));
 </script>
 
 <Sidebar.Action

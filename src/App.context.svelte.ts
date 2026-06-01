@@ -1,16 +1,38 @@
 import { setContext, getContext } from 'svelte';
-import { EDGES, NODES, START_NODE } from './App.mock';
 import type { DiagramContext } from './App.types';
-import { Edge } from './lib/modules/edge';
-import { Node, NodeTypes, createNode } from './lib/modules/nodes';
+import { BranchEdge, Edge, EdgeInsertionTargetType } from './lib/modules/edge';
+import type { EdgeInsertionTarget } from './lib/modules/edge';
+import {
+  EndNode,
+  Node,
+  NodeTypes,
+  StartNode,
+  createNode,
+} from './lib/modules/nodes';
 
 const DIAGRAM_KEY = Symbol('DIAGRAM');
 
-let diagram = $state<DiagramContext>({
-  nodes: NODES,
-  edges: EDGES,
-  start: START_NODE.id,
-});
+const createContext = (): DiagramContext => {
+  const startNode = StartNode.create();
+  const endNode = EndNode.create();
+
+  const nodes = new Map<string, Node>([
+    [startNode.id, startNode],
+    [endNode.id, endNode],
+  ]);
+
+  const edges = new Map<string, Edge>([
+    [startNode.id, Edge.create(startNode.id, endNode.id)],
+  ]);
+
+  return {
+    nodes,
+    edges,
+    start: startNode.id,
+  };
+};
+
+let diagram = $state<DiagramContext>(createContext());
 
 export const setDiagramContext = () => {
   return setContext(DIAGRAM_KEY, { diagram });
@@ -24,23 +46,73 @@ export const updateNode = (node: Node) => {
   diagram.nodes = new Map(diagram.nodes).set(node.id, node);
 };
 
-export const attachNewNode = (sourceNode: Node, newNodeType: NodeTypes) => {
-  const newNode = createNode({ type: newNodeType });
+const getNewEdge = (newNode: Node, target: string, previous: string) => {
+  const baseEdge = Edge.create(newNode.id, target, previous);
 
-  const prevSourceEdge = diagram.edges.get(sourceNode.id)!;
+  if (newNode.type === NodeTypes.Condition) {
+    return BranchEdge.fromEdge(baseEdge);
+  }
+
+  return baseEdge;
+};
+
+const attachBranchNewNode = (
+  target: Extract<
+    EdgeInsertionTarget,
+    { type: EdgeInsertionTargetType.Branch }
+  >,
+  currentEdge: BranchEdge,
+  newNode: Node,
+) => {
+  const branchTarget = currentEdge[target.side];
 
   const newNodes = new Map(diagram.nodes).set(newNode.id, newNode);
-  const newEdges = new Map(diagram.edges).set(
-    sourceNode.id,
-    Edge.create(sourceNode.id, newNode.id, prevSourceEdge.previous),
-  );
+  const newEdges = new Map(diagram.edges)
+    .set(target.source, currentEdge.withBranchSide(target.side, newNode.id))
+    .set(newNode.id, getNewEdge(newNode, branchTarget, currentEdge.source));
 
-  if (prevSourceEdge?.target) {
+  if (branchTarget) {
     newEdges.set(
-      newNode.id,
-      Edge.create(newNode.id, prevSourceEdge.target, sourceNode.id),
+      branchTarget,
+      diagram.edges.get(branchTarget)!.withPrevious(newNode.id),
     );
   }
+
+  diagram.nodes = newNodes;
+  diagram.edges = newEdges;
+
+  return newNode;
+};
+
+export const attachNewNode = (
+  target: EdgeInsertionTarget,
+  newNodeType: NodeTypes,
+) => {
+  const currentEdge = diagram.edges.get(target.source);
+
+  if (!currentEdge) {
+    console.error('Invalid edge insertion target', target);
+    return null;
+  }
+
+  const newNode = createNode({ type: newNodeType });
+
+  if (target.type === EdgeInsertionTargetType.Branch) {
+    if (!(currentEdge instanceof BranchEdge)) {
+      console.error('Invalid branch insertion target', target);
+      return null;
+    }
+
+    return attachBranchNewNode(target, currentEdge, newNode);
+  }
+
+  const newNodes = new Map(diagram.nodes).set(newNode.id, newNode);
+  const newEdges = new Map(diagram.edges)
+    .set(target.source, currentEdge.withTarget(newNode.id))
+    .set(
+      newNode.id,
+      getNewEdge(newNode, currentEdge.target, currentEdge.source),
+    );
 
   diagram.nodes = newNodes;
   diagram.edges = newEdges;

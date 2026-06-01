@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createForm } from 'felte';
   import { GitCommitVertical, Save } from 'lucide-svelte';
+  import { onMount } from 'svelte';
 
   import { Sidebar } from '../../Sidebar';
   import {
@@ -13,20 +14,25 @@
     normalizeConditions,
   } from './ConditionalDrawer.utils';
   import { ConditionalComposer } from './ConditionalComposer';
+  import { NodeStates } from '~/lib/modules/nodes';
 
-  let { node, onSave, onClose }: ConditionalDrawerProps = $props();
+  let { node, onSave, onClose, onDismiss }: ConditionalDrawerProps = $props();
 
-  const { form, data, setData } = createForm<ConditionalDrawerForm>({
+  const { form, data, setData, reset } = createForm<ConditionalDrawerForm>({
+    // TODO: add validations
     onSubmit: (values) => {
       if (!node) return;
 
       onSave(
-        node.withUpdate({
-          ...values,
-          [FormFields.Conditions]: normalizeConditions(
-            values[FormFields.Conditions],
-          ),
-        }),
+        node.withUpdate(
+          {
+            ...values,
+            [FormFields.Conditions]: normalizeConditions(
+              values[FormFields.Conditions],
+            ),
+          },
+          NodeStates.Ok,
+        ),
       );
     },
     // svelte-ignore state_referenced_locally
@@ -34,9 +40,12 @@
   });
 
   $effect(() => {
-    console.log('CONDITION_DRAWER_TRIGGER');
+    // Re-initialize
+    reset();
     setData(createConditionDrawerData(node?.data));
   });
+
+  onMount(() => () => node && onDismiss?.(node));
 </script>
 
 <Sidebar.Action

@@ -1,5 +1,6 @@
 import type { Edge } from '~/lib/modules/edge';
 import type { Node, OutputNode, OutputNodeData } from '~/lib/modules/nodes';
+import type { FormNodeDrawer } from '../SidebarDrawer.types';
 
 export enum FormFields {
   Text = 'text',
@@ -7,11 +8,7 @@ export enum FormFields {
 
 export type OutputDrawerForm = OutputNodeData;
 
-export type OutputDrawerProps = {
-  node: OutputNode | null;
-  onSave: (node: OutputNode) => void;
-  onClose?: () => void;
-};
+export interface OutputDrawerProps extends FormNodeDrawer<OutputNode> {}
 
 export type GetVariablesUntilOptions = {
   nodes: Map<string, Node>;

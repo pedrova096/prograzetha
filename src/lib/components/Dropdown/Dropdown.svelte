@@ -5,7 +5,7 @@
 
   let {
     children,
-    onSelect,
+    onSelected,
     offset,
     open = $bindable(false),
   }: RootProps = $props();
@@ -45,7 +45,7 @@
     toggle: () => (open ? instance?.hide() : instance?.show()),
     onSelect: (event, option) => {
       option.onclick?.(event, option);
-      onSelect?.(event, option);
+      onSelected?.(event, option);
       instance?.hide();
     },
     setTriggerRef: (element) => (triggerEl = element),

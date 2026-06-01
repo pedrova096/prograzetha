@@ -2,6 +2,7 @@ import type { Node } from '~/lib/modules/nodes';
 import type { Edge } from '~/lib/modules/edge';
 import type { OperationNode } from '~/lib/modules/nodes';
 import type { OperationNodeData } from '~/lib/modules/nodes/operationNode';
+import type { FormNodeDrawer } from '../SidebarDrawer.types';
 
 export enum FormFields {
   LeftSide = 'leftSide',
@@ -19,11 +20,7 @@ export type OperationDrawerForm = {
   [FormFields.IsDeclaration]: boolean;
 };
 
-export type OperationDrawerProps = {
-  node: OperationNode | null;
-  onSave: (node: OperationNode) => void;
-  onClose?: () => void;
-};
+export interface OperationDrawerProps extends FormNodeDrawer<OperationNode> {}
 
 export type GetVariablesUntilOptions = {
   nodes: Map<string, Node>;

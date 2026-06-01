@@ -23,11 +23,10 @@
     type OperationDrawerForm,
     type OperationDrawerProps,
   } from './OperationDrawer.types';
-  import { untrack } from 'svelte';
-  import { derived } from 'svelte/store';
   import { LiteralVariantBadge } from '../../LiteralVariantBadge';
+  import { onMount } from 'svelte';
 
-  let { node, onSave, onClose }: OperationDrawerProps = $props();
+  let { node, onSave, onClose, onDismiss }: OperationDrawerProps = $props();
 
   let {
     diagram: { nodes, edges },
@@ -94,6 +93,8 @@
     hasError: !!$errors[FormFields.LeftSide],
     isTouched: $touched[FormFields.LeftSide],
   });
+
+  onMount(() => () => node && onDismiss?.(node));
 </script>
 
 <Sidebar.Action
