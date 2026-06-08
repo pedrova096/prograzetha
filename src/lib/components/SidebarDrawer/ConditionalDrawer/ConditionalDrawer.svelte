@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { validator } from '@felte/validator-yup';
   import { createForm } from 'felte';
   import { GitCommitVertical, Save } from 'lucide-svelte';
   import { onMount } from 'svelte';
@@ -12,6 +13,7 @@
   import {
     createConditionDrawerData,
     normalizeConditions,
+    schema,
   } from './ConditionalDrawer.utils';
   import { ConditionalComposer } from './ConditionalComposer';
   import { NodeStates } from '~/lib/modules/nodes';
@@ -19,7 +21,7 @@
   let { node, onSave, onClose, onDismiss }: ConditionalDrawerProps = $props();
 
   const { form, data, setData, reset } = createForm<ConditionalDrawerForm>({
-    // TODO: add validations
+    extend: validator({ schema }),
     onSubmit: (values) => {
       if (!node) return;
 

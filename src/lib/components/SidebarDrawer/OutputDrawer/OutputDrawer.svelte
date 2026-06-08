@@ -1,7 +1,7 @@
 <script lang="ts">
   import { validator } from '@felte/validator-yup';
   import { createForm } from 'felte';
-  import { GitCommitVertical, Save } from 'lucide-svelte';
+  import { GitCommitVertical, Lightbulb, Save } from 'lucide-svelte';
 
   import { getDiagramContext } from '~/App.context.svelte';
   import { NodeStates } from '~/lib/modules/nodes';
@@ -10,6 +10,7 @@
   import {
     createOutputDrawerData,
     getPreviousVariables,
+    getTemplateLiteral,
     schema,
   } from './OutputDrawer.utils';
   import {
@@ -52,7 +53,12 @@
       onSubmit: (values) => {
         if (!node) return;
 
-        onSave(node.withUpdate(values, NodeStates.Ok));
+        onSave(
+          node.withUpdate(
+            { ...values, expression: getTemplateLiteral(values.text) },
+            NodeStates.Ok,
+          ),
+        );
       },
       // svelte-ignore state_referenced_locally
       initialValues: createOutputDrawerData(node?.data),
@@ -112,6 +118,22 @@
         }
         {options}
       />
+
+      {#if options.length}
+        <div
+          class="flex self-start rounded-md bg-amber-100 px-2 py-1 text-xs font-medium text-amber-900"
+        >
+          <Lightbulb class="mr-1 inline size-3.5" />
+          <span
+            class="rounded-full bg-amber-300 size-4 text-center font-bold mr-1"
+            >{options.length}</span
+          >
+          {options.length === 1 ? 'Variable' : 'Variables'}, utiliza
+          <pre
+            class="rounded bg-amber-300 size-4 text-center font-bold mx-1">$</pre>
+          para {options.length === 1 ? 'usarla' : 'usarlas'}.
+        </div>
+      {/if}
     </form>
   {/snippet}
 </Sidebar.Action>

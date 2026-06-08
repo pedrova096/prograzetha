@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { attachNewNode, getDiagramContext } from '~/App.context.svelte';
+  import {
+    attachNewNode,
+    getDiagramContext,
+    getRuntimeContext,
+  } from '~/App.context.svelte';
   import { getLayout } from '~/lib/modules/layout';
   import type { RenderEdge, RenderNode } from '~/lib/modules/layout';
   import { EdgeInsertionTargetType } from '~/lib/modules/edge';
@@ -14,6 +18,8 @@
   let {
     diagram: { nodes, edges, start },
   } = $derived(getDiagramContext());
+
+  let { runtime } = $derived(getRuntimeContext());
 
   let hoveredEdgeId = $state<string | null>(null);
   let addMenuOpen = $state(false);
@@ -86,6 +92,16 @@
       }),
     );
   };
+
+  const edgePaths = $derived(
+    layout.edges.map((edge) => ({
+      id: edge.id,
+      node: edge.source,
+      isJoin: edge.isJoin,
+      isTraverse: runtime.traverseNodeIds.has(edge.source),
+      path: roundedEdgePath(edge.points),
+    })),
+  );
 </script>
 
 <div
@@ -97,7 +113,7 @@
   onpointerleave={clearHoveredEdge}
 >
   <svg
-    class="pointer-events-none absolute inset-0 overflow-visible text-zinc-400"
+    class="pointer-events-none absolute inset-0 overflow-visible stroke-zinc-400"
     role="img"
     aria-label="Diagram connections"
     width={layout.box.width}
@@ -117,7 +133,7 @@
         <path
           d="M 2 2 L 6 5 2 8"
           fill="none"
-          stroke="currentColor"
+          stroke="context-stroke"
           stroke-width="1"
           stroke-linecap="round"
           stroke-linejoin="round"
@@ -125,7 +141,7 @@
       </marker>
     </defs>
 
-    {#each layout.edges as edge (edge.id)}
+    {#each edgePaths as edge (edge.id)}
       <g
         role="group"
         aria-label={`Connection ${edge.id}`}
@@ -133,7 +149,7 @@
       >
         <path
           aria-hidden="true"
-          d={roundedEdgePath(edge.points)}
+          d={edge.path}
           fill="none"
           stroke="transparent"
           stroke-width="16"
@@ -144,7 +160,7 @@
         />
         <path
           role="presentation"
-          d={roundedEdgePath(edge.points)}
+          d={edge.path}
           fill="none"
           stroke="currentColor"
           stroke-width="2"
@@ -154,9 +170,24 @@
           class={[
             'transition-[filter,stroke-width] duration-150',
             hoveredEdgeId === edge.id &&
-              'text-sky-500 z-10 drop-shadow-[0_3px_5px_rgba(37,99,235,0.45)]',
+              'z-10 stroke-sky-500 drop-shadow-[0_3px_5px_rgba(37,99,235,0.45)]',
           ]}
         />
+        {#if edge.isTraverse}
+          <path
+            aria-hidden="true"
+            d={edge.path}
+            pathLength="1"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            marker-end={edge.isJoin ? undefined : 'url(#edge-arrow)'}
+            style:--progress-edge-duration={`${runtime.speed.edgeMs}ms`}
+            class="progress-edge-path stroke-emerald-500 drop-shadow-[0_3px_5px_rgba(16,185,129,0.35)]"
+          />
+        {/if}
       </g>
     {/each}
   </svg>
@@ -185,3 +216,18 @@
     {/if}
   {/each}
 </div>
+
+<style>
+  .progress-edge-path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: draw-progress-edge var(--progress-edge-duration, 450ms) ease-out
+      forwards;
+  }
+
+  @keyframes draw-progress-edge {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+</style>

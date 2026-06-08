@@ -34,6 +34,10 @@ function evaluateExpression(
         case '||':
           return Boolean(left) || Boolean(right);
         case '+':
+          if (typeof left === 'string' || typeof right === 'string') {
+            return String(left) + String(right);
+          }
+
           return Number(left) + Number(right);
         case '-':
           return Number(left) - Number(right);
@@ -103,13 +107,17 @@ async function* executeAction(
       return;
 
     case RuntimeActions.Alert: {
+      const message = action.expression
+        ? String(evaluateExpression(action.expression, context))
+        : action.message;
+
       yield {
         type: RuntimeEvents.ActionAlert,
         nodeId: node.id,
-        message: action.message,
+        message,
       };
 
-      await services.alert(action.message);
+      await services.alert(message);
       return;
     }
 
@@ -154,18 +162,13 @@ async function* executeStep(
   services: RuntimeServices,
 ): AsyncGenerator<RuntimeEvent> {
   yield {
-    type: RuntimeEvents.NodeStart,
+    type: RuntimeEvents.NodeProcess,
     nodeId: node.id,
   };
 
   if (node.action) {
     yield* executeAction(node, node.action, context, services);
   }
-
-  yield {
-    type: RuntimeEvents.NodeEnd,
-    nodeId: node.id,
-  };
 }
 
 async function* executeBranch(
@@ -174,7 +177,7 @@ async function* executeBranch(
   services: RuntimeServices,
 ): AsyncGenerator<RuntimeEvent> {
   yield {
-    type: RuntimeEvents.NodeStart,
+    type: RuntimeEvents.NodeProcess,
     nodeId: node.id,
   };
 
@@ -186,11 +189,6 @@ async function* executeBranch(
     type: RuntimeEvents.BranchChoose,
     nodeId: node.id,
     branch,
-  };
-
-  yield {
-    type: RuntimeEvents.NodeEnd,
-    nodeId: node.id,
   };
 
   const selectedNodes = result ? node.then : node.else;
@@ -248,4 +246,12 @@ export async function* executeProgram(
 ): AsyncGenerator<RuntimeEvent> {
   yield* executeSequence(program, context, services);
   yield { type: RuntimeEvents.ExecutionEnd };
+}
+
+export function isEdgeTraverse(event: RuntimeEvent): event is {
+  type: RuntimeEvents.EdgeTraverse;
+  from: string;
+  to: string;
+} {
+  return event.type === RuntimeEvents.EdgeTraverse;
 }

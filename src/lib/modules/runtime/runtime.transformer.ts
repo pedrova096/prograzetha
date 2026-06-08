@@ -139,6 +139,7 @@ function createStepNode(
         action: {
           type: RuntimeActions.Alert,
           message: data.text,
+          expression: data.expression,
         },
       };
     }

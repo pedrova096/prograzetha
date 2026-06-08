@@ -1,5 +1,5 @@
 import { wait } from '~/utils/fp';
-import { executeProgram } from './runtime';
+import { executeProgram, isEdgeTraverse } from './runtime';
 import { PlayerStatus, RuntimeEvents } from './runtime.types';
 import type {
   PendingInput,
@@ -21,6 +21,10 @@ export class RuntimePlayer {
   // chosenBranches = $state<Record<string, 'then' | 'else'>>({});
   events = $state<RuntimeEvent[]>([]);
   pendingInput = $state<PendingInput | null>(null);
+
+  traverseNodeIds = $derived(
+    new Set(this.events.filter(isEdgeTraverse).map((event) => event.from)),
+  );
 
   speed = DEFAULT_SPEED;
 
@@ -80,8 +84,7 @@ export class RuntimePlayer {
 
   private getEventDuration(event: RuntimeEvent): number {
     switch (event.type) {
-      case RuntimeEvents.NodeStart:
-      case RuntimeEvents.NodeEnd:
+      case RuntimeEvents.NodeProcess:
         return this.speed.nodeMs;
 
       case RuntimeEvents.EdgeTraverse:
@@ -114,14 +117,9 @@ export class RuntimePlayer {
     this.events = [...this.events, event];
 
     switch (event.type) {
-      case RuntimeEvents.NodeStart: {
+      case RuntimeEvents.NodeProcess: {
         this.activeEdge = null;
         this.activeNodeId = event.nodeId;
-        return;
-      }
-
-      case RuntimeEvents.NodeEnd: {
-        this.activeNodeId = null;
         return;
       }
 

@@ -72,10 +72,6 @@
     setData(FormFields.IsDeclaration, leftFromList);
   });
 
-  $effect(() => {
-    // Re-initialize
-    setFields(createOperationDrawerData(node?.data));
-  });
   const onCodeEditorChangeHandler: CodeEditorProps['onchange'] = (event) => {
     setTouched(FormFields.RightSide, true);
 

@@ -28,15 +28,14 @@ export enum RuntimeActions {
 
 export type RuntimeAction =
   | { type: RuntimeActions.Noop }
-  | { type: RuntimeActions.Alert; message: string }
+  | { type: RuntimeActions.Alert; message: string; expression?: Expression }
   | { type: RuntimeActions.Input; variable: string; prompt: string }
   | { type: RuntimeActions.Assign; variable: string; expression: Expression };
 // #endregion
 
 // #region Runtime Events
 export enum RuntimeEvents {
-  NodeStart = 'node:start',
-  NodeEnd = 'node:end',
+  NodeProcess = 'node:process',
   EdgeTraverse = 'edge:traverse',
   BranchChoose = 'branch:choose',
   ActionAlert = 'action:alert',
@@ -46,8 +45,7 @@ export enum RuntimeEvents {
 }
 
 export type RuntimeEvent =
-  | { type: RuntimeEvents.NodeStart; nodeId: string }
-  | { type: RuntimeEvents.NodeEnd; nodeId: string }
+  | { type: RuntimeEvents.NodeProcess; nodeId: string }
   | { type: RuntimeEvents.EdgeTraverse; from: string; to: string }
   | {
       type: RuntimeEvents.BranchChoose;

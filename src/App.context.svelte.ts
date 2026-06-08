@@ -1,7 +1,8 @@
 import { setContext, getContext } from 'svelte';
-import type { DiagramContext } from './App.types';
+import type { DiagramContext, RuntimeContext } from './App.types';
 import { BranchEdge, Edge, EdgeInsertionTargetType } from './lib/modules/edge';
 import type { EdgeInsertionTarget } from './lib/modules/edge';
+import { getRuntimeProgram, RuntimePlayer } from './lib/modules/runtime';
 import {
   EndNode,
   Node,
@@ -11,6 +12,7 @@ import {
 } from './lib/modules/nodes';
 
 const DIAGRAM_KEY = Symbol('DIAGRAM');
+const RUNTIME_KEY = Symbol('RUNTIME');
 
 const createContext = (): DiagramContext => {
   const startNode = StartNode.create();
@@ -34,12 +36,41 @@ const createContext = (): DiagramContext => {
 
 let diagram = $state<DiagramContext>(createContext());
 
+const createRuntime = () => {
+  return new RuntimePlayer({
+    program: getRuntimeProgram(
+      { nodes: diagram.nodes, edges: diagram.edges },
+      diagram.start,
+    ),
+    services: {
+      alert: async () => {},
+      input: async (prompt) => globalThis.prompt?.(prompt) ?? '',
+    },
+  });
+};
+
+let runtimeContext = $state<RuntimeContext>({
+  runtime: createRuntime(),
+});
+
 export const setDiagramContext = () => {
   return setContext(DIAGRAM_KEY, { diagram });
 };
 
+export const setRuntimeContext = () => {
+  $effect(() => {
+    runtimeContext.runtime = createRuntime();
+  });
+
+  return setContext(RUNTIME_KEY, runtimeContext);
+};
+
 export const getDiagramContext = () => {
   return getContext<ReturnType<typeof setDiagramContext>>(DIAGRAM_KEY);
+};
+
+export const getRuntimeContext = () => {
+  return getContext<ReturnType<typeof setRuntimeContext>>(RUNTIME_KEY);
 };
 
 export const updateNode = (node: Node) => {

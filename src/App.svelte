@@ -1,10 +1,11 @@
 <script lang="ts">
   import 'tippy.js/dist/tippy.css';
   import { Diagram, Background, SidebarDrawer } from '~/lib/components';
-  import { setDiagramContext } from './App.context.svelte';
+  import { setDiagramContext, setRuntimeContext } from './App.context.svelte';
   import { Router } from 'svelte-routing';
 
   setDiagramContext();
+  setRuntimeContext();
 </script>
 
 <Router>

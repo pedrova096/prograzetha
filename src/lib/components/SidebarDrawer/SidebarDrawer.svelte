@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Play, Settings, Code } from 'lucide-svelte';
+  import { Settings, Code } from 'lucide-svelte';
   import { getDiagramContext, updateNode } from '~/App.context.svelte';
   import {
     ConditionalNode,
@@ -14,6 +14,7 @@
   import { ConditionalDrawer } from './ConditionalDrawer';
   import { OperationDrawer } from './OperationDrawer';
   import { OutputDrawer } from './OutputDrawer';
+  import { ExecutionDrawer } from './ExecutionDrawer';
   import { DrawerRoutes, NodeRoutes } from './SidebarDrawer.constants';
   import type { SidebarDrawerProps } from './SidebarDrawer.types';
   import { navigate, Route, useLocation } from 'svelte-routing';
@@ -87,6 +88,14 @@
   const toggleCodePanelRoute = () => {
     navigate(
       pathname === DrawerRoutes.Code ? DrawerRoutes.Home : DrawerRoutes.Code,
+    );
+  };
+
+  const toggleExecutionPanelRoute = () => {
+    navigate(
+      pathname === DrawerRoutes.Execution
+        ? DrawerRoutes.Home
+        : DrawerRoutes.Execution,
     );
   };
 
@@ -176,7 +185,11 @@
         >
           {#snippet panel()}{/snippet}
         </Sidebar.Action>
-        <Sidebar.Item icon={Play} label="Ejecutar" />
+        <ExecutionDrawer
+          active={pathname === DrawerRoutes.Execution}
+          defaultOpenPanel={pathname === DrawerRoutes.Execution}
+          onclick={toggleExecutionPanelRoute}
+        />
       </Sidebar.Group>
 
       <Sidebar.Divider />

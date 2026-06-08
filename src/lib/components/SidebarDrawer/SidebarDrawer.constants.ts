@@ -4,6 +4,7 @@ export enum DrawerRoutes {
   NodeTypeId = '/drawer/node/:type/:id',
   Node = '/drawer/node',
   Code = '/drawer/code',
+  Execution = '/drawer/execution',
 }
 
 export enum NodeRoutes {
