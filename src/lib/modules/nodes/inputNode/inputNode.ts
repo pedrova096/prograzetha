@@ -8,7 +8,7 @@ export class InputNode extends Node<InputNodeData> {
   constructor(
     id = createId(),
     type = NodeTypes.Input,
-    data = { variable: '', type: 'string' } as InputNodeData,
+    data = { name: '', type: 'string' } as InputNodeData,
     state?: NodeState,
   ) {
     super(id, type, data, undefined, state);

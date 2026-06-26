@@ -2,12 +2,12 @@ import type { InputNode, InputType } from '~/lib/modules/nodes';
 import type { FormNodeDrawer } from '../SidebarDrawer.types';
 
 export enum FormFields {
-  Variable = 'variable',
+  Name = 'name',
   Type = 'type',
 }
 
 export type InputDrawerForm = {
-  [FormFields.Variable]: string;
+  [FormFields.Name]: string;
   [FormFields.Type]: `${InputType}`;
 };
 

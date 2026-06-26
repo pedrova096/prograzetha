@@ -10,12 +10,12 @@ import { FormFields, type InputDrawerForm } from './InputDrawer.types';
 export const createInputDrawerData = (
   data?: InputNodeData,
 ): InputDrawerForm => ({
-  [FormFields.Variable]: data?.[FormFields.Variable] ?? '',
+  [FormFields.Name]: data?.[FormFields.Name] ?? '',
   [FormFields.Type]: data?.[FormFields.Type] ?? InputType.String,
 });
 
 export const schema = yup.object({
-  [FormFields.Variable]: yup
+  [FormFields.Name]: yup
     .string()
     .trim()
     .required('Campo requerido')

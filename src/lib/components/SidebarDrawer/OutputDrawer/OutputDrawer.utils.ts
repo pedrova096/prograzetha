@@ -81,9 +81,9 @@ export const getPreviousVariables = (
     const node = options.nodes.get(currentId);
     const edge = options.edges.get(currentId);
 
-    if (node instanceof InputNode && node.data.variable) {
+    if (node instanceof InputNode && node.data.name) {
       variables.push({
-        name: node.data.variable,
+        name: node.data.name,
         type: node.data.type,
       });
     }

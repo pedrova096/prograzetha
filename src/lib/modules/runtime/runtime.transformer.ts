@@ -119,11 +119,11 @@ function createStepNode(
         id: node.id,
         type: RuntimeNodes.Step,
         kind: 'read',
-        label: data.variable,
+        label: data.name,
         action: {
           type: RuntimeActions.Input,
-          variable: data.variable,
-          prompt: data.variable,
+          variable: data.name,
+          prompt: data.name,
         },
       };
     }

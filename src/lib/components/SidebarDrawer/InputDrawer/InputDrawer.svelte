@@ -68,14 +68,14 @@
     >
       <div class="flex flex-col gap-4">
         <Input
-          id={FormFields.Variable}
-          name={FormFields.Variable}
+          id={FormFields.Name}
+          name={FormFields.Name}
           label="Nombre de la variable"
           placeholder="Nombre de la variable"
-          value={$data[FormFields.Variable]}
-          error={!!$errors[FormFields.Variable]}
-          helper={$touched[FormFields.Variable]
-            ? $errors[FormFields.Variable]
+          value={$data[FormFields.Name]}
+          error={!!$errors[FormFields.Name]}
+          helper={$touched[FormFields.Name]
+            ? $errors[FormFields.Name]
             : undefined}
           clearable
         />
