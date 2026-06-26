@@ -1,6 +1,6 @@
 <script lang="ts">
   import { javascript } from '@codemirror/lang-javascript';
-  import { Prec } from '@codemirror/state';
+  import { Compartment, EditorState } from '@codemirror/state';
   import { minimalSetup, EditorView } from 'codemirror';
   import { onMount } from 'svelte';
   import {
@@ -18,6 +18,7 @@
   import { javascriptTheme } from './CodeEditor.theme';
 
   let editor = $state<EditorView | null>(null);
+  const readonlyCompartment = new Compartment();
 
   let {
     autocomplete: autocompleteConfig,
@@ -95,6 +96,11 @@
     return true;
   };
 
+  const createReadonlyExtensions = (value?: boolean) => [
+    EditorView.editable.of(!value),
+    EditorState.readOnly.of(!!value),
+  ];
+
   onMount(() => {
     if (!ref) return;
 
@@ -119,6 +125,7 @@
           onchange?.(changeEvent);
         }
       }),
+      readonlyCompartment.of(createReadonlyExtensions(readonly)),
       ...extensionConfig,
     ];
 
@@ -147,10 +154,6 @@
       }
     }
 
-    if (readonly) {
-      extensions.push(EditorView.editable.of(false));
-    }
-
     if (placeholder) {
       extensions.push(placeholderExtension(placeholder));
     }
@@ -169,6 +172,14 @@
 
   $effect(() => {
     editorValue.value = value;
+  });
+
+  $effect(() => {
+    editor?.dispatch({
+      effects: readonlyCompartment.reconfigure(
+        createReadonlyExtensions(readonly),
+      ),
+    });
   });
 </script>
 

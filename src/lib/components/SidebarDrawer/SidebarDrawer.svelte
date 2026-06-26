@@ -19,6 +19,7 @@
   import type { SidebarDrawerProps } from './SidebarDrawer.types';
   import { navigate, Route, useLocation } from 'svelte-routing';
   import { tick } from 'svelte';
+  import { CodeDrawer } from './CodeDrawer';
 
   let { class: className, ...props }: SidebarDrawerProps = $props();
 
@@ -175,20 +176,16 @@
       <Sidebar.Divider />
 
       <Sidebar.Group>
-        <Sidebar.Action
-          icon={Code}
-          id="code"
-          label="Código"
-          active={pathname === DrawerRoutes.Code}
-          defaultOpenPanel={pathname === DrawerRoutes.Code}
-          onclick={toggleCodePanelRoute}
-        >
-          {#snippet panel()}{/snippet}
-        </Sidebar.Action>
         <ExecutionDrawer
           active={pathname === DrawerRoutes.Execution}
           defaultOpenPanel={pathname === DrawerRoutes.Execution}
           onclick={toggleExecutionPanelRoute}
+        />
+
+        <CodeDrawer
+          active={pathname === DrawerRoutes.Code}
+          defaultOpenPanel={pathname === DrawerRoutes.Code}
+          onclick={toggleCodePanelRoute}
         />
       </Sidebar.Group>
 
