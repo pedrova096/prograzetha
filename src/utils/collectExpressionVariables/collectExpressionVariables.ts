@@ -1,78 +1,68 @@
-import type jsep from 'jsep';
+import { ExpressionKind, type Expression } from '~/lib/modules/expression';
 
 const ALLOWED_GLOBAL_IDENTIFIERS = new Set(['Math']);
 
 const collectExpressionVariablesInner = (
-  node: jsep.Expression | null | undefined,
+  node: Expression | null | undefined,
   variables = new Set<string>(),
 ) => {
   if (!node) {
     return variables;
   }
 
-  switch (node.type) {
-    case 'Identifier': {
-      const name = (node as jsep.Identifier).name;
-
-      if (!ALLOWED_GLOBAL_IDENTIFIERS.has(name)) {
-        variables.add(name);
+  switch (node.kind) {
+    case ExpressionKind.Identifier:
+      if (!ALLOWED_GLOBAL_IDENTIFIERS.has(node.name)) {
+        variables.add(node.name);
       }
 
       break;
-    }
 
-    case 'ArrayExpression':
-      (node as jsep.ArrayExpression).elements.forEach((element) => {
+    case ExpressionKind.ArrayExpression:
+      node.elements.forEach((element) => {
         collectExpressionVariablesInner(element, variables);
       });
       break;
 
-    case 'BinaryExpression': {
-      const expression = node as jsep.BinaryExpression;
-      collectExpressionVariablesInner(expression.left, variables);
-      collectExpressionVariablesInner(expression.right, variables);
+    case ExpressionKind.BinaryExpression:
+    case ExpressionKind.LogicalExpression:
+      collectExpressionVariablesInner(node.left, variables);
+      collectExpressionVariablesInner(node.right, variables);
       break;
-    }
 
-    case 'CallExpression': {
-      const expression = node as jsep.CallExpression;
-      collectExpressionVariablesInner(expression.callee, variables);
-      expression.arguments.forEach((argument) => {
+    case ExpressionKind.CallExpression:
+      collectExpressionVariablesInner(node.callee, variables);
+      node.args.forEach((argument) => {
         collectExpressionVariablesInner(argument, variables);
       });
       break;
-    }
 
-    case 'ConditionalExpression': {
-      const expression = node as jsep.ConditionalExpression;
-      collectExpressionVariablesInner(expression.test, variables);
-      collectExpressionVariablesInner(expression.consequent, variables);
-      collectExpressionVariablesInner(expression.alternate, variables);
+    case ExpressionKind.ConditionalExpression:
+      collectExpressionVariablesInner(node.test, variables);
+      collectExpressionVariablesInner(node.consequent, variables);
+      collectExpressionVariablesInner(node.alternate, variables);
       break;
-    }
 
-    case 'MemberExpression': {
-      const expression = node as jsep.MemberExpression;
-      collectExpressionVariablesInner(expression.object, variables);
-
-      if (expression.computed) {
-        collectExpressionVariablesInner(expression.property, variables);
-      }
-
+    case ExpressionKind.MemberExpression:
+      collectExpressionVariablesInner(node.object, variables);
       break;
-    }
 
-    case 'SequenceExpression':
-      (node as jsep.SequenceExpression).expressions.forEach((expression) => {
-        collectExpressionVariablesInner(expression, variables);
+    case ExpressionKind.ObjectExpression:
+      node.properties.forEach((property) => {
+        collectExpressionVariablesInner(property.value, variables);
       });
       break;
 
-    case 'UnaryExpression':
-      collectExpressionVariablesInner(
-        (node as jsep.UnaryExpression).argument,
-        variables,
-      );
+    case ExpressionKind.TemplateLiteral:
+      node.parts.forEach((part) => {
+        if (typeof part !== 'string') {
+          collectExpressionVariablesInner(part, variables);
+        }
+      });
+      break;
+
+    case ExpressionKind.UnaryExpression:
+      collectExpressionVariablesInner(node.argument, variables);
       break;
   }
 
@@ -80,7 +70,7 @@ const collectExpressionVariablesInner = (
 };
 
 export const collectExpressionVariables = (
-  node: jsep.Expression | null | undefined,
+  node: Expression | null | undefined,
 ) => {
   const variables = collectExpressionVariablesInner(node);
   return Array.from(variables);

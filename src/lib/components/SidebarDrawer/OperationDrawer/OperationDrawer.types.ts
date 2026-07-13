@@ -1,7 +1,6 @@
-import type { Node } from '~/lib/modules/nodes';
-import type { Edge } from '~/lib/modules/edge';
 import type { OperationNode } from '~/lib/modules/nodes';
 import type { OperationNodeData } from '~/lib/modules/nodes/operationNode';
+import type { Graph } from '~/lib/types';
 import type { FormNodeDrawer } from '../SidebarDrawer.types';
 
 export enum FormFields {
@@ -22,10 +21,7 @@ export type OperationDrawerForm = {
 
 export interface OperationDrawerProps extends FormNodeDrawer<OperationNode> {}
 
-export type GetVariablesUntilOptions = {
-  nodes: Map<string, Node>;
-  edges: Map<string, Edge>;
-};
+export type GetVariablesUntilOptions = Graph;
 
 export type CreateOperationDrawerSchemaOptions = {
   variablesSet: Set<string>;

@@ -1,10 +1,12 @@
 <script lang="ts">
   import { validator } from '@felte/validator-yup';
   import { createForm } from 'felte';
-  import jsep from 'jsep';
   import { GitCommitVertical, Lightbulb, Save } from 'lucide-svelte';
 
   import { getDiagramContext } from '~/App.context.svelte';
+  import {
+    parseExpression,
+  } from '~/lib/modules/expression';
   import { NodeStates } from '~/lib/modules/nodes';
   import { CodeEditor, type CodeEditorProps } from '../../CodeEditor';
   import { Input } from '../../Input';
@@ -76,7 +78,9 @@
     setTouched(FormFields.RightSide, true);
 
     try {
-      const newTree = jsep(event.detail.value);
+      const newTree = parseExpression(
+        event.detail.value,
+      );
       setFields(FormFields.Tree, newTree);
       setFields(FormFields.InferType, inferOperationType(newTree));
     } catch {

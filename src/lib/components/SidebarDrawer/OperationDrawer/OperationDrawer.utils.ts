@@ -1,6 +1,4 @@
-import jsep from 'jsep';
 import * as yup from 'yup';
-import type { Expression } from 'estree';
 
 import {
   FormFields,
@@ -21,6 +19,11 @@ import {
   inferExpressionType,
   InferredType,
 } from '~/utils';
+import {
+  parseExpression,
+  tokenizeJavascriptExpression,
+  type Expression,
+} from '~/lib/modules/expression';
 
 export const createOperationDrawerData = (
   data?: OperationNodeData,
@@ -43,34 +46,25 @@ export const createOperationNodeData = (
   },
 });
 
-const mapJsepError = (error: Error) => {
-  if (error.message.includes('Unexpected')) {
-    let char = error.message.split('Unexpected ')[1];
-    char = char.slice(0, char.lastIndexOf('"') + 1);
+const mapExpressionParseError = (error: Error) => {
+  if (error.message.includes('Unexpected character: ')) {
+    const char = error.message.split('Unexpected character: ')[1];
     return `Carácter inesperado ${char}`;
   }
 
-  if (error.message.includes('missing unaryOp argument')) {
+  if (error.message.includes('Expected expression')) {
     return 'Falta argumento para la operación'; // example: + 1
   }
 
-  if (error.message.includes('Unclosed [')) {
+  if (error.message.includes('Expected Bracket')) {
     return 'Corchetes sin cerrar'; // example: [1 + 2
   }
 
-  if (error.message.includes('Expected exponent')) {
-    return 'Se esperaba un exponente'; // example: 1e
-  }
-
-  if (error.message.includes('Variable names cannot start with a number')) {
-    return 'Las variables no pueden empezar con un número'; // example: 1var
-  }
-
-  if (error.message.includes('Unexpected period')) {
+  if (error.message.includes('Expected Dot')) {
     return 'Punto inesperado'; // example: 1.2.
   }
 
-  if (error.message.includes('Unclosed quote')) {
+  if (error.message.includes('Unterminated string literal')) {
     return 'Comillas sin cerrar'; // example: "string
   }
 
@@ -78,31 +72,27 @@ const mapJsepError = (error: Error) => {
     return 'Símbolo inesperado'; // example: 1 + #
   }
 
-  if (error.message.includes('Expected comma')) {
+  if (error.message.includes('Expected Comma')) {
     return 'Se esperaba una coma'; // example: [1 2]
   }
 
-  if (error.message.includes('Expected')) {
-    // return "TODO";
-  }
-
-  if (error.message.includes('Unclosed (')) {
+  if (error.message.includes('Expected Paren')) {
     return 'Paréntesis sin cerrar'; // example: (1 + 2
   }
 
-  if (error.message.includes('Expected expression')) {
-    // return "TODO"; // example: +
+  if (error.message.includes('Expected Colon')) {
+    return "Se esperaba un ':'"; // example: {a 1}
   }
 
-  if (error.message.includes('Expected :')) {
-    return "Se esperaba un ':'"; // example: {a 1}
+  if (error.message.includes('Expected')) {
+    return 'Expresión incompleta';
   }
 
   return 'Error en la expresión';
 };
 
 const validateRightSideVariables = (
-  expression: jsep.Expression | null | undefined,
+  expression: Expression | null | undefined,
   variablesSet: Set<string>,
 ) => {
   if (!expression) {
@@ -135,16 +125,12 @@ export const createSchema = (options: CreateOperationDrawerSchemaOptions) =>
     [FormFields.RightSide]: yup
       .string()
       .required('Campo requerido')
-      .test('jsep-error', 'Expresión inválida', (value) => {
+      .test('expression-error', 'Expresión inválida', (value) => {
         try {
-          const parsed = jsep(value);
-          if (parsed.type === 'Compound') {
-            throw new yup.ValidationError(
-              'Expresión inválida',
-              value,
-              FormFields.RightSide,
-            );
-          }
+          const parsed = parseExpression(
+            value ?? '',
+            tokenizeJavascriptExpression,
+          );
 
           return validateRightSideVariables(parsed, options.variablesSet);
         } catch (error) {
@@ -153,7 +139,7 @@ export const createSchema = (options: CreateOperationDrawerSchemaOptions) =>
           }
 
           throw new yup.ValidationError(
-            mapJsepError(error as Error),
+            mapExpressionParseError(error as Error),
             value,
             FormFields.RightSide,
           );
@@ -167,7 +153,7 @@ export const inferOperationType = (
 ): `${LiteralVariants}` => {
   if (!tree) return LiteralVariants.Null;
 
-  const type = inferExpressionType(tree as Expression);
+  const type = inferExpressionType(tree);
 
   switch (type) {
     case InferredType.String:

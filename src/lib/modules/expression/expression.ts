@@ -1,8 +1,7 @@
-import {
-  ExpressionKind,
-  type Expression,
-} from './expression.types';
-import { TokenType, type Token, type Tokenizer } from './tokenizer';
+import { ExpressionKind } from './expression.types';
+import type { Expression } from './expression.types';
+import { tokenizeJavascriptExpression, TokenType } from './tokenizer';
+import type { Token, Tokenizer } from './tokenizer';
 import {
   BINARY_OPERATORS,
   LOGICAL_OPERATORS,
@@ -345,7 +344,10 @@ export class ExpressionParser {
         }
 
         parts.push(
-          new ExpressionParser(this.tokenizer(expression), this.tokenizer).parse(),
+          new ExpressionParser(
+            this.tokenizer(expression),
+            this.tokenizer,
+          ).parse(),
         );
         continue;
       }
@@ -405,5 +407,5 @@ export class ExpressionParser {
 
 export const parseExpression = (
   source: string,
-  tokenizer: Tokenizer,
+  tokenizer: Tokenizer = tokenizeJavascriptExpression,
 ): Expression => new ExpressionParser(tokenizer(source), tokenizer).parse();

@@ -1,5 +1,5 @@
-import type { Node } from '~/lib/modules/nodes';
-import type { Edge, EdgeInsertionTarget } from '~/lib/modules/edge';
+import type { EdgeInsertionTarget } from '~/lib/modules/edge';
+import type { Graph } from '~/lib/types';
 
 export type Size = {
   width: number;
@@ -53,7 +53,4 @@ export interface LayoutBlock {
   layout(origin: Point): LayoutResult;
 }
 
-export type GetLayoutOptions = {
-  nodes: Map<string, Node>;
-  edges: Map<string, Edge>;
-};
+export type GetLayoutOptions = Graph;

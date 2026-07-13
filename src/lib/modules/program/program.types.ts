@@ -1,7 +1,3 @@
-import type { Node } from '~/lib/modules/nodes';
-import type { Edge } from '~/lib/modules/edge';
+import type { Graph } from '~/lib/types';
 
-export type GetASTOptions = {
-  nodes: Map<string, Node>;
-  edges: Map<string, Edge>;
-};
+export type GetASTOptions = Graph;

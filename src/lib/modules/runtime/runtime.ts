@@ -1,5 +1,3 @@
-import type { CoreExpression, Expression } from 'jsep';
-
 import { RuntimeActions, RuntimeEvents, RuntimeNodes } from './runtime.types';
 import type {
   RuntimeContext,
@@ -10,75 +8,109 @@ import type {
   RuntimeServices,
   RuntimeStepNode,
 } from './runtime.types';
+import {
+  BinaryOperator,
+  ExpressionKind,
+  LogicalOperatorExpression,
+  UnaryOperator,
+  type Expression,
+} from '../expression';
 
 function evaluateExpression(
   expression: Expression,
   context: RuntimeContext,
 ): unknown {
-  const node = expression as CoreExpression;
+  switch (expression.kind) {
+    case ExpressionKind.Literal:
+      return expression.value;
 
-  switch (node.type) {
-    case 'Literal':
-      return node.value;
+    case ExpressionKind.Identifier:
+      return context.variables[expression.name];
 
-    case 'Identifier':
-      return context.variables[node.name];
+    case ExpressionKind.UnaryExpression: {
+      const argument = evaluateExpression(expression.argument, context);
 
-    case 'BinaryExpression': {
-      const left = evaluateExpression(node.left, context);
-      const right = evaluateExpression(node.right, context);
+      switch (expression.operator) {
+        case UnaryOperator.Not:
+          return !argument;
+        case UnaryOperator.Negative:
+          return -Number(argument);
+        case UnaryOperator.Positive:
+          return Number(argument);
+      }
 
-      switch (node.operator) {
-        case '&&':
-          return Boolean(left) && Boolean(right);
-        case '||':
-          return Boolean(left) || Boolean(right);
-        case '+':
+      return undefined;
+    }
+
+    case ExpressionKind.BinaryExpression: {
+      const left = evaluateExpression(expression.left, context);
+      const right = evaluateExpression(expression.right, context);
+
+      switch (expression.operator) {
+        case BinaryOperator.Add:
           if (typeof left === 'string' || typeof right === 'string') {
             return String(left) + String(right);
           }
 
           return Number(left) + Number(right);
-        case '-':
+        case BinaryOperator.Subtract:
           return Number(left) - Number(right);
-        case '*':
+        case BinaryOperator.Multiply:
           return Number(left) * Number(right);
-        case '/':
+        case BinaryOperator.Divide:
           return Number(left) / Number(right);
-        case '>':
+        case BinaryOperator.Modulo:
+          return Number(left) % Number(right);
+        case BinaryOperator.Power:
+          return Number(left) ** Number(right);
+        case BinaryOperator.GreaterThan:
           return Number(left) > Number(right);
-        case '<':
+        case BinaryOperator.LessThan:
           return Number(left) < Number(right);
-        case '>=':
+        case BinaryOperator.GreaterThanOrEqual:
           return Number(left) >= Number(right);
-        case '<=':
+        case BinaryOperator.LessThanOrEqual:
           return Number(left) <= Number(right);
-        case '==':
+        case BinaryOperator.Equals:
           return left == right;
-        case '!=':
+        case BinaryOperator.NotEquals:
           return left != right;
-        case '===':
-          return left === right;
-        case '!==':
-          return left !== right;
       }
+
+      return undefined;
     }
 
-    case 'CallExpression': {
-      const callee = node.callee as CoreExpression;
+    case ExpressionKind.LogicalExpression: {
+      if (expression.operator === LogicalOperatorExpression.And) {
+        return (
+          Boolean(evaluateExpression(expression.left, context)) &&
+          Boolean(evaluateExpression(expression.right, context))
+        );
+      }
 
-      if (callee.type !== 'MemberExpression') {
+      if (expression.operator === LogicalOperatorExpression.Or) {
+        return (
+          Boolean(evaluateExpression(expression.left, context)) ||
+          Boolean(evaluateExpression(expression.right, context))
+        );
+      }
+
+      return undefined;
+    }
+
+    case ExpressionKind.CallExpression: {
+      const callee = expression.callee;
+
+      if (callee.kind !== ExpressionKind.MemberExpression) {
         return undefined;
       }
 
-      const property = callee.property as CoreExpression;
-
-      if (property.type !== 'Identifier' || property.name !== 'includes') {
+      if (callee.property !== 'includes') {
         return undefined;
       }
 
       const target = evaluateExpression(callee.object, context);
-      const [searchExpression] = node.arguments as Expression[];
+      const [searchExpression] = expression.args;
       const search = searchExpression
         ? evaluateExpression(searchExpression, context)
         : undefined;
@@ -93,6 +125,44 @@ function evaluateExpression(
 
       return false;
     }
+
+    case ExpressionKind.MemberExpression: {
+      const object = evaluateExpression(expression.object, context);
+
+      if (object && typeof object === 'object') {
+        return (object as Record<string, unknown>)[expression.property];
+      }
+
+      return undefined;
+    }
+
+    case ExpressionKind.ConditionalExpression:
+      return evaluateExpression(
+        evaluateExpression(expression.test, context)
+          ? expression.consequent
+          : expression.alternate,
+        context,
+      );
+
+    case ExpressionKind.ArrayExpression:
+      return expression.elements.map((element) =>
+        evaluateExpression(element, context),
+      );
+
+    case ExpressionKind.ObjectExpression:
+      return Object.fromEntries(
+        expression.properties.map((property) => [
+          property.key,
+          evaluateExpression(property.value, context),
+        ]),
+      );
+
+    case ExpressionKind.TemplateLiteral:
+      return expression.parts
+        .map((part) =>
+          typeof part === 'string' ? part : evaluateExpression(part, context),
+        )
+        .join('');
   }
 }
 

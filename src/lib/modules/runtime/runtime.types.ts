@@ -1,6 +1,5 @@
-import type { Expression } from 'jsep';
-import type { Edge } from '../edge';
-import type { Node } from '../nodes';
+import type { Graph } from '~/lib/types';
+import type { Expression } from '../expression';
 
 export type RuntimeContext = {
   variables: Record<string, unknown>;
@@ -13,10 +12,7 @@ export type RuntimeSpeed = {
   contextMs: number;
 };
 
-export type GetRuntimeProgramOptions = {
-  nodes: Map<string, Node>;
-  edges: Map<string, Edge>;
-};
+export type GetRuntimeProgramOptions = Graph;
 
 // #region Runtime Actions
 export enum RuntimeActions {

@@ -1,6 +1,6 @@
-import type jsep from 'jsep';
+import type { Expression } from '~/lib/modules/expression';
 
 export type OutputNodeData = {
   text: string;
-  expression?: jsep.Expression;
+  expression?: Expression;
 };
