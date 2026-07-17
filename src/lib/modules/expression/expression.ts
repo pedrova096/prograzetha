@@ -11,11 +11,14 @@ import {
 
 export class ExpressionParser {
   protected index = 0;
+  protected readonly tokens: Token[];
 
   constructor(
-    protected readonly tokens: Token[],
+    tokens: Token[],
     private readonly tokenizer: Tokenizer,
-  ) {}
+  ) {
+    this.tokens = tokens.filter((token) => token.type !== TokenType.Newline);
+  }
 
   parse(): Expression {
     const expression = this.parseExpression();

@@ -43,7 +43,7 @@ const createRuntime = () => {
       diagram.start,
     ),
     services: {
-      alert: async () => {},
+      output: async () => {},
       input: async (prompt) => globalThis.prompt?.(prompt) ?? '',
     },
   });

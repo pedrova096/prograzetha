@@ -8,6 +8,12 @@ export const tokenizeJavascriptExpression = (source: string): Token[] => {
   while (i < source.length) {
     const char = source[i];
 
+    if (char === '\n' || char === '\r') {
+      tokens.push({ type: TokenType.Newline, value: '\n' });
+      i += char === '\r' && source[i + 1] === '\n' ? 2 : 1;
+      continue;
+    }
+
     if (/\s/.test(char)) {
       i++;
       continue;

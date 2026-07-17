@@ -3,7 +3,8 @@
 
   import { getDiagramContext } from '~/App.context.svelte';
   import type { Recordable } from '~/lib/types';
-  import { getIR, JavaScript, Python } from '~/lib/modules/ir';
+  import { getIRFromGraph, getGraphFromProgram } from '~/lib/modules/ir';
+  import { JavaScript, Python } from '~/lib/modules/ir/languages';
   import { debounce } from '~/lib/utils';
   import { RadioGroup } from '../../RadioGroup';
   import { Sidebar } from '../../Sidebar';
@@ -20,11 +21,9 @@
 
   let edit = $state(false);
   let language = $state(`${CodeLanguage.JavaScript}`);
-  let {
-    diagram: { nodes, edges, start },
-  } = $derived(getDiagramContext());
-
-  let program = $derived(getIR({ nodes, edges }, start));
+  let { diagram } = $derived(getDiagramContext());
+  let { nodes, edges, start } = $derived(diagram);
+  let program = $derived(getIRFromGraph({ nodes, edges }, start));
 
   let code = $state('');
 
@@ -42,12 +41,15 @@
 
     code =
       language === CodeLanguage.Python
-        ? Python.getTextFromIR(program)
+        ? Python.encodeProgram(program)
         : JavaScript.encodeProgram(program);
   });
 
   const debouncedJavascriptCodeChanged = debounce(() => {
-    console.log(JavaScript.decodeProgram(code));
+    const result = getGraphFromProgram(JavaScript.decodeProgram(code));
+    diagram.nodes = result.nodes;
+    diagram.edges = result.edges;
+    diagram.start = result.startId;
   }, 600);
 
   const onCodeChangeHandler: CodeEditorProps['onchange'] = (event) => {

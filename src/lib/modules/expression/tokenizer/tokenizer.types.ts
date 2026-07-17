@@ -11,6 +11,7 @@ export enum TokenType {
   Colon = 'colon',
   Question = 'question',
   Semicolon = 'semicolon',
+  Newline = 'newline',
   Template = 'template',
   EOF = 'eof',
 }
@@ -28,6 +29,7 @@ export type Token =
   | { type: `${TokenType.Colon}`; value: ':' }
   | { type: `${TokenType.Question}`; value: '?' }
   | { type: `${TokenType.Semicolon}`; value: ';' }
+  | { type: `${TokenType.Newline}`; value: '\n' }
   | { type: `${TokenType.Template}`; value: string }
   | { type: `${TokenType.EOF}`; value: '' };
 

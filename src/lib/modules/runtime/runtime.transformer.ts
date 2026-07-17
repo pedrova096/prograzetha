@@ -1,81 +1,15 @@
-import jsep from 'jsep';
-
 import { RuntimeActions, RuntimeNodes } from './runtime.types';
 import type {
   GetRuntimeProgramOptions,
   RuntimeNode,
   RuntimeStepNode,
 } from './runtime.types';
-import {
-  ConditionOperator,
-  ConditionalNode,
-  isConditionGroup,
-  NodeTypes,
-  type ConditionNode,
-  type ConditionUnion,
-} from '../nodes';
+import { ConditionalNode, NodeTypes } from '../nodes';
 import { BranchEdge } from '../edge';
 import type { InputNodeData } from '../nodes/inputNode';
 import type { OperationNodeData } from '../nodes/operationNode';
 import type { OutputNodeData } from '../nodes/outputNode';
-import { LOGICAL_OPERATOR_EXPRESSION } from './runtime.constants';
-
-function getExpressionFromConditionNode(condition: ConditionNode) {
-  const left = jsep(condition.leftSide);
-  const right = jsep(condition.rightSide);
-
-  if (condition.operator === ConditionOperator.Includes) {
-    return {
-      type: 'CallExpression',
-      callee: {
-        type: 'MemberExpression',
-        computed: false,
-        object: left,
-        property: {
-          type: 'Identifier',
-          name: 'includes',
-        },
-      },
-      arguments: [right],
-    } satisfies jsep.CallExpression;
-  }
-
-  return {
-    type: 'BinaryExpression',
-    operator: condition.operator,
-    left,
-    right,
-  } satisfies jsep.BinaryExpression;
-}
-
-export function getExpressionFromConditionUnion(
-  condition: ConditionUnion,
-): jsep.Expression {
-  if (!isConditionGroup(condition)) {
-    return getExpressionFromConditionNode(condition);
-  }
-
-  const [first, ...rest] = condition.children.map(
-    getExpressionFromConditionUnion,
-  );
-
-  if (!first) {
-    return {
-      type: 'Literal',
-      value: true,
-      raw: 'true',
-    } satisfies jsep.Literal;
-  }
-
-  return rest.reduce<jsep.Expression>((expression, child) => {
-    return {
-      type: 'BinaryExpression',
-      operator: LOGICAL_OPERATOR_EXPRESSION[condition.logicalOperator],
-      left: expression,
-      right: child,
-    } satisfies jsep.BinaryExpression;
-  }, first);
-}
+import { createConditionExpression } from '../ir';
 
 function createStepNode(
   nodes: GetRuntimeProgramOptions['nodes'],
@@ -195,7 +129,7 @@ export function getRuntimeProgram(
     if (node instanceof ConditionalNode && edge instanceof BranchEdge) {
       children.push({
         id: currentId,
-        condition: getExpressionFromConditionUnion(node.data.conditions),
+        condition: createConditionExpression(node.data.conditions),
         type: RuntimeNodes.Branch,
         label: '',
         then: getRuntimeProgram(

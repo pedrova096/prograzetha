@@ -60,7 +60,7 @@ export type RuntimeEvent =
 // #endregion
 
 export type RuntimeServices = {
-  alert(message: string): Promise<void>;
+  output(message: string): Promise<void>;
   input(prompt: string): Promise<string | number>;
 };
 

@@ -4,7 +4,7 @@ import {
   UnaryOperator,
 } from '~/lib/modules/expression';
 
-export const INDENT = '  ';
+export const INDENT = '    ';
 
 export const BINARY_OPERATORS = {
   [BinaryOperator.Equals]: '==',
@@ -22,29 +22,12 @@ export const BINARY_OPERATORS = {
 } as const satisfies Record<BinaryOperator, string>;
 
 export const LOGICAL_OPERATORS = {
-  [LogicalOperatorExpression.And]: '&&',
-  [LogicalOperatorExpression.Or]: '||',
+  [LogicalOperatorExpression.And]: 'and',
+  [LogicalOperatorExpression.Or]: 'or',
 } as const satisfies Record<LogicalOperatorExpression, string>;
 
 export const UNARY_OPERATORS = {
-  [UnaryOperator.Not]: '!',
+  [UnaryOperator.Not]: 'not ',
   [UnaryOperator.Negative]: '-',
   [UnaryOperator.Positive]: '+',
 } as const satisfies Record<UnaryOperator, string>;
-
-export const PRECEDENCE: Record<string, number> = {
-  '||': 1,
-  '&&': 2,
-  '==': 3,
-  '!=': 3,
-  '>': 4,
-  '>=': 4,
-  '<': 4,
-  '<=': 4,
-  '+': 5,
-  '-': 5,
-  '*': 6,
-  '/': 6,
-  '%': 6,
-  '**': 7,
-};

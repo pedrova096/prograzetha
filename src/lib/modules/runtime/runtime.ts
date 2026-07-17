@@ -187,7 +187,7 @@ async function* executeAction(
         message,
       };
 
-      await services.alert(message);
+      await services.output(message);
       return;
     }
 

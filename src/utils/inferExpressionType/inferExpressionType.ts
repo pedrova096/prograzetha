@@ -1,99 +1,85 @@
-import type {
-  BinaryExpression,
-  CallExpression,
-  Expression,
-  Identifier,
-  Literal,
-  LogicalExpression,
-  MemberExpression,
-  UnaryExpression,
-} from 'estree';
+import {
+  BinaryOperator,
+  ExpressionKind,
+  LogicalOperatorExpression,
+  UnaryOperator,
+  type BinaryExpression,
+  type CallExpression,
+  type Expression,
+  type IdentifierExpression,
+  type LiteralExpression,
+  type LogicalExpression,
+  type MemberExpression,
+  type UnaryExpression,
+} from '~/lib/modules/expression';
 
-import type { TypeScope } from './inferExpressionType.types';
-import { InferredType } from './inferExpressionType.types';
 import { MATH_NUMBER_RETURNING_METHODS } from './inferExpressionType.constants';
+import { InferredType, type TypeScope } from './inferExpressionType.types';
 
 export function inferExpressionType(
   node: Expression,
   scope: TypeScope = {},
 ): InferredType {
-  switch (node.type) {
-    case 'Literal':
+  switch (node.kind) {
+    case ExpressionKind.Literal:
       return inferLiteralType(node);
-
-    case 'Identifier':
+    case ExpressionKind.Identifier:
       return inferIdentifierType(node, scope);
-
-    case 'ArrayExpression':
+    case ExpressionKind.ArrayExpression:
       return InferredType.Array;
-
-    case 'ObjectExpression':
+    case ExpressionKind.ObjectExpression:
       return InferredType.Object;
-
-    case 'UnaryExpression':
+    case ExpressionKind.TemplateLiteral:
+      return InferredType.String;
+    case ExpressionKind.UnaryExpression:
       return inferUnaryType(node);
-
-    case 'BinaryExpression':
+    case ExpressionKind.BinaryExpression:
       return inferBinaryType(node, scope);
-
-    case 'LogicalExpression':
+    case ExpressionKind.LogicalExpression:
       return inferLogicalType(node, scope);
-
-    case 'ConditionalExpression':
+    case ExpressionKind.ConditionalExpression:
       return mergeTypes(
         inferExpressionType(node.consequent, scope),
         inferExpressionType(node.alternate, scope),
       );
-
-    case 'CallExpression':
+    case ExpressionKind.CallExpression:
       return inferCallType(node);
-
+    case ExpressionKind.MemberExpression:
+      return InferredType.Unknown;
     default:
       return InferredType.Unknown;
   }
 }
 
-function inferLiteralType(node: Literal): InferredType {
-  if (node.value === null) {
-    return InferredType.Null;
-  }
+function inferLiteralType(node: LiteralExpression): InferredType {
+  if (node.value === null) return InferredType.Null;
 
   switch (typeof node.value) {
     case 'string':
       return InferredType.String;
-
     case 'number':
       return InferredType.Number;
-
     case 'boolean':
       return InferredType.Boolean;
-
     default:
       return InferredType.Unknown;
   }
 }
 
-function inferIdentifierType(node: Identifier, scope: TypeScope): InferredType {
+function inferIdentifierType(
+  node: IdentifierExpression,
+  scope: TypeScope,
+): InferredType {
   return (scope[node.name] as InferredType) ?? InferredType.Unknown;
 }
 
 function inferUnaryType(node: UnaryExpression): InferredType {
   switch (node.operator) {
-    case '!':
-    case 'delete':
+    case UnaryOperator.Not:
       return InferredType.Boolean;
-
-    case '+':
-    case '-':
-    case '~':
+    case UnaryOperator.Positive:
+    case UnaryOperator.Negative:
       return InferredType.Number;
-
-    case 'typeof':
-      return InferredType.String;
-
-    case 'void':
-      return InferredType.Unknown;
-
     default:
       return InferredType.Unknown;
   }
@@ -104,38 +90,21 @@ function inferBinaryType(
   scope: TypeScope,
 ): InferredType {
   switch (node.operator) {
-    case '==':
-    case '!=':
-    case '===':
-    case '!==':
-    case '<':
-    case '<=':
-    case '>':
-    case '>=':
-    case 'in':
-    case 'instanceof':
+    case BinaryOperator.Equals:
+    case BinaryOperator.NotEquals:
+    case BinaryOperator.GreaterThan:
+    case BinaryOperator.GreaterThanOrEqual:
+    case BinaryOperator.LessThan:
+    case BinaryOperator.LessThanOrEqual:
       return InferredType.Boolean;
-
-    case '-':
-    case '*':
-    case '/':
-    case '%':
-    case '**':
-    case '|':
-    case '&':
-    case '^':
-    case '<<':
-    case '>>':
-    case '>>>':
+    case BinaryOperator.Subtract:
+    case BinaryOperator.Multiply:
+    case BinaryOperator.Divide:
+    case BinaryOperator.Modulo:
+    case BinaryOperator.Power:
       return InferredType.Number;
-
-    case '+':
-      return inferPlusType(
-        node.left as Expression,
-        node.right as Expression,
-        scope,
-      );
-
+    case BinaryOperator.Add:
+      return inferPlusType(node.left, node.right, scope);
     default:
       return InferredType.Unknown;
   }
@@ -164,26 +133,34 @@ function inferLogicalType(
   node: LogicalExpression,
   scope: TypeScope,
 ): InferredType {
+  if (
+    node.operator === LogicalOperatorExpression.And ||
+    node.operator === LogicalOperatorExpression.Or
+  ) {
+    return InferredType.Boolean;
+  }
+
   return mergeTypes(
-    inferExpressionType(node.left as Expression, scope),
-    inferExpressionType(node.right as Expression, scope),
+    inferExpressionType(node.left, scope),
+    inferExpressionType(node.right, scope),
   );
 }
 
 function inferCallType(node: CallExpression): InferredType {
-  const callee = node.callee;
+  if (
+    node.callee.kind === ExpressionKind.Identifier &&
+    node.callee.name === 'input'
+  ) {
+    return InferredType.String;
+  }
 
-  if (callee.type !== 'MemberExpression') {
+  if (node.callee.kind !== ExpressionKind.MemberExpression) {
     return InferredType.Unknown;
   }
 
-  const method = getMathMethodName(callee);
+  const method = getMathMethodName(node.callee);
 
-  if (!method) {
-    return InferredType.Unknown;
-  }
-
-  if (MATH_NUMBER_RETURNING_METHODS.has(method)) {
+  if (method && MATH_NUMBER_RETURNING_METHODS.has(method)) {
     return InferredType.Number;
   }
 
@@ -191,33 +168,16 @@ function inferCallType(node: CallExpression): InferredType {
 }
 
 function getMathMethodName(node: MemberExpression): string | null {
-  if (node.object.type !== 'Identifier') {
+  if (
+    node.object.kind !== ExpressionKind.Identifier ||
+    node.object.name !== 'Math'
+  ) {
     return null;
   }
 
-  if (node.object.name !== 'Math') {
-    return null;
-  }
-
-  if (node.computed) {
-    if (node.property.type === 'Literal') {
-      return String(node.property.value);
-    }
-
-    return null;
-  }
-
-  if (node.property.type === 'Identifier') {
-    return node.property.name;
-  }
-
-  return null;
+  return node.property;
 }
 
 function mergeTypes(a: InferredType, b: InferredType): InferredType {
-  if (a === b) {
-    return a;
-  }
-
-  return InferredType.Unknown;
+  return a === b ? a : InferredType.Unknown;
 }
