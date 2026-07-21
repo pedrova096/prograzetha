@@ -19,7 +19,7 @@
     diagram: { nodes, edges, start },
   } = $derived(getDiagramContext());
 
-  let { runtime } = $derived(getRuntimeContext());
+  let { runtimeState } = $derived(getRuntimeContext());
 
   let hoveredEdgeId = $state<string | null>(null);
   let addMenuOpen = $state(false);
@@ -93,12 +93,16 @@
     );
   };
 
+  const runtime = $derived(
+    runtimeState.kind === 'ready' ? runtimeState.runtime : null,
+  );
+
   const edgePaths = $derived(
     layout.edges.map((edge) => ({
       id: edge.id,
       node: edge.source,
       isJoin: edge.isJoin,
-      isTraverse: runtime.traverseNodeIds.has(edge.source),
+      isTraverse: runtime?.traverseNodeIds.has(edge.source),
       path: roundedEdgePath(edge.points),
     })),
   );
@@ -184,7 +188,7 @@
             stroke-linecap="round"
             stroke-linejoin="round"
             marker-end={edge.isJoin ? undefined : 'url(#edge-arrow)'}
-            style:--progress-edge-duration={`${runtime.speed.edgeMs}ms`}
+            style:--progress-edge-duration={`${runtime?.speed.edgeMs}ms`}
             class="progress-edge-path stroke-emerald-500 drop-shadow-[0_3px_5px_rgba(16,185,129,0.35)]"
           />
         {/if}

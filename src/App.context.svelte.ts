@@ -1,5 +1,5 @@
 import { setContext, getContext } from 'svelte';
-import type { DiagramContext, RuntimeContext } from './App.types';
+import type { DiagramContext, RuntimeContext, RuntimeState } from './App.types';
 import { BranchEdge, Edge, EdgeInsertionTargetType } from './lib/modules/edge';
 import type { EdgeInsertionTarget } from './lib/modules/edge';
 import { getRuntimeProgram, RuntimePlayer } from './lib/modules/runtime';
@@ -49,8 +49,19 @@ const createRuntime = () => {
   });
 };
 
+const tryCreateRuntime = (): RuntimeState => {
+  try {
+    return { kind: 'ready', runtime: createRuntime() };
+  } catch (error) {
+    return {
+      kind: 'error',
+      error: error as Error,
+    };
+  }
+};
+
 let runtimeContext = $state<RuntimeContext>({
-  runtime: createRuntime(),
+  runtimeState: tryCreateRuntime(),
 });
 
 export const setDiagramContext = () => {
@@ -59,7 +70,7 @@ export const setDiagramContext = () => {
 
 export const setRuntimeContext = () => {
   $effect(() => {
-    runtimeContext.runtime = createRuntime();
+    runtimeContext.runtimeState = tryCreateRuntime();
   });
 
   return setContext(RUNTIME_KEY, runtimeContext);

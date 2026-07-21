@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { Code } from 'lucide-svelte';
+  import { CircleAlert, Code } from 'lucide-svelte';
 
   import { getDiagramContext } from '~/App.context.svelte';
   import type { Recordable } from '~/lib/types';
-  import { getIRFromGraph, getGraphFromProgram } from '~/lib/modules/ir';
+  import { getGraphFromProgram } from '~/lib/modules/ir';
   import { JavaScript, Python } from '~/lib/modules/ir/languages';
   import { debounce } from '~/lib/utils';
   import { RadioGroup } from '../../RadioGroup';
@@ -12,6 +12,7 @@
   import { CodeLanguage, type CodeDrawerProps } from './CodeDrawer.types';
   import { CodeEditor, Language, type CodeEditorProps } from '../../CodeEditor';
   import { LANGUAGE_OPTIONS } from './CodeDrawer.constants';
+  import { getCodeProgramState, getLanguageLabel } from './CodeDrawer.utils';
 
   let {
     active = false,
@@ -20,10 +21,10 @@
   }: CodeDrawerProps = $props();
 
   let edit = $state(false);
-  let language = $state(`${CodeLanguage.JavaScript}`);
+  let language = $state<CodeLanguage>(CodeLanguage.JavaScript);
   let { diagram } = $derived(getDiagramContext());
   let { nodes, edges, start } = $derived(diagram);
-  let program = $derived(getIRFromGraph({ nodes, edges }, start));
+  let programState = $derived(getCodeProgramState({ nodes, edges, start }));
 
   let code = $state('');
 
@@ -31,22 +32,22 @@
     language === CodeLanguage.JavaScript ? Language.JavaScript : undefined,
   );
 
-  let languageLabel = $derived(
-    LANGUAGE_OPTIONS.find((option) => option.value === language)?.label ??
-      'JavaScript',
-  );
+  let languageLabel = $derived(getLanguageLabel(language));
 
   $effect(() => {
-    if (edit) return;
+    if (edit || programState.kind !== 'ready') return;
 
     code =
       language === CodeLanguage.Python
-        ? Python.encodeProgram(program)
-        : JavaScript.encodeProgram(program);
+        ? Python.encodeProgram(programState.program)
+        : JavaScript.encodeProgram(programState.program);
   });
 
   const debouncedJavascriptCodeChanged = debounce(() => {
-    const result = getGraphFromProgram(JavaScript.decodeProgram(code));
+    const result = getGraphFromProgram(
+      JavaScript.decodeProgram(code),
+      JavaScript.encodeExpression,
+    );
     diagram.nodes = result.nodes;
     diagram.edges = result.edges;
     diagram.start = result.startId;
@@ -102,15 +103,33 @@
       />
 
       <Toggle label="Editar" bind:checked={edit} />
+      {#if programState.kind === 'ready' || edit}
+        <CodeEditor
+          label={languageLabel}
+          language={editorLanguage}
+          value={code}
+          onchange={onCodeChangeHandler}
+          readonly={!edit}
+          class="min-h-0 flex-1 overflow-auto w-96"
+        />
+      {:else}
+        <div
+          class="flex flex-col gap-3 rounded-md border border-red-200 bg-red-50 p-3"
+          role="alert"
+          aria-label="Error de código"
+        >
+          <div
+            class="flex items-center gap-2 text-sm font-semibold text-red-900"
+          >
+            <CircleAlert class="size-4" />
+            No se puede generar el código.
+          </div>
 
-      <CodeEditor
-        label={languageLabel}
-        language={editorLanguage}
-        value={code}
-        onchange={onCodeChangeHandler}
-        readonly={!edit}
-        class="min-h-0 flex-1 overflow-auto w-96"
-      />
+          <p class="break-words text-sm text-red-800">
+            {programState.error.message}
+          </p>
+        </div>
+      {/if}
     </div>
   {/snippet}
 </Sidebar.Action>

@@ -34,6 +34,7 @@
   {...props}
   class={['flex h-full min-h-0 items-stretch gap-2', className]}
   data-collapsed={collapsed}
+  data-action={actionId ?? 'none'}
 >
   {#if panel}
     <section

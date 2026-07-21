@@ -8,6 +8,10 @@ export type DiagramContext = {
   start: string;
 };
 
+export type RuntimeState =
+  | { kind: 'ready'; runtime: RuntimePlayer }
+  | { kind: 'error'; error: Error };
+
 export type RuntimeContext = {
-  runtime: RuntimePlayer;
+  runtimeState: RuntimeState;
 };

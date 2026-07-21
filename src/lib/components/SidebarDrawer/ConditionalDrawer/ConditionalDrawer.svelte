@@ -54,7 +54,7 @@
   icon={GitCommitVertical}
   id="node-condition"
   label="Nodo"
-  panelTitle="Condicion"
+  panelTitle="Condición"
   defaultOpenPanel
 >
   {#snippet panelActions()}

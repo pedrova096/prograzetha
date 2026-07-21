@@ -10,6 +10,8 @@ import {
   OperationNode,
   OutputNode,
   StartNode,
+  isConditionNode,
+  type ConditionGroup,
   type ConditionUnion,
 } from '../nodes';
 import {
@@ -28,7 +30,6 @@ import {
   type ExpressionStatementIR,
   type GetIROptions,
   type GraphFromProgramResult,
-  type IfIR,
   type ProgramIR,
   type StatementIR,
   type VariableDeclarationIR,
@@ -38,7 +39,8 @@ import {
   createConditionExpression,
   createLiteral,
 } from './ir.utils';
-import { JavaScript } from './languages';
+
+type ExpressionEncoder = (expression: Expression) => string;
 
 const createStatements = (
   options: GetIROptions,
@@ -124,8 +126,20 @@ export const getIRFromGraph = (
   body: createStatements(options, startId),
 });
 
-const expressionToText = (expression: Expression): string =>
-  JavaScript.encodeExpression(expression);
+const expressionToText = (expression: Expression): string => {
+  switch (expression.kind) {
+    case ExpressionKind.Literal:
+      return expression.value as string;
+    case ExpressionKind.Identifier:
+      return `$${expression.name}`;
+    case ExpressionKind.BinaryExpression:
+      return `${expressionToText(expression.left)} ${expressionToText(
+        expression.right,
+      )}`;
+    default:
+      return '';
+  }
+};
 
 const mapInferredType = (expression: Expression): `${LiteralVariants}` => {
   switch (inferExpressionType(expression)) {
@@ -163,10 +177,11 @@ const createInputNode = (statement: VariableDeclarationIR): InputNode => {
 
 const createOperationFromDeclaration = (
   statement: VariableDeclarationIR,
+  expressionEncoder: ExpressionEncoder,
 ): OperationNode =>
   new OperationNode(undefined, undefined, {
     leftSide: statement.name,
-    rightSide: statement.init ? expressionToText(statement.init) : 'null',
+    rightSide: statement.init ? expressionEncoder(statement.init) : 'null',
     tree: statement.init ?? createLiteral(null),
     leftMeta: {
       isDeclaration: true,
@@ -178,10 +193,11 @@ const createOperationFromDeclaration = (
 
 const createOperationFromAssignment = (
   statement: AssignmentIR,
+  expressionEncoder: ExpressionEncoder,
 ): OperationNode =>
   new OperationNode(undefined, undefined, {
     leftSide: statement.target.name,
-    rightSide: expressionToText(statement.value),
+    rightSide: expressionEncoder(statement.value),
     tree: statement.value,
     leftMeta: {
       isDeclaration: false,
@@ -220,14 +236,17 @@ const LOGICAL_CONDITION_OPERATORS: Record<
 
 const createConditionId = () => createId();
 
-const expressionToCondition = (expression: Expression): ConditionUnion => {
+const expressionToCondition = (
+  expression: Expression,
+  expressionEncoder: ExpressionEncoder,
+): ConditionUnion => {
   if (expression.kind === ExpressionKind.LogicalExpression) {
     return {
       id: createConditionId(),
       logicalOperator: LOGICAL_CONDITION_OPERATORS[expression.operator],
       children: [
-        expressionToCondition(expression.left),
-        expressionToCondition(expression.right),
+        expressionToCondition(expression.left, expressionEncoder),
+        expressionToCondition(expression.right, expressionEncoder),
       ],
     };
   }
@@ -238,7 +257,7 @@ const expressionToCondition = (expression: Expression): ConditionUnion => {
     if (!operator) {
       return {
         id: createConditionId(),
-        leftSide: expressionToText(expression),
+        leftSide: expressionEncoder(expression),
         rightSide: 'true',
         operator: ConditionOperator.Equals,
       };
@@ -246,8 +265,8 @@ const expressionToCondition = (expression: Expression): ConditionUnion => {
 
     return {
       id: createConditionId(),
-      leftSide: expressionToText(expression.left),
-      rightSide: expressionToText(expression.right),
+      leftSide: expressionEncoder(expression.left),
+      rightSide: expressionEncoder(expression.right),
       operator,
     };
   }
@@ -259,35 +278,53 @@ const expressionToCondition = (expression: Expression): ConditionUnion => {
   ) {
     return {
       id: createConditionId(),
-      leftSide: expressionToText(expression.callee.object),
-      rightSide: expressionToText(expression.args[0] ?? createLiteral('')),
+      leftSide: expressionEncoder(expression.callee.object),
+      rightSide: expressionEncoder(expression.args[0] ?? createLiteral('')),
       operator: ConditionOperator.Includes,
     };
   }
 
   return {
     id: createConditionId(),
-    leftSide: expressionToText(expression),
+    leftSide: expressionEncoder(expression),
     rightSide: 'true',
     operator: ConditionOperator.Equals,
   };
 };
 
-const expressionToConditionData = (expression: Expression) => ({
-  conditions: expressionToCondition(expression),
-});
+const expressionToConditionData = (
+  expression: Expression,
+  expressionEncoder: ExpressionEncoder,
+) => {
+  const conditions = expressionToCondition(expression, expressionEncoder);
 
-const createNodeFromStatement = (statement: StatementIR) => {
+  if (isConditionNode(conditions)) {
+    return {
+      conditions: {
+        id: createId(),
+        logicalOperator: LogicalOperator.And,
+        children: [conditions],
+      } satisfies ConditionGroup,
+    };
+  }
+
+  return { conditions };
+};
+
+const createNodeFromStatement = (
+  statement: StatementIR,
+  expressionEncoder: ExpressionEncoder,
+) => {
   switch (statement.kind) {
     case IRKind.VariableDeclaration:
       if (statement.init && isNamedCall(statement.init, 'input')) {
         return createInputNode(statement);
       }
 
-      return createOperationFromDeclaration(statement);
+      return createOperationFromDeclaration(statement, expressionEncoder);
 
     case IRKind.Assignment:
-      return createOperationFromAssignment(statement);
+      return createOperationFromAssignment(statement, expressionEncoder);
 
     case IRKind.ExpressionStatement:
       if (!isNamedCall(statement.expression, 'output')) {
@@ -300,7 +337,7 @@ const createNodeFromStatement = (statement: StatementIR) => {
       return new ConditionalNode(
         undefined,
         undefined,
-        expressionToConditionData(statement.test),
+        expressionToConditionData(statement.test, expressionEncoder),
       );
 
     default:
@@ -317,19 +354,21 @@ const appendStatements = (
   edges: Map<string, Edge>,
   previousId: string,
   targetId: string,
+  expressionEncoder: ExpressionEncoder,
 ): string => {
   let previous = previousId;
 
   for (const statement of statements) {
-    const node = createNodeFromStatement(statement);
+    const node = createNodeFromStatement(statement, expressionEncoder);
+    console.log({ node });
     nodes.set(node.id, node);
 
     if (statement.kind === IRKind.If) {
       const thenStart = statement.consequent.length
-        ? createNodeFromStatement(statement.consequent[0]).id
+        ? createNodeFromStatement(statement.consequent[0], expressionEncoder).id
         : targetId;
       const elseStart = statement.alternate?.length
-        ? createNodeFromStatement(statement.alternate[0]).id
+        ? createNodeFromStatement(statement.alternate[0], expressionEncoder).id
         : targetId;
 
       edges.set(
@@ -343,6 +382,7 @@ const appendStatements = (
         edges,
         node.id,
         targetId,
+        expressionEncoder,
       );
       const actualElseStart = appendStatements(
         statement.alternate ?? [],
@@ -350,6 +390,7 @@ const appendStatements = (
         edges,
         node.id,
         targetId,
+        expressionEncoder,
       );
 
       edges.set(
@@ -390,6 +431,7 @@ const appendStatements = (
 
 export const getGraphFromProgram = (
   program: ProgramIR,
+  expressionEncoder: ExpressionEncoder,
 ): GraphFromProgramResult => {
   const startNode = StartNode.create();
   const endNode = EndNode.create();
@@ -415,6 +457,7 @@ export const getGraphFromProgram = (
     edges,
     startNode.id,
     endNode.id,
+    expressionEncoder,
   );
   const endPrevious = lastId || startNode.id;
 
