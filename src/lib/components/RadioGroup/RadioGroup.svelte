@@ -16,6 +16,7 @@
     optionLabel = 'label',
     optionValue = 'value',
     name,
+    onchange,
     variant = 'outline',
     size = 'md',
     ...restProps
@@ -26,6 +27,15 @@
   const helper = $derived(
     Array.isArray(helperProps) ? helperProps.join(', ') : helperProps,
   );
+
+  const onChangeHandler = (nextValue: string) => {
+    value = nextValue;
+    onchange?.(
+      new CustomEvent('change', {
+        detail: { value },
+      }),
+    );
+  };
 </script>
 
 <div class={['flex w-full flex-col gap-1.5', className, classNames?.container]}>
@@ -58,6 +68,7 @@
           class={['peer sr-only', classNames?.radio]}
           bind:group={value}
           value={optionValueResolved}
+          onchange={() => onChangeHandler(optionValueResolved)}
           {...restProps}
         />
         <span

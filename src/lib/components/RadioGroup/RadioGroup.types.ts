@@ -16,9 +16,19 @@ export type RadioGroupClassNames = {
 export type RadioGroupVariant = 'default' | 'outline' | 'secondary';
 export type RadioGroupSize = 'sm' | 'md' | 'lg';
 
-export type RadioGroupProps<T extends Recordable = Recordable> = Omit<
+export type RadioGroupChangeEvent<
+  T extends Recordable = Recordable,
+  K extends keyof T = string,
+> = CustomEvent<{
+  value: T[K];
+}>;
+
+export type RadioGroupProps<
+  T extends Recordable = Recordable,
+  K extends keyof T = string,
+> = Omit<
   HTMLProps<'input', HTMLAttributes<any>>,
-  'value' | 'type' | 'size'
+  'value' | 'type' | 'size' | 'onchange'
 > & {
   classNames?: RadioGroupClassNames;
   ref?: globalThis.HTMLInputElement | null;
@@ -30,8 +40,9 @@ export type RadioGroupProps<T extends Recordable = Recordable> = Omit<
   options?: T[];
   optionRender?: Snippet<[T, boolean]>;
   optionLabel?: keyof T;
-  optionValue?: keyof T;
+  optionValue?: K;
   name?: string;
+  onchange?: (event: RadioGroupChangeEvent<T, K>) => void;
   variant?: RadioGroupVariant;
   size?: RadioGroupSize;
 };

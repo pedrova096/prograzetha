@@ -1,18 +1,22 @@
 <script lang="ts">
   import { CircleAlert, Code } from 'lucide-svelte';
+  import { onDestroy } from 'svelte';
 
   import { getGraphContext } from '~/App.context.svelte';
   import type { Recordable } from '~/lib/types';
-  import { getGraphFromProgram } from '~/lib/modules/ir';
-  import { JavaScript, Python } from '~/lib/modules/ir/languages';
   import { debounce } from '~/lib/utils';
-  import { RadioGroup } from '../../RadioGroup';
+  import { RadioGroup, type RadioGroupProps } from '../../RadioGroup';
   import { Sidebar } from '../../Sidebar';
   import { Toggle } from '../../Toggle';
   import { CodeLanguage, type CodeDrawerProps } from './CodeDrawer.types';
   import { CodeEditor, Language, type CodeEditorProps } from '../../CodeEditor';
-  import { LANGUAGE_OPTIONS } from './CodeDrawer.constants';
-  import { getCodeProgramState, getLanguageLabel } from './CodeDrawer.utils';
+  import { LANGUAGE_OPTIONS, LANG_MODULE_MAP } from './CodeDrawer.constants';
+  import {
+    getCodeGraphState,
+    getCodeProgramState,
+    getLanguageLabel,
+  } from './CodeDrawer.utils';
+  import { createCodeAutocomplete } from './autocomplete';
 
   let {
     active = false,
@@ -27,6 +31,8 @@
   let programState = $derived(getCodeProgramState({ nodes, edges, start }));
 
   let code = $state('');
+  let parseError = $state<Error | null>(null);
+  // let previousLanguage = $state<CodeLanguage>(CodeLanguage.JavaScript);
 
   let editorLanguage = $derived(
     language === CodeLanguage.JavaScript ? Language.JavaScript : undefined,
@@ -34,37 +40,65 @@
 
   let languageLabel = $derived(getLanguageLabel(language));
 
-  $effect(() => {
-    if (edit || programState.kind !== 'ready') return;
+  const codeAutocomplete = $derived(createCodeAutocomplete(language));
 
-    code =
-      language === CodeLanguage.Python
-        ? Python.encodeProgram(programState.program)
-        : JavaScript.encodeProgram(programState.program);
-  });
+  const encodeProgram = (languageFromOption?: CodeLanguage) => {
+    if (programState.kind !== 'ready') return null;
+    let selectedLanguage = languageFromOption || language;
 
-  const debouncedJavascriptCodeChanged = debounce(() => {
-    const result = getGraphFromProgram(
-      JavaScript.decodeProgram(code),
-      JavaScript.encodeExpression,
+    return LANG_MODULE_MAP[selectedLanguage].encodeProgram(
+      programState.program,
     );
-    graph.replace({
-      nodes: result.nodes,
-      edges: result.edges,
-      start: result.startId,
-    });
-  }, 600);
+  };
 
-  const onCodeChangeHandler: CodeEditorProps['onchange'] = (event) => {
-    code = event.detail.value;
+  const commitCode = (source: string, sourceLanguage: CodeLanguage) => {
+    const result = getCodeGraphState(source, sourceLanguage);
 
-    if (language === CodeLanguage.Python) {
-      debouncedJavascriptCodeChanged.cancel();
+    if (result.kind === 'error') {
+      parseError = result.error;
       return;
     }
 
-    debouncedJavascriptCodeChanged();
+    graph.replace(result.graph);
+    parseError = null;
   };
+
+  const debouncedCodeChanged = debounce(commitCode, 600);
+
+  $effect(() => {
+    if (edit) return;
+
+    debouncedCodeChanged.cancel();
+    parseError = null;
+
+    const generatedCode = encodeProgram();
+    if (generatedCode !== null) code = generatedCode;
+  });
+
+  const onCodeChangeHandler: CodeEditorProps['onchange'] = (event) => {
+    code = event.detail.value;
+    parseError = null;
+    debouncedCodeChanged(code, language);
+  };
+
+  const onLanguageChangeHandler: RadioGroupProps<
+    { value: CodeLanguage },
+    'value'
+  >['onchange'] = (event) => {
+    let newLanguage = event.detail.value;
+
+    if (!newLanguage) return;
+
+    debouncedCodeChanged.cancel();
+    parseError = null;
+
+    const generatedCode = encodeProgram(newLanguage);
+    if (generatedCode === null) return;
+
+    code = generatedCode;
+  };
+
+  onDestroy(debouncedCodeChanged.cancel);
 </script>
 
 <Sidebar.Action
@@ -97,6 +131,7 @@
         optionValue="value"
         optionRender={languageOption}
         bind:value={language}
+        onchange={onLanguageChangeHandler}
         classNames={{
           radioContainer: 'grid w-full grid-cols-2',
           radioWrapper: 'w-full',
@@ -112,8 +147,28 @@
           value={code}
           onchange={onCodeChangeHandler}
           readonly={!edit}
+          autocomplete={codeAutocomplete}
+          error={parseError !== null}
           class="min-h-0 flex-1 overflow-auto w-96"
         />
+        {#if parseError}
+          <div
+            class="flex flex-col gap-2 rounded-md border border-red-200 bg-red-50 p-3"
+            role="alert"
+            aria-live="polite"
+            aria-label="Diagnóstico del código"
+          >
+            <div
+              class="flex items-center gap-2 text-sm font-semibold text-red-900"
+            >
+              <CircleAlert class="size-4 shrink-0" />
+              No se pudo interpretar {languageLabel}.
+            </div>
+            <p class="break-words text-sm text-red-800">
+              {parseError.message}
+            </p>
+          </div>
+        {/if}
       {:else}
         <div
           class="flex flex-col gap-3 rounded-md border border-red-200 bg-red-50 p-3"
