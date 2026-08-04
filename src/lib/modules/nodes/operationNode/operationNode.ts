@@ -28,43 +28,6 @@ export class OperationNode extends Node<OperationNodeData> {
     return node.type === NodeTypes.Operation;
   }
 
-  /*
-  toAST(
-    options: OperationNodeOptions = { variables: [] },
-  ): ExpressionStatement | VariableDeclaration {
-    const { variables } = options;
-    if (this.data.leftMeta.isNew || !variables.includes(this.data.leftSide)) {
-      return {
-        type: 'VariableDeclaration',
-        declarations: [
-          {
-            type: 'VariableDeclarator',
-            id: {
-              type: 'Identifier',
-              name: this.data.leftSide,
-            },
-            init: this.data.tree as Expression,
-          },
-        ],
-        kind: 'let',
-      };
-    }
-
-    return {
-      type: 'ExpressionStatement',
-      expression: {
-        type: 'AssignmentExpression',
-        operator: '=',
-        left: {
-          type: 'Identifier',
-          name: this.data.leftSide,
-        },
-        right: this.data.tree as Expression,
-      },
-    };
-  }
-  */
-
   public withUpdate(data = this.data, state = this.state) {
     return new OperationNode(this.id, this.type, data, state);
   }

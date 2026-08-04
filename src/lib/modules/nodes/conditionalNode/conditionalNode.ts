@@ -1,5 +1,4 @@
 import { createId } from '@paralleldrive/cuid2';
-import type { IfStatement } from 'estree';
 
 import { Node, NodeTypes, type NodeState } from '../base';
 import { createDefaultConditionalData } from './conditionalNode.utils';
@@ -21,10 +20,6 @@ export class ConditionalNode extends Node<ConditionalNodeData> {
 
   public static nodeIs(node: Node): node is ConditionalNode {
     return node.type === NodeTypes.Condition;
-  }
-
-  toAST(value?: unknown): IfStatement {
-    throw new Error('Not implemented');
   }
 
   public withUpdate(data = this.data, state = this.state) {
