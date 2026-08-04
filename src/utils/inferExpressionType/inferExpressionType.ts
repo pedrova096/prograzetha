@@ -1,6 +1,7 @@
 import {
   BinaryOperator,
   ExpressionKind,
+  InputFunctions,
   LogicalOperatorExpression,
   UnaryOperator,
   type BinaryExpression,
@@ -147,11 +148,14 @@ function inferLogicalType(
 }
 
 function inferCallType(node: CallExpression): InferredType {
-  if (
-    node.callee.kind === ExpressionKind.Identifier &&
-    node.callee.name === 'input'
-  ) {
-    return InferredType.String;
+  if (node.callee.kind === ExpressionKind.Identifier) {
+    if (node.callee.name === InputFunctions.Number) {
+      return InferredType.Number;
+    }
+
+    if (node.callee.name === InputFunctions.Text) {
+      return InferredType.String;
+    }
   }
 
   if (node.callee.kind !== ExpressionKind.MemberExpression) {

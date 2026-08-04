@@ -4,6 +4,11 @@ import {
   UnaryOperator,
 } from './expression.types';
 
+export enum InputFunctions {
+  Number = 'input_number',
+  Text = 'input_text',
+}
+
 export const BINARY_OPERATORS: Record<string, BinaryOperator> = {
   '+': BinaryOperator.Add,
   '-': BinaryOperator.Subtract,

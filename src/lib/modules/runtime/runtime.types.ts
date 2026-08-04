@@ -1,5 +1,6 @@
 import type { Graph } from '~/lib/types';
 import type { Expression } from '../expression';
+import type { InputType } from '../nodes';
 
 export type RuntimeContext = {
   variables: Record<string, unknown>;
@@ -25,7 +26,11 @@ export enum RuntimeActions {
 export type RuntimeAction =
   | { type: RuntimeActions.Noop }
   | { type: RuntimeActions.Alert; message: string; expression?: Expression }
-  | { type: RuntimeActions.Input; variable: string; prompt: string }
+  | {
+      type: RuntimeActions.Input;
+      variable: string;
+      inputType: `${InputType}`;
+    }
   | { type: RuntimeActions.Assign; variable: string; expression: Expression };
 // #endregion
 
@@ -53,7 +58,7 @@ export type RuntimeEvent =
       type: RuntimeEvents.ActionInput;
       nodeId: string;
       variable: string;
-      prompt: string;
+      inputType: `${InputType}`;
     }
   | { type: RuntimeEvents.ContextUpdate; variables: Record<string, unknown> }
   | { type: RuntimeEvents.ExecutionEnd };
@@ -61,7 +66,8 @@ export type RuntimeEvent =
 
 export type RuntimeServices = {
   output(message: string): Promise<void>;
-  input(prompt: string): Promise<string | number>;
+  inputNumber(): Promise<number>;
+  inputText(): Promise<string>;
 };
 
 export enum RuntimeNodes {
@@ -99,6 +105,6 @@ export enum PlayerStatus {
 
 export type PendingInput = {
   nodeId: string;
-  prompt: string;
   variableName: string;
+  inputType: `${InputType}`;
 };

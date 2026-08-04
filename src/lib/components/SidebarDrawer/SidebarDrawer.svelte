@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Settings, Code } from 'lucide-svelte';
-  import { getDiagramContext, updateNode } from '~/App.context.svelte';
+  import { getGraphContext } from '~/App.context.svelte';
   import {
     ConditionalNode,
     InputNode,
@@ -23,9 +23,8 @@
 
   let { class: className, ...props }: SidebarDrawerProps = $props();
 
-  let {
-    diagram: { nodes },
-  } = $derived(getDiagramContext());
+  const graph = getGraphContext();
+  let { nodes } = $derived(graph);
 
   let collapsed = $state(false);
   let actionId = $state<string | null>(null);
@@ -77,7 +76,7 @@
   };
 
   const onSave = (node: Node) => {
-    updateNode(node);
+    graph.updateNode(node);
     closePanel();
     navigate(DrawerRoutes.Home);
   };
@@ -104,7 +103,7 @@
     await tick();
     const node = nodes.get(nodeFromOption.id)!;
     if (node.state === NodeStates.New) {
-      updateNode(node.withUpdate(node.data, NodeStates.Error));
+      graph.updateNode(node.withUpdate(node.data, NodeStates.Error));
     }
   };
 </script>

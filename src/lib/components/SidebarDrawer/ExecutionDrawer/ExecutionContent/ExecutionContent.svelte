@@ -1,6 +1,7 @@
 <script lang="ts">
   import { PlayerStatus, RuntimeEvents } from '~/lib/modules/runtime';
   import { EventsSection } from './EventsSection';
+  import { ExecutionError } from '../ExecutionError';
   import { OutputSection } from './OutputSection';
   import { StateSection } from './StateSection';
   import { VariablesSection } from './VariablesSection';
@@ -27,18 +28,22 @@
   const sectionDividerClass = 'border-zinc-200';
 </script>
 
-<div class="flex h-full min-h-0 flex-col gap-4 overflow-hidden">
-  <StateSection {statusLabel} />
+{#if runtime.status === PlayerStatus.Error && runtime.error}
+  <ExecutionError error={runtime.error} />
+{:else}
+  <div class="flex h-full min-h-0 flex-col gap-4 overflow-hidden">
+    <StateSection {statusLabel} />
 
-  <hr class={sectionDividerClass} />
+    <hr class={sectionDividerClass} />
 
-  <OutputSection events={outputEvents} />
+    <OutputSection events={outputEvents} />
 
-  <hr class={sectionDividerClass} />
+    <hr class={sectionDividerClass} />
 
-  <VariablesSection {variables} />
+    <VariablesSection {variables} />
 
-  <hr class={sectionDividerClass} />
+    <hr class={sectionDividerClass} />
 
-  <EventsSection events={recentEvents} />
-</div>
+    <EventsSection events={recentEvents} />
+  </div>
+{/if}

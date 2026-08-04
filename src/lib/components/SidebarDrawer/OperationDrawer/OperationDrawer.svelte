@@ -3,7 +3,7 @@
   import { createForm } from 'felte';
   import { GitCommitVertical, Lightbulb, Save } from 'lucide-svelte';
 
-  import { getDiagramContext } from '~/App.context.svelte';
+  import { getGraphContext } from '~/App.context.svelte';
   import {
     parseExpression,
   } from '~/lib/modules/expression';
@@ -31,8 +31,9 @@
   let { node, onSave, onClose, onDismiss }: OperationDrawerProps = $props();
 
   let {
-    diagram: { nodes, edges },
-  } = $derived(getDiagramContext());
+    nodes,
+    edges,
+  } = $derived(getGraphContext());
 
   let variablesList = $derived(getPreviousVariables({ nodes, edges }, node));
   let variablesSet = $derived(

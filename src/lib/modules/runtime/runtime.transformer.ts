@@ -57,7 +57,7 @@ function createStepNode(
         action: {
           type: RuntimeActions.Input,
           variable: data.name,
-          prompt: data.name,
+          inputType: data.type,
         },
       };
     }

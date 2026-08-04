@@ -1,57 +1,43 @@
-import { setContext, getContext } from 'svelte';
-import type { DiagramContext, RuntimeContext, RuntimeState } from './App.types';
-import { BranchEdge, Edge, EdgeInsertionTargetType } from './lib/modules/edge';
-import type { EdgeInsertionTarget } from './lib/modules/edge';
-import { getRuntimeProgram, RuntimePlayer } from './lib/modules/runtime';
-import {
-  EndNode,
-  Node,
-  NodeTypes,
-  StartNode,
-  createNode,
-} from './lib/modules/nodes';
+import { getContext, setContext } from 'svelte';
 
-const DIAGRAM_KEY = Symbol('DIAGRAM');
+import type { RuntimeContext, RuntimeState } from './App.types';
+import type { Graph, GraphState } from './lib/modules/graph';
+import { getRuntimeProgram, RuntimePlayer } from './lib/modules/runtime';
+
+const GRAPH_KEY = Symbol('GRAPH');
 const RUNTIME_KEY = Symbol('RUNTIME');
 
-const createContext = (): DiagramContext => {
-  const startNode = StartNode.create();
-  const endNode = EndNode.create();
-
-  const nodes = new Map<string, Node>([
-    [startNode.id, startNode],
-    [endNode.id, endNode],
-  ]);
-
-  const edges = new Map<string, Edge>([
-    [startNode.id, Edge.create(startNode.id, endNode.id)],
-  ]);
-
-  return {
-    nodes,
-    edges,
-    start: startNode.id,
-  };
-};
-
-let diagram = $state<DiagramContext>(createContext());
-
-const createRuntime = () => {
+const createRuntime = (graph: GraphState) => {
   return new RuntimePlayer({
     program: getRuntimeProgram(
-      { nodes: diagram.nodes, edges: diagram.edges },
-      diagram.start,
+      { nodes: graph.nodes, edges: graph.edges },
+      graph.start,
     ),
     services: {
       output: async () => {},
-      input: async (prompt) => globalThis.prompt?.(prompt) ?? '',
+      inputNumber: async () => {
+        const rawValue = globalThis.prompt?.('Ingrese un número');
+
+        if (!rawValue) {
+          throw new Error('Debe ingresar un número.');
+        }
+
+        const value = Number(rawValue);
+
+        if (!Number.isFinite(value)) {
+          throw new Error('La entrada debe ser un número válido.');
+        }
+
+        return value;
+      },
+      inputText: async () => globalThis.prompt?.('Ingrese texto') ?? '',
     },
   });
 };
 
-const tryCreateRuntime = (): RuntimeState => {
+const tryCreateRuntime = (graph: GraphState): RuntimeState => {
   try {
-    return { kind: 'ready', runtime: createRuntime() };
+    return { kind: 'ready', runtime: createRuntime(graph) };
   } catch (error) {
     return {
       kind: 'error',
@@ -60,104 +46,27 @@ const tryCreateRuntime = (): RuntimeState => {
   }
 };
 
-let runtimeContext = $state<RuntimeContext>({
-  runtimeState: tryCreateRuntime(),
-});
+export const setGraphContext = (graph: Graph) => {
+  return setContext<Graph>(GRAPH_KEY, graph);
+};
 
-export const setDiagramContext = () => {
-  return setContext(DIAGRAM_KEY, { diagram });
+export const getGraphContext = () => {
+  return getContext<Graph>(GRAPH_KEY);
 };
 
 export const setRuntimeContext = () => {
-  $effect(() => {
-    runtimeContext.runtimeState = tryCreateRuntime();
+  const graph = getGraphContext();
+  const context = $state<RuntimeContext>({
+    runtimeState: tryCreateRuntime(graph),
   });
 
-  return setContext(RUNTIME_KEY, runtimeContext);
-};
+  $effect(() => {
+    context.runtimeState = tryCreateRuntime(graph);
+  });
 
-export const getDiagramContext = () => {
-  return getContext<ReturnType<typeof setDiagramContext>>(DIAGRAM_KEY);
+  return setContext(RUNTIME_KEY, context);
 };
 
 export const getRuntimeContext = () => {
   return getContext<ReturnType<typeof setRuntimeContext>>(RUNTIME_KEY);
-};
-
-export const updateNode = (node: Node) => {
-  diagram.nodes = new Map(diagram.nodes).set(node.id, node);
-};
-
-const getNewEdge = (newNode: Node, target: string, previous: string) => {
-  const baseEdge = Edge.create(newNode.id, target, previous);
-
-  if (newNode.type === NodeTypes.Condition) {
-    return BranchEdge.fromEdge(baseEdge);
-  }
-
-  return baseEdge;
-};
-
-const attachBranchNewNode = (
-  target: Extract<
-    EdgeInsertionTarget,
-    { type: EdgeInsertionTargetType.Branch }
-  >,
-  currentEdge: BranchEdge,
-  newNode: Node,
-) => {
-  const branchTarget = currentEdge[target.side];
-
-  const newNodes = new Map(diagram.nodes).set(newNode.id, newNode);
-  const newEdges = new Map(diagram.edges)
-    .set(target.source, currentEdge.withBranchSide(target.side, newNode.id))
-    .set(newNode.id, getNewEdge(newNode, branchTarget, currentEdge.source));
-
-  if (branchTarget) {
-    newEdges.set(
-      branchTarget,
-      diagram.edges.get(branchTarget)!.withPrevious(newNode.id),
-    );
-  }
-
-  diagram.nodes = newNodes;
-  diagram.edges = newEdges;
-
-  return newNode;
-};
-
-export const attachNewNode = (
-  target: EdgeInsertionTarget,
-  newNodeType: NodeTypes,
-) => {
-  const currentEdge = diagram.edges.get(target.source);
-
-  if (!currentEdge) {
-    console.error('Invalid edge insertion target', target);
-    return null;
-  }
-
-  const newNode = createNode({ type: newNodeType });
-
-  if (target.type === EdgeInsertionTargetType.Branch) {
-    if (!(currentEdge instanceof BranchEdge)) {
-      console.error('Invalid branch insertion target', target);
-      return null;
-    }
-
-    return attachBranchNewNode(target, currentEdge, newNode);
-  }
-
-  const newNodes = new Map(diagram.nodes).set(newNode.id, newNode);
-  const newEdges = new Map(diagram.edges)
-    .set(target.source, currentEdge.withTarget(newNode.id))
-    .set(
-      newNode.id,
-      getNewEdge(newNode, currentEdge.target, currentEdge.source),
-    );
-
-  diagram.nodes = newNodes;
-  diagram.edges = newEdges;
-
-  return newNode;
 };

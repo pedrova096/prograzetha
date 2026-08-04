@@ -21,6 +21,7 @@ export class RuntimePlayer {
   // chosenBranches = $state<Record<string, 'then' | 'else'>>({});
   events = $state<RuntimeEvent[]>([]);
   pendingInput = $state<PendingInput | null>(null);
+  error = $state<Error | null>(null);
 
   traverseNodeIds = $derived(
     new Set(this.events.filter(isEdgeTraverse).map((event) => event.from)),
@@ -49,6 +50,7 @@ export class RuntimePlayer {
     this.events = [];
     this.context = { variables: {} };
     this.pendingInput = null;
+    this.error = null;
   }
 
   async play() {
@@ -61,24 +63,34 @@ export class RuntimePlayer {
 
     this.status = PlayerStatus.Running;
 
-    while (this.status === PlayerStatus.Running) {
-      const result = await this.iterator!.next();
+    try {
+      while (this.status === PlayerStatus.Running) {
+        const result = await this.iterator!.next();
 
-      if (result.done) {
-        this.status = PlayerStatus.Done;
-        break;
+        if (result.done) {
+          this.status = PlayerStatus.Done;
+          break;
+        }
+
+        const event = result.value;
+
+        this.applyEvent(event);
+
+        if (event.type === RuntimeEvents.ExecutionEnd) {
+          this.status = PlayerStatus.Done;
+          break;
+        }
+
+        await wait(this.getEventDuration(event));
       }
-
-      const event = result.value;
-
-      this.applyEvent(event);
-
-      if (event.type === RuntimeEvents.ExecutionEnd) {
-        this.status = PlayerStatus.Done;
-        break;
-      }
-
-      await wait(this.getEventDuration(event));
+    } catch (error) {
+      this.iterator = null;
+      this.activeNodeId = null;
+      this.activeEdge = null;
+      this.pendingInput = null;
+      this.error =
+        error instanceof Error ? error : new Error('Error de ejecución.');
+      this.status = PlayerStatus.Error;
     }
   }
 

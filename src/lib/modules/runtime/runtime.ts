@@ -15,6 +15,7 @@ import {
   UnaryOperator,
   type Expression,
 } from '../expression';
+import { InputType } from '../nodes';
 
 function evaluateExpression(
   expression: Expression,
@@ -196,10 +197,15 @@ async function* executeAction(
         type: RuntimeEvents.ActionInput,
         nodeId: node.id,
         variable: action.variable,
-        prompt: action.prompt,
+        inputType: action.inputType,
       };
 
-      const value = await services.input(action.prompt);
+      const input_service = {
+        [InputType.Number]: services.inputNumber,
+        [InputType.String]: services.inputText,
+      }[action.inputType];
+
+      const value = await input_service();
 
       context.variables[action.variable] = value;
 

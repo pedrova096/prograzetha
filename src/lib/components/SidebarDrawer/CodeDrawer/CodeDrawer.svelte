@@ -1,7 +1,7 @@
 <script lang="ts">
   import { CircleAlert, Code } from 'lucide-svelte';
 
-  import { getDiagramContext } from '~/App.context.svelte';
+  import { getGraphContext } from '~/App.context.svelte';
   import type { Recordable } from '~/lib/types';
   import { getGraphFromProgram } from '~/lib/modules/ir';
   import { JavaScript, Python } from '~/lib/modules/ir/languages';
@@ -22,8 +22,8 @@
 
   let edit = $state(false);
   let language = $state<CodeLanguage>(CodeLanguage.JavaScript);
-  let { diagram } = $derived(getDiagramContext());
-  let { nodes, edges, start } = $derived(diagram);
+  const graph = getGraphContext();
+  let { nodes, edges, start } = $derived(graph);
   let programState = $derived(getCodeProgramState({ nodes, edges, start }));
 
   let code = $state('');
@@ -48,9 +48,11 @@
       JavaScript.decodeProgram(code),
       JavaScript.encodeExpression,
     );
-    diagram.nodes = result.nodes;
-    diagram.edges = result.edges;
-    diagram.start = result.startId;
+    graph.replace({
+      nodes: result.nodes,
+      edges: result.edges,
+      start: result.startId,
+    });
   }, 600);
 
   const onCodeChangeHandler: CodeEditorProps['onchange'] = (event) => {

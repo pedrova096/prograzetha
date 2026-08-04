@@ -1,9 +1,5 @@
 <script lang="ts">
-  import {
-    attachNewNode,
-    getDiagramContext,
-    getRuntimeContext,
-  } from '~/App.context.svelte';
+  import { getGraphContext, getRuntimeContext } from '~/App.context.svelte';
   import { getLayout } from '~/lib/modules/layout';
   import type { RenderEdge, RenderNode } from '~/lib/modules/layout';
   import { EdgeInsertionTargetType } from '~/lib/modules/edge';
@@ -15,9 +11,8 @@
   import { generatePath } from '~/utils';
   import { DrawerRoutes } from '../SidebarDrawer';
 
-  let {
-    diagram: { nodes, edges, start },
-  } = $derived(getDiagramContext());
+  const graph = getGraphContext();
+  let { nodes, edges, start } = $derived(graph);
 
   let { runtimeState } = $derived(getRuntimeContext());
 
@@ -70,7 +65,10 @@
       source: layoutEdge.source,
     };
 
-    const newNode = attachNewNode(insertTarget, option.value as NodeTypes);
+    const newNode = graph.attachNewNode(
+      insertTarget,
+      option.value as NodeTypes,
+    );
 
     if (!newNode) return;
 
@@ -91,6 +89,12 @@
         type: node.type,
       }),
     );
+  };
+
+  const onNodeDeleteHandler = (node: NodeProps['node']) => {
+    if (!graph.deleteNode(node.id)) return;
+    // Check if that id its open
+    navigate(DrawerRoutes.Home);
   };
 
   const runtime = $derived(
@@ -213,6 +217,7 @@
     {#if node}
       <Node
         {node}
+        onDelete={onNodeDeleteHandler}
         class="absolute"
         style={nodeStyle(renderNode)}
         onclick={() => onNodeClickHandler(node)}

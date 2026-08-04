@@ -6,6 +6,7 @@ import {
   ConditionalNode,
   EndNode,
   InputNode,
+  InputType,
   LogicalOperator,
   OperationNode,
   OutputNode,
@@ -17,6 +18,7 @@ import {
 import {
   BinaryOperator,
   ExpressionKind,
+  InputFunctions,
   LogicalOperatorExpression,
   type CallExpression,
   type Expression,
@@ -62,11 +64,16 @@ const createStatements = (
     visited.add(currentId);
 
     if (InputNode.nodeIs(node)) {
+      const inputFunction =
+        node.data.type === InputType.Number
+          ? InputFunctions.Number
+          : InputFunctions.Text;
+
       body.push({
         kind: IRKind.VariableDeclaration,
         name: node.data.name,
         valueType: node.data.type,
-        init: createCallExpression('input', [createLiteral(node.data.name)]),
+        init: createCallExpression(inputFunction),
       });
     } else if (OperationNode.nodeIs(node) && node.data.tree) {
       if (node.data.leftMeta.isDeclaration) {
@@ -161,17 +168,18 @@ const isNamedCall = (expression: Expression, name: string) =>
   expression.callee.kind === ExpressionKind.Identifier &&
   expression.callee.name === name;
 
+const getTypeByFunctionName = (expression: CallExpression) =>
+  isNamedCall(expression, InputFunctions.Number)
+    ? InputType.Number
+    : InputType.String;
+
 const createInputNode = (statement: VariableDeclarationIR): InputNode => {
   const init = statement.init as CallExpression;
-  const [prompt] = init.args;
-  const name =
-    prompt?.kind === ExpressionKind.Literal && typeof prompt.value === 'string'
-      ? prompt.value
-      : statement.name;
+  const type = getTypeByFunctionName(init);
 
   return new InputNode(undefined, undefined, {
-    name: statement.name || name,
-    type: 'string',
+    name: statement.name,
+    type,
   });
 };
 
@@ -311,13 +319,17 @@ const expressionToConditionData = (
   return { conditions };
 };
 
+const isExpressionInputFunction = (expression: Expression) =>
+  isNamedCall(expression, InputFunctions.Number) ||
+  isNamedCall(expression, InputFunctions.Text);
+
 const createNodeFromStatement = (
   statement: StatementIR,
   expressionEncoder: ExpressionEncoder,
 ) => {
   switch (statement.kind) {
     case IRKind.VariableDeclaration:
-      if (statement.init && isNamedCall(statement.init, 'input')) {
+      if (statement.init && isExpressionInputFunction(statement.init)) {
         return createInputNode(statement);
       }
 
@@ -360,7 +372,6 @@ const appendStatements = (
 
   for (const statement of statements) {
     const node = createNodeFromStatement(statement, expressionEncoder);
-    console.log({ node });
     nodes.set(node.id, node);
 
     if (statement.kind === IRKind.If) {
