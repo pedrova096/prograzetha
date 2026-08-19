@@ -6,7 +6,13 @@
   import { ICON_BY_TYPE, TITLE_BY_TYPE } from './Node.constants';
   import type { NodeProps } from './Node.types';
 
-  let { node, onDelete, class: className, ...props }: NodeProps = $props();
+  let {
+    node,
+    onDelete,
+    class: className,
+    children,
+    ...props
+  }: NodeProps = $props();
   let { id, type, state } = $derived(node);
 
   let title = $derived(TITLE_BY_TYPE[type]);
@@ -22,7 +28,7 @@
   {@attach tooltip({ content: id, interactive: false })}
   {...props}
   class={[
-    'group flex items-center justify-center rounded-lg border-2 bg-white px-4 py-2 shadow-md transition-shadow hover:shadow-lg z-10 w-40 cursor-pointer',
+    'group flex flex-col items-center justify-center rounded-lg border-2 bg-white px-4 py-2 shadow-md transition-shadow hover:shadow-lg z-10 w-40 cursor-pointer',
     state === NodeStates.New && 'border-dashed',
     state === NodeStates.Error && 'border-rose-300 shadow-rose-100',
     state !== NodeStates.Error && 'border-zinc-300',
@@ -40,8 +46,12 @@
     ></span>
   {/if}
 
-  <Icon class="inline-flex mr-1 opacity-40 size-3 stroke-3 absolute left-4" />
-  <span class="text-sm font-medium text-zinc-700 select-none">{title}</span>
+  <div class="relative flex self-start gap-3 items-center">
+    <Icon class="opacity-40 size-3 stroke-3" />
+    <span class="text-sm font-medium text-zinc-700 select-none pt-0.5">
+      {title}
+    </span>
+  </div>
 
   {#if canRemove}
     <button
@@ -57,4 +67,6 @@
       <Trash2 class="size-3.5" />
     </button>
   {/if}
+
+  {@render children?.()}
 </div>

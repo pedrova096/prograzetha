@@ -5,16 +5,23 @@ export class BlockLayout implements LayoutBlock {
   constructor(
     private readonly id: string,
     private readonly type = 'block',
+    private readonly width = BLOCK_WIDTH,
+    private readonly height = BLOCK_HEIGHT,
   ) {}
 
-  public static create(id: string, type?: string): BlockLayout {
-    return new BlockLayout(id, type);
+  public static create(
+    id: string,
+    type?: string,
+    width?: number,
+    height?: number,
+  ): BlockLayout {
+    return new BlockLayout(id, type, width, height);
   }
 
   public measure(): Size {
     return {
-      width: BLOCK_WIDTH,
-      height: BLOCK_HEIGHT,
+      width: this.width,
+      height: this.height,
     };
   }
 

@@ -10,6 +10,7 @@
   import { navigate } from 'svelte-routing';
   import { generatePath } from '~/utils';
   import { DrawerRoutes } from '../SidebarDrawer';
+  import { NODE_COMPONENTS } from './Diagram.constants';
 
   const graph = getGraphContext();
   let { nodes, edges, start } = $derived(graph);
@@ -215,7 +216,8 @@
     {@const node = nodes.get(renderNode.id)}
 
     {#if node}
-      <Node
+      {@const Component = NODE_COMPONENTS[node.type] ?? Node}
+      <Component
         {node}
         onDelete={onNodeDeleteHandler}
         class="absolute"

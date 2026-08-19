@@ -63,7 +63,7 @@
     <Background />
 
     <div
-      class="relative flex flex-1 flex-col items-center gap-1 overflow-y-auto rounded-sm border border-red-300 p-2"
+      class="relative flex flex-1 flex-col items-center gap-1 overflow-y-auto rounded-sm p-2"
     >
       <div
         class="sticky left-2 top-2 z-30 flex self-start rounded-md border border-zinc-200 bg-white p-1 shadow-sm"

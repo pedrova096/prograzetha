@@ -1,7 +1,12 @@
 import { BranchEdge, LoopEdge } from '~/lib/modules/edge';
-import { NodeTypes } from '~/lib/modules/nodes';
+import { NodeStates, NodeTypes } from '~/lib/modules/nodes';
 
-import { BlockLayout } from './block';
+import {
+  BLOCK_HEIGHT,
+  BLOCK_OK_EXTRA_HEIGHT,
+  BLOCK_WIDTH,
+  BlockLayout,
+} from './block';
 import { BranchLayout } from './branch';
 import { LoopLayout } from './loop';
 import type {
@@ -17,8 +22,15 @@ const createNodeBlock = (options: GetLayoutOptions, id: string) => {
   if (!node) {
     return null;
   }
+  const shouldHaveExtraHeight =
+    node.type !== NodeTypes.Start &&
+    node.type !== NodeTypes.End &&
+    node.state === NodeStates.Ok;
 
-  return BlockLayout.create(node.id, node.type);
+  const height =
+    BLOCK_HEIGHT + (shouldHaveExtraHeight ? BLOCK_OK_EXTRA_HEIGHT : 0);
+
+  return BlockLayout.create(node.id, node.type, BLOCK_WIDTH, height);
 };
 
 const createSequenceBlock = (
