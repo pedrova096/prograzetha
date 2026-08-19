@@ -1,12 +1,8 @@
-import { getContext, setContext } from "svelte";
+import { getContext, setContext } from 'svelte';
 
-import type { SortableClassNames } from "./Sortable.types";
+import type { SortableContextValue } from './Sortable.types';
 
-export type SortableContextValue = {
-  classNames: SortableClassNames;
-};
-
-const SORTABLE_KEY = Symbol("SORTABLE");
+const SORTABLE_KEY = Symbol('SORTABLE');
 
 export const setSortableContext = (value: SortableContextValue) => {
   return setContext(SORTABLE_KEY, value);

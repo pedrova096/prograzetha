@@ -16,3 +16,5 @@ export enum HistoryAction {
   Undo = 'undo',
   Redo = 'redo',
 }
+
+export type NodesFailReason = 'ERROR' | 'NEW';

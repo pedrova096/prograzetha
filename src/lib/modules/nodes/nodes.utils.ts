@@ -1,5 +1,3 @@
-import { createId } from '@paralleldrive/cuid2';
-
 import { NodeStates, NodeTypes, type NodeState, Node } from './base';
 import { ConditionalNode } from './conditionalNode';
 import { EndNode } from './endNode';
@@ -8,42 +6,37 @@ import { OperationNode } from './operationNode';
 import { OutputNode } from './outputNode';
 import { StartNode } from './startNode';
 
-const applyNodeOptions = <T>(
-  node: Node,
-  data: T | undefined,
-  state: NodeState,
-) => {
-  return node.withUpdate(data === undefined ? node.data : data, state);
-};
-
 export const createNode = <T>(options: {
+  id?: string;
   type: NodeTypes;
   state?: NodeState;
   data?: T;
   next?: Node;
   prev?: Node;
 }) => {
-  const { type, data, state = NodeStates.New } = options;
+  const { id, type, data, state = NodeStates.New } = options;
 
   switch (type) {
     case NodeTypes.Start:
-      return applyNodeOptions(StartNode.create(), data, state);
+      return new StartNode(id, type, data as StartNode['data'], state);
     case NodeTypes.End:
-      return applyNodeOptions(EndNode.create(), data, state);
+      return new EndNode(id, type, data as EndNode['data'], state);
     case NodeTypes.Input:
-      return applyNodeOptions(InputNode.create(), data, state);
+      return new InputNode(id, type, data as InputNode['data'], state);
     case NodeTypes.Output:
-      return applyNodeOptions(OutputNode.create(), data, state);
+      return new OutputNode(id, type, data as OutputNode['data'], state);
     case NodeTypes.Condition:
-      return applyNodeOptions(ConditionalNode.create(), data, state);
-    case NodeTypes.Operation:
-      return applyNodeOptions(OperationNode.create(), data, state);
-    case NodeTypes.Loop:
-      return applyNodeOptions(
-        new Node(createId(), NodeTypes.Loop, null, undefined, state),
-        data,
+      return new ConditionalNode(
+        id,
+        type,
+        data as ConditionalNode['data'],
         state,
       );
+    case NodeTypes.Operation:
+      return new OperationNode(id, type, data as OperationNode['data'], state);
+    case NodeTypes.Loop:
+      // TODO change when loop implemented:
+      return new Node(id!, type, data, undefined, state);
     default:
       throw new Error(`Unsupported node type: ${type}`);
   }

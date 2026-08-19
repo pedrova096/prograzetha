@@ -54,3 +54,7 @@ export type GetSortableOptions = Omit<
   onSort?: SortableHandler;
   onStart?: SortableHandler;
 };
+
+export type SortableContextValue = {
+  classNames: SortableClassNames;
+};

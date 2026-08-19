@@ -5,6 +5,7 @@ export enum DrawerRoutes {
   Node = '/drawer/node',
   Code = '/drawer/code',
   Execution = '/drawer/execution',
+  Storage = '/drawer/storage',
 }
 
 export enum NodeRoutes {

@@ -213,6 +213,12 @@ export class Graph {
     this.restore(next);
   };
 
+  reset = (next: GraphState) => {
+    this.restore(next);
+    this.snapshots = createSnapshotHistory();
+    this.syncHistoryState();
+  };
+
   deleteNode = (nodeId: string) => {
     const next = deleteNodeFromGraph(this, nodeId);
     if (!next) return false;

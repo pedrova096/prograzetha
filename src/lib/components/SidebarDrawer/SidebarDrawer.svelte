@@ -20,6 +20,7 @@
   import { navigate, Route, useLocation } from 'svelte-routing';
   import { tick } from 'svelte';
   import { CodeDrawer } from './CodeDrawer';
+  import { StorageDrawer } from './StorageDrawer';
 
   let { class: className, ...props }: SidebarDrawerProps = $props();
 
@@ -39,7 +40,9 @@
   $effect(() => {
     if (pathname === previousPathname) return;
 
-    closePanel();
+    if (!pathname.includes('/drawer')) {
+      closePanel();
+    }
     previousPathname = pathname;
   });
 
@@ -96,6 +99,14 @@
       pathname === DrawerRoutes.Execution
         ? DrawerRoutes.Home
         : DrawerRoutes.Execution,
+    );
+  };
+
+  const toggleStoragePanelRoute = () => {
+    navigate(
+      pathname === DrawerRoutes.Storage
+        ? DrawerRoutes.Home
+        : DrawerRoutes.Storage,
     );
   };
 
@@ -185,6 +196,12 @@
           active={pathname === DrawerRoutes.Code}
           defaultOpenPanel={pathname === DrawerRoutes.Code}
           onclick={toggleCodePanelRoute}
+        />
+
+        <StorageDrawer
+          active={pathname === DrawerRoutes.Storage}
+          defaultOpenPanel={pathname === DrawerRoutes.Storage}
+          onclick={toggleStoragePanelRoute}
         />
       </Sidebar.Group>
 
