@@ -6,6 +6,7 @@ import {
   Split,
   Code,
   Repeat,
+  Repeat1,
   type IconProps,
 } from 'lucide-svelte';
 import type { Component } from 'svelte';
@@ -19,7 +20,8 @@ export const TITLE_BY_TYPE = {
   [NodeTypes.Output]: 'Escribir',
   [NodeTypes.Condition]: 'Condición',
   [NodeTypes.Operation]: 'Operación',
-  [NodeTypes.Loop]: 'Ciclo',
+  [NodeTypes.WhileLoop]: 'Ciclo mientras',
+  [NodeTypes.ForLoop]: 'Ciclo para',
 } satisfies Record<NodeTypes, string>;
 
 export const ICON_BY_TYPE = {
@@ -29,7 +31,8 @@ export const ICON_BY_TYPE = {
   [NodeTypes.Output]: Megaphone,
   [NodeTypes.Condition]: Split,
   [NodeTypes.Operation]: Code,
-  [NodeTypes.Loop]: Repeat,
+  [NodeTypes.WhileLoop]: Repeat,
+  [NodeTypes.ForLoop]: Repeat1,
 } satisfies Record<NodeTypes, unknown> as unknown as Record<
   NodeTypes,
   Component<IconProps>

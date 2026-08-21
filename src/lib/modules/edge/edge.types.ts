@@ -6,6 +6,7 @@ export enum BranchEdgeSide {
 export enum EdgeInsertionTargetType {
   Edge = 'edge',
   Branch = 'branch',
+  Loop = 'loop',
 }
 
 export type EdgeInsertionTarget =
@@ -14,4 +15,8 @@ export type EdgeInsertionTarget =
       type: EdgeInsertionTargetType.Branch;
       source: string;
       side: BranchEdgeSide;
+    }
+  | {
+      type: EdgeInsertionTargetType.Loop;
+      source: string;
     };

@@ -105,6 +105,9 @@ export class RuntimePlayer {
       case RuntimeEvents.BranchChoose:
         return this.speed.branchMs;
 
+      case RuntimeEvents.LoopCheck:
+        return this.speed.branchMs;
+
       case RuntimeEvents.ContextUpdate:
         return this.speed.contextMs;
 

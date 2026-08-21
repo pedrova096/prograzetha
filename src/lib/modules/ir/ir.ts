@@ -1,16 +1,18 @@
 import { createId } from '@paralleldrive/cuid2';
 
-import { BranchEdge, Edge } from '../edge';
+import { BranchEdge, Edge, LoopEdge } from '../edge';
 import {
   ConditionOperator,
   ConditionalNode,
   EndNode,
+  ForLoopNode,
   InputNode,
   InputType,
   LogicalOperator,
   OperationNode,
   OutputNode,
   StartNode,
+  WhileLoopNode,
   isConditionNode,
   type ConditionGroup,
   type ConditionUnion,
@@ -20,6 +22,7 @@ import {
   ExpressionKind,
   InputFunctions,
   LogicalOperatorExpression,
+  parseExpression,
   type CallExpression,
   type Expression,
 } from '../expression';
@@ -117,6 +120,21 @@ const createStatements = (
           new Set(visited),
         ),
       });
+    } else if (WhileLoopNode.nodeIs(node) && edge instanceof LoopEdge) {
+      body.push({
+        kind: IRKind.While,
+        test: createConditionExpression(node.data.conditions),
+        body: createStatements(options, edge.body, node.id, new Set(visited)),
+      });
+    } else if (ForLoopNode.nodeIs(node) && edge instanceof LoopEdge) {
+      body.push({
+        kind: IRKind.ForRange,
+        iterator: node.data.iterator,
+        start: createLiteral(node.data.start),
+        end: createLiteral(node.data.end),
+        step: createLiteral(node.data.step),
+        body: createStatements(options, edge.body, node.id, new Set(visited)),
+      });
     }
 
     currentId = edge?.target ?? '';
@@ -146,6 +164,26 @@ const expressionToText = (expression: Expression): string => {
     default:
       return '';
   }
+};
+
+const expressionToNumber = (expression: Expression): number => {
+  if (
+    expression.kind === ExpressionKind.Literal &&
+    typeof expression.value === 'number'
+  ) {
+    return expression.value;
+  }
+
+  if (
+    expression.kind === ExpressionKind.UnaryExpression &&
+    expression.argument.kind === ExpressionKind.Literal &&
+    typeof expression.argument.value === 'number'
+  ) {
+    if (expression.operator === '-') return -expression.argument.value;
+    if (expression.operator === '+') return expression.argument.value;
+  }
+
+  throw new Error('For loop values must be numeric literals');
 };
 
 const mapInferredType = (expression: Expression): `${LiteralVariants}` => {
@@ -352,9 +390,29 @@ const createNodeFromStatement = (
         expressionToConditionData(statement.test, expressionEncoder),
       );
 
+    case IRKind.While:
+      return new WhileLoopNode(
+        undefined,
+        undefined,
+        expressionToConditionData(statement.test, expressionEncoder),
+      );
+
+    case IRKind.ForRange:
+      return new ForLoopNode(undefined, undefined, {
+        iterator: statement.iterator,
+        start: expressionToNumber(statement.start),
+        end: expressionToNumber(statement.end),
+        step: expressionToNumber(statement.step),
+      });
+
     default:
       throw new Error('Unsupported statement');
   }
+};
+
+type AppendStatementsResult = {
+  firstId: string;
+  lastId: string;
 };
 
 const appendStatements = (
@@ -367,27 +425,19 @@ const appendStatements = (
   previousId: string,
   targetId: string,
   expressionEncoder: ExpressionEncoder,
-): string => {
+): AppendStatementsResult => {
   let previous = previousId;
+  let firstId = '';
 
   for (const statement of statements) {
     const node = createNodeFromStatement(statement, expressionEncoder);
     nodes.set(node.id, node);
+    firstId ||= node.id;
 
     if (statement.kind === IRKind.If) {
-      const thenStart = statement.consequent.length
-        ? createNodeFromStatement(statement.consequent[0], expressionEncoder).id
-        : targetId;
-      const elseStart = statement.alternate?.length
-        ? createNodeFromStatement(statement.alternate[0], expressionEncoder).id
-        : targetId;
+      edges.set(node.id, BranchEdge.create(node.id, targetId, previous));
 
-      edges.set(
-        node.id,
-        BranchEdge.create(node.id, targetId, previous, thenStart, elseStart),
-      );
-
-      const actualThenStart = appendStatements(
+      const thenResult = appendStatements(
         statement.consequent,
         nodes,
         edges,
@@ -395,7 +445,7 @@ const appendStatements = (
         targetId,
         expressionEncoder,
       );
-      const actualElseStart = appendStatements(
+      const elseResult = appendStatements(
         statement.alternate ?? [],
         nodes,
         edges,
@@ -410,9 +460,28 @@ const appendStatements = (
           node.id,
           targetId,
           previous,
-          actualThenStart || targetId,
-          actualElseStart || targetId,
+          thenResult.firstId,
+          elseResult.firstId,
         ),
+      );
+    } else if (
+      statement.kind === IRKind.While ||
+      statement.kind === IRKind.ForRange
+    ) {
+      edges.set(node.id, LoopEdge.create(node.id, targetId, previous));
+
+      const loopResult = appendStatements(
+        statement.body,
+        nodes,
+        edges,
+        node.id,
+        node.id,
+        expressionEncoder,
+      );
+
+      edges.set(
+        node.id,
+        LoopEdge.create(node.id, targetId, previous, loopResult.firstId),
       );
     } else {
       edges.set(node.id, Edge.create(node.id, targetId, previous));
@@ -437,7 +506,10 @@ const appendStatements = (
     }
   }
 
-  return statements.length ? previous : '';
+  return {
+    firstId,
+    lastId: statements.length ? previous : '',
+  };
 };
 
 export const getGraphFromProgram = (
@@ -454,6 +526,8 @@ export const getGraphFromProgram = (
     | OperationNode
     | OutputNode
     | ConditionalNode
+    | WhileLoopNode
+    | ForLoopNode
   >([
     [startNode.id, startNode],
     [endNode.id, endNode],
@@ -462,7 +536,7 @@ export const getGraphFromProgram = (
     [startNode.id, Edge.create(startNode.id, endNode.id)],
   ]);
 
-  const lastId = appendStatements(
+  const result = appendStatements(
     program.body,
     nodes,
     edges,
@@ -470,7 +544,7 @@ export const getGraphFromProgram = (
     endNode.id,
     expressionEncoder,
   );
-  const endPrevious = lastId || startNode.id;
+  const endPrevious = result.lastId || startNode.id;
 
   edges.set(endNode.id, Edge.create(endNode.id, '', endPrevious));
 

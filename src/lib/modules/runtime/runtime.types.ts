@@ -39,6 +39,7 @@ export enum RuntimeEvents {
   NodeProcess = 'node:process',
   EdgeTraverse = 'edge:traverse',
   BranchChoose = 'branch:choose',
+  LoopCheck = 'loop:check',
   ActionAlert = 'action:alert',
   ActionInput = 'action:input',
   ContextUpdate = 'context:update',
@@ -52,6 +53,12 @@ export type RuntimeEvent =
       type: RuntimeEvents.BranchChoose;
       nodeId: string;
       branch: 'then' | 'else';
+    }
+  | {
+      type: RuntimeEvents.LoopCheck;
+      nodeId: string;
+      continues: boolean;
+      iteration: number;
     }
   | { type: RuntimeEvents.ActionAlert; nodeId: string; message: string }
   | {
@@ -73,6 +80,8 @@ export type RuntimeServices = {
 export enum RuntimeNodes {
   Step = 'step',
   Branch = 'branch',
+  WhileLoop = 'while-loop',
+  ForLoop = 'for-loop',
 }
 
 export type RuntimeStepNode = {
@@ -92,7 +101,32 @@ export type RuntimeBranchNode = {
   else: RuntimeNode[];
 };
 
-export type RuntimeNode = RuntimeStepNode | RuntimeBranchNode;
+export type RuntimeWhileLoopNode = {
+  id: string;
+  type: RuntimeNodes.WhileLoop;
+  label: string;
+  condition: Expression;
+  body: RuntimeNode[];
+};
+
+export type RuntimeForLoopNode = {
+  id: string;
+  type: RuntimeNodes.ForLoop;
+  label: string;
+  iterator: string;
+  start: Expression;
+  end: Expression;
+  step: Expression;
+  body: RuntimeNode[];
+};
+
+export type RuntimeLoopNode = RuntimeWhileLoopNode | RuntimeForLoopNode;
+
+export type RuntimeNode =
+  | RuntimeStepNode
+  | RuntimeBranchNode
+  | RuntimeWhileLoopNode
+  | RuntimeForLoopNode;
 
 export enum PlayerStatus {
   Idle = 'idle',

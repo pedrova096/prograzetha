@@ -1,5 +1,5 @@
 import { BranchEdge, LoopEdge } from '~/lib/modules/edge';
-import { NodeStates, NodeTypes } from '~/lib/modules/nodes';
+import { isLoopNode, NodeStates, NodeTypes } from '~/lib/modules/nodes';
 
 import {
   BLOCK_HEIGHT,
@@ -80,7 +80,7 @@ const createSequenceBlock = (
       continue;
     }
 
-    if (node.type === NodeTypes.Loop && edge instanceof LoopEdge) {
+    if (isLoopNode(node) && edge instanceof LoopEdge) {
       const condition = createNodeBlock(options, currentId);
 
       if (condition) {

@@ -1,5 +1,7 @@
 import {
   PRECEDENCE,
+  ExpressionKind,
+  UnaryOperator,
   parseExpression,
   tokenizeJavascriptExpression,
   TokenType,
@@ -35,6 +37,8 @@ class ProgramParser {
   private parseStatement(): StatementIR {
     if (this.matchIdentifier('let')) return this.parseVariableDeclaration();
     if (this.matchIdentifier('if')) return this.parseIfStatement();
+    if (this.matchIdentifier('while')) return this.parseWhileStatement();
+    if (this.matchIdentifier('for')) return this.parseForStatement();
 
     return this.parseExpressionOrAssignmentStatement();
   }
@@ -87,6 +91,99 @@ class ProgramParser {
       consequent,
       alternate,
     };
+  }
+
+  private parseWhileStatement(): StatementIR {
+    this.expect(TokenType.Identifier, 'while');
+    this.expect(TokenType.Paren, '(');
+    const test = this.parseExpressionUntil(
+      (token, depth) =>
+        depth === 0 && token.type === TokenType.Paren && token.value === ')',
+    );
+    this.expect(TokenType.Paren, ')');
+
+    return {
+      kind: IRKind.While,
+      test,
+      body: this.parseStatementBlock(),
+    };
+  }
+
+  private parseForStatement(): StatementIR {
+    this.expect(TokenType.Identifier, 'for');
+    this.expect(TokenType.Paren, '(');
+    this.expect(TokenType.Identifier, 'let');
+    const iterator = this.expect(TokenType.Identifier).value;
+    this.expect(TokenType.Operator, '=');
+    const start = this.parseExpressionUntil(
+      (token, depth) => depth === 0 && token.type === TokenType.Semicolon,
+    );
+    this.expect(TokenType.Semicolon);
+
+    const conditionIterator = this.expect(TokenType.Identifier).value;
+    if (conditionIterator !== iterator) {
+      throw new Error('For loop condition must use its iterator');
+    }
+
+    const comparator = this.expect(TokenType.Operator).value;
+    if (comparator !== '<' && comparator !== '>') {
+      throw new Error('For loop must use an exclusive < or > comparison');
+    }
+
+    const end = this.parseExpressionUntil(
+      (token, depth) => depth === 0 && token.type === TokenType.Semicolon,
+    );
+    this.expect(TokenType.Semicolon);
+
+    const updateIterator = this.expect(TokenType.Identifier).value;
+    if (updateIterator !== iterator) {
+      throw new Error('For loop update must use its iterator');
+    }
+    this.expect(TokenType.Operator, '+=');
+    const step = this.parseExpressionUntil(
+      (token, depth) =>
+        depth === 0 && token.type === TokenType.Paren && token.value === ')',
+    );
+    this.expect(TokenType.Paren, ')');
+
+    const stepValue = this.getIntegerLiteral(step);
+    if (stepValue === null || stepValue === 0) {
+      throw new Error('For loop step must be a non-zero integer literal');
+    }
+    if ((stepValue > 0 && comparator !== '<') || (stepValue < 0 && comparator !== '>')) {
+      throw new Error('For loop comparison does not match its step direction');
+    }
+
+    return {
+      kind: IRKind.ForRange,
+      iterator,
+      start,
+      end,
+      step,
+      body: this.parseStatementBlock(),
+    };
+  }
+
+  private getIntegerLiteral(expression: ReturnType<typeof parseExpression>) {
+    if (
+      expression.kind === ExpressionKind.Literal &&
+      typeof expression.value === 'number' &&
+      Number.isInteger(expression.value)
+    ) {
+      return expression.value;
+    }
+
+    if (
+      expression.kind === ExpressionKind.UnaryExpression &&
+      expression.operator === UnaryOperator.Negative &&
+      expression.argument.kind === ExpressionKind.Literal &&
+      typeof expression.argument.value === 'number' &&
+      Number.isInteger(expression.argument.value)
+    ) {
+      return -expression.argument.value;
+    }
+
+    return null;
   }
 
   private parseStatementBlock(): StatementIR[] {

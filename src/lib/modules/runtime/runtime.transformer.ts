@@ -4,12 +4,18 @@ import type {
   RuntimeNode,
   RuntimeStepNode,
 } from './runtime.types';
-import { ConditionalNode, NodeTypes } from '../nodes';
-import { BranchEdge } from '../edge';
+import {
+  ConditionalNode,
+  ForLoopNode,
+  NodeTypes,
+  WhileLoopNode,
+  isLoopNode,
+} from '../nodes';
+import { BranchEdge, LoopEdge } from '../edge';
 import type { InputNodeData } from '../nodes/inputNode';
 import type { OperationNodeData } from '../nodes/operationNode';
 import type { OutputNodeData } from '../nodes/outputNode';
-import { createConditionExpression } from '../ir';
+import { createConditionExpression, createLiteral } from '../ir';
 
 function createStepNode(
   nodes: GetRuntimeProgramOptions['nodes'],
@@ -145,6 +151,39 @@ export function getRuntimeProgram(
           new Set(visited),
         ),
       });
+
+      currentId = edge.target;
+      continue;
+    }
+
+    if (isLoopNode(node) && edge instanceof LoopEdge) {
+      const body = getRuntimeProgram(
+        options,
+        edge.body,
+        node.id,
+        new Set(visited),
+      );
+
+      if (WhileLoopNode.nodeIs(node)) {
+        children.push({
+          id: currentId,
+          type: RuntimeNodes.WhileLoop,
+          label: 'Mientras',
+          condition: createConditionExpression(node.data.conditions),
+          body,
+        });
+      } else if (ForLoopNode.nodeIs(node)) {
+        children.push({
+          id: currentId,
+          type: RuntimeNodes.ForLoop,
+          label: `Para ${node.data.iterator}`,
+          iterator: node.data.iterator,
+          start: createLiteral(node.data.start),
+          end: createLiteral(node.data.end),
+          step: createLiteral(node.data.step),
+          body,
+        });
+      }
 
       currentId = edge.target;
       continue;

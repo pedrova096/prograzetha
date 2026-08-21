@@ -1,4 +1,8 @@
-import { BinaryOperator, ExpressionKind } from '~/lib/modules/expression';
+import {
+  BinaryOperator,
+  ExpressionKind,
+  UnaryOperator,
+} from '~/lib/modules/expression';
 import type {
   BinaryExpression,
   Expression,
@@ -171,6 +175,28 @@ const getTextFromStatements = (
     .map((statement) => getTextFromStatement(statement, indentLevel))
     .join('\n');
 
+const getIntegerLiteral = (expression: Expression): number | null => {
+  if (
+    expression.kind === ExpressionKind.Literal &&
+    typeof expression.value === 'number' &&
+    Number.isInteger(expression.value)
+  ) {
+    return expression.value;
+  }
+
+  if (
+    expression.kind === ExpressionKind.UnaryExpression &&
+    expression.operator === UnaryOperator.Negative &&
+    expression.argument.kind === ExpressionKind.Literal &&
+    typeof expression.argument.value === 'number' &&
+    Number.isInteger(expression.argument.value)
+  ) {
+    return -expression.argument.value;
+  }
+
+  return null;
+};
+
 const getTextFromStatement = (statement: StatementIR, indentLevel: number) => {
   const indent = createIndent(indentLevel);
 
@@ -202,6 +228,28 @@ const getTextFromStatement = (statement: StatementIR, indentLevel: number) => {
       return `${indent}if (${encodeExpression(
         statement.test,
       )}) {\n${consequent}\n${indent}}${alternate}`;
+    }
+    case IRKind.While: {
+      const body = getTextFromStatements(statement.body, indentLevel + 1);
+      return `${indent}while (${encodeExpression(
+        statement.test,
+      )}) {\n${body}\n${indent}}`;
+    }
+    case IRKind.ForRange: {
+      const step = getIntegerLiteral(statement.step);
+      if (step === null || step === 0) {
+        throw new Error('For loop step must be a non-zero integer literal');
+      }
+
+      const comparator = step > 0 ? '<' : '>';
+      const body = getTextFromStatements(statement.body, indentLevel + 1);
+      return `${indent}for (let ${statement.iterator} = ${encodeExpression(
+        statement.start,
+      )}; ${statement.iterator} ${comparator} ${encodeExpression(
+        statement.end,
+      )}; ${statement.iterator} += ${encodeExpression(
+        statement.step,
+      )}) {\n${body}\n${indent}}`;
     }
   }
 };

@@ -3,10 +3,12 @@
   import { getGraphContext } from '~/App.context.svelte';
   import {
     ConditionalNode,
+    ForLoopNode,
     InputNode,
     NodeStates,
     OperationNode,
     OutputNode,
+    WhileLoopNode,
     type Node,
   } from '~/lib/modules/nodes';
   import { Sidebar } from '../Sidebar';
@@ -21,6 +23,8 @@
   import { tick } from 'svelte';
   import { CodeDrawer } from './CodeDrawer';
   import { StorageDrawer } from './StorageDrawer';
+  import { ForLoopDrawer } from './ForLoopDrawer';
+  import { WhileLoopDrawer } from './WhileLoopDrawer';
 
   let { class: className, ...props }: SidebarDrawerProps = $props();
 
@@ -58,6 +62,22 @@
     const node = nodes.get(id);
 
     if (!node || !ConditionalNode.nodeIs(node)) return null;
+
+    return node;
+  };
+
+  const getForLoopNode = (id: string): ForLoopNode | null => {
+    const node = nodes.get(id);
+
+    if (!node || !ForLoopNode.nodeIs(node)) return null;
+
+    return node;
+  };
+
+  const getWhileLoopNode = (id: string): WhileLoopNode | null => {
+    const node = nodes.get(id);
+
+    if (!node || !WhileLoopNode.nodeIs(node)) return null;
 
     return node;
   };
@@ -155,6 +175,26 @@
           {#key params.id}
             <ConditionalDrawer
               node={getConditionalNode(params.id)}
+              {onSave}
+              onClose={onCloseNodePanel}
+              {onDismiss}
+            />
+          {/key}
+        </Route>
+        <Route path={NodeRoutes.WhileLoopId} let:params>
+          {#key params.id}
+            <WhileLoopDrawer
+              node={getWhileLoopNode(params.id)}
+              {onSave}
+              onClose={onCloseNodePanel}
+              {onDismiss}
+            />
+          {/key}
+        </Route>
+        <Route path={NodeRoutes.ForLoopId} let:params>
+          {#key params.id}
+            <ForLoopDrawer
+              node={getForLoopNode(params.id)}
               {onSave}
               onClose={onCloseNodePanel}
               {onDismiss}

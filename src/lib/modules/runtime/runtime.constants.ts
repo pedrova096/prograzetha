@@ -6,3 +6,5 @@ export const DEFAULT_SPEED: RuntimeSpeed = {
   branchMs: 500,
   contextMs: 200,
 };
+
+export const MAX_LOOP_ITERATIONS = 1_000;

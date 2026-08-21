@@ -3,7 +3,7 @@ import type { HTMLInputAttributes } from 'svelte/elements';
 
 export interface InputProps extends HTMLInputAttributes {
   ref?: HTMLInputElement | null;
-  value?: string;
+  value?: string | number;
   label?: string;
   helper?: string | string[] | null;
   helperHint?: Snippet;

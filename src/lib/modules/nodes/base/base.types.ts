@@ -5,7 +5,8 @@ export enum NodeTypes {
   Output = 'output',
   Condition = 'condition',
   Operation = 'operation',
-  Loop = 'loop',
+  WhileLoop = 'while-loop',
+  ForLoop = 'for-loop',
 }
 
 export enum NodeStates {

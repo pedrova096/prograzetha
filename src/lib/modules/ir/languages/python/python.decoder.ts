@@ -11,6 +11,38 @@ import type { ProgramIR, StatementIR } from '../../ir.types';
 import type { PythonLine } from './python.types';
 
 const ASSIGNMENT_PATTERN = /^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)$/;
+const FOR_RANGE_PATTERN =
+  /^for\s+([A-Za-z_][A-Za-z0-9_]*)\s+in\s+range\((.*)\):$/;
+
+const splitArguments = (source: string): string[] => {
+  const result: string[] = [];
+  let start = 0;
+  let depth = 0;
+  let quote = '';
+
+  for (let index = 0; index < source.length; index += 1) {
+    const char = source[index];
+
+    if (quote) {
+      if (char === quote && source[index - 1] !== '\\') quote = '';
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      quote = char;
+    } else if (char === '(' || char === '[' || char === '{') {
+      depth += 1;
+    } else if (char === ')' || char === ']' || char === '}') {
+      depth -= 1;
+    } else if (char === ',' && depth === 0) {
+      result.push(source.slice(start, index).trim());
+      start = index + 1;
+    }
+  }
+
+  result.push(source.slice(start).trim());
+  return result.filter(Boolean);
+};
 
 const normalizeLines = (source: string): PythonLine[] =>
   source
@@ -75,6 +107,14 @@ class PythonProgramParser {
       return this.parseIfStatement(indent);
     }
 
+    if (line.text.startsWith('while ') && line.text.endsWith(':')) {
+      return this.parseWhileStatement(indent);
+    }
+
+    if (FOR_RANGE_PATTERN.test(line.text)) {
+      return this.parseForStatement(indent);
+    }
+
     return this.parseSimpleStatement();
   }
 
@@ -99,6 +139,45 @@ class PythonProgramParser {
       test,
       consequent,
       alternate,
+    };
+  }
+
+  private parseWhileStatement(indent: number): StatementIR {
+    const line = this.consume();
+    return {
+      kind: IRKind.While,
+      test: parsePythonExpression(line.text.slice(6, -1).trim()),
+      body: this.parseNestedBlock(indent),
+    };
+  }
+
+  private parseForStatement(indent: number): StatementIR {
+    const line = this.consume();
+    const match = FOR_RANGE_PATTERN.exec(line.text);
+    if (!match) throw new Error(`Invalid for loop: ${line.text}`);
+
+    const [, iterator, argumentSource] = match;
+    const args = splitArguments(argumentSource);
+    if (args.length < 1 || args.length > 3) {
+      throw new Error('range() expects one to three arguments');
+    }
+
+    const [startSource, endSource, stepSource] =
+      args.length === 1
+        ? ['0', args[0], '1']
+        : args.length === 2
+          ? [args[0], args[1], '1']
+          : args;
+
+    this.declarations.add(iterator);
+
+    return {
+      kind: IRKind.ForRange,
+      iterator,
+      start: parsePythonExpression(startSource),
+      end: parsePythonExpression(endSource),
+      step: parsePythonExpression(stepSource),
+      body: this.parseNestedBlock(indent),
     };
   }
 

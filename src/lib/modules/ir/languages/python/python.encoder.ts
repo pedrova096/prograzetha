@@ -125,6 +125,22 @@ const getTextFromStatement = (statement: StatementIR, indentLevel: number) => {
         statement.test,
       )}:\n${consequent}${alternate}`;
     }
+    case IRKind.While: {
+      const body = statement.body.length
+        ? getTextFromStatements(statement.body, indentLevel + 1)
+        : `${createIndent(indentLevel + 1)}pass`;
+      return `${indent}while ${encodeExpression(statement.test)}:\n${body}`;
+    }
+    case IRKind.ForRange: {
+      const body = statement.body.length
+        ? getTextFromStatements(statement.body, indentLevel + 1)
+        : `${createIndent(indentLevel + 1)}pass`;
+      return `${indent}for ${statement.iterator} in range(${encodeExpression(
+        statement.start,
+      )}, ${encodeExpression(statement.end)}, ${encodeExpression(
+        statement.step,
+      )}):\n${body}`;
+    }
   }
 };
 

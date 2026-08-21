@@ -124,10 +124,18 @@ export class LoopEdge extends Edge {
     return new LoopEdge(source, target, previous, body);
   }
 
+  static fromEdge(edge: Edge, body: string = ''): LoopEdge {
+    return new LoopEdge(edge.source, edge.target, edge.previous, body);
+  }
+
   public override withUpdate(
     target: string = this.target,
     previous: string = this.previous,
   ) {
     return new LoopEdge(this.source, target, previous, this.body);
+  }
+
+  public withBody(body: string) {
+    return new LoopEdge(this.source, this.target, this.previous, body);
   }
 }

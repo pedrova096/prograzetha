@@ -2,9 +2,16 @@ import { NodeStates, NodeTypes, type NodeState, Node } from './base';
 import { ConditionalNode } from './conditionalNode';
 import { EndNode } from './endNode';
 import { InputNode } from './inputNode';
+import { ForLoopNode } from './forLoopNode';
 import { OperationNode } from './operationNode';
 import { OutputNode } from './outputNode';
 import { StartNode } from './startNode';
+import { WhileLoopNode } from './whileLoopNode';
+
+export const isLoopNode = (
+  node: Node,
+): node is ForLoopNode | WhileLoopNode =>
+  ForLoopNode.nodeIs(node) || WhileLoopNode.nodeIs(node);
 
 export const createNode = <T>(options: {
   id?: string;
@@ -34,9 +41,15 @@ export const createNode = <T>(options: {
       );
     case NodeTypes.Operation:
       return new OperationNode(id, type, data as OperationNode['data'], state);
-    case NodeTypes.Loop:
-      // TODO change when loop implemented:
-      return new Node(id!, type, data, undefined, state);
+    case NodeTypes.WhileLoop:
+      return new WhileLoopNode(
+        id,
+        type,
+        data as WhileLoopNode['data'],
+        state,
+      );
+    case NodeTypes.ForLoop:
+      return new ForLoopNode(id, type, data as ForLoopNode['data'], state);
     default:
       throw new Error(`Unsupported node type: ${type}`);
   }

@@ -20,6 +20,8 @@
     NodeTypes.Output,
     NodeTypes.Condition,
     NodeTypes.Operation,
+    NodeTypes.WhileLoop,
+    NodeTypes.ForLoop,
   ].map((type) => ({
     label: TITLE_BY_TYPE[type],
     value: type,

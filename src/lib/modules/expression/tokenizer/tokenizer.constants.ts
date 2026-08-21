@@ -2,6 +2,8 @@ import { TokenType } from './tokenizer.types';
 import type { Token } from './tokenizer.types';
 
 export const JS_OPERATORS = [
+  '+=',
+  '-=',
   '===',
   '!==',
   '>=',

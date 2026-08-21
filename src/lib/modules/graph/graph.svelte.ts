@@ -1,9 +1,4 @@
-import {
-  BranchEdge,
-  Edge,
-  EdgeInsertionTargetType,
-  LoopEdge,
-} from '../edge';
+import { BranchEdge, Edge, EdgeInsertionTargetType, LoopEdge } from '../edge';
 import type { EdgeInsertionTarget } from '../edge';
 import {
   EndNode,
@@ -11,6 +6,7 @@ import {
   NodeTypes,
   StartNode,
   createNode,
+  isLoopNode,
 } from '../nodes';
 import type { Graph as GraphData } from '~/lib/types';
 import type { GraphHistoryState, GraphState } from './graph.types';
@@ -252,32 +248,41 @@ export class Graph {
   private getNewEdge(newNode: Node, target: string, previous: string) {
     const baseEdge = Edge.create(newNode.id, target, previous);
 
-    return newNode.type === NodeTypes.Condition
-      ? BranchEdge.fromEdge(baseEdge)
-      : baseEdge;
+    if (newNode.type === NodeTypes.Condition) {
+      return BranchEdge.fromEdge(baseEdge);
+    }
+
+    if (isLoopNode(newNode)) {
+      return LoopEdge.fromEdge(baseEdge);
+    }
+
+    return baseEdge;
   }
 
   private attachBranchNode(
+    branchEdge: BranchEdge,
+    newNode: Node,
     target: Extract<
       EdgeInsertionTarget,
       { type: EdgeInsertionTargetType.Branch }
     >,
-    currentEdge: BranchEdge,
-    newNode: Node,
   ) {
-    const branchTarget = currentEdge[target.side];
+    const sideChildId = branchEdge[target.side];
     const nodes = new Map(this.nodes).set(newNode.id, newNode);
     const edges = new Map(this.edges)
-      .set(target.source, currentEdge.withBranchSide(target.side, newNode.id))
+      .set(
+        branchEdge.source,
+        branchEdge.withBranchSide(target.side, newNode.id),
+      )
       .set(
         newNode.id,
-        this.getNewEdge(newNode, branchTarget, currentEdge.source),
+        this.getNewEdge(newNode, sideChildId, branchEdge.source),
       );
 
-    if (branchTarget) {
+    if (sideChildId) {
       edges.set(
-        branchTarget,
-        this.edges.get(branchTarget)!.withPrevious(newNode.id),
+        sideChildId,
+        this.edges.get(sideChildId)!.withPrevious(newNode.id),
       );
     }
 
@@ -286,10 +291,26 @@ export class Graph {
     return newNode;
   }
 
-  attachNewNode = (
-    target: EdgeInsertionTarget,
-    newNodeType: NodeTypes,
-  ) => {
+  private attachLoopBodyNode(loopEdge: LoopEdge, newNode: Node) {
+    const bodyChildId = loopEdge.body;
+    const nodes = new Map(this.nodes).set(newNode.id, newNode);
+    const edges = new Map(this.edges)
+      .set(loopEdge.source, loopEdge.withBody(newNode.id))
+      .set(newNode.id, this.getNewEdge(newNode, bodyChildId, loopEdge.source));
+
+    if (bodyChildId) {
+      edges.set(
+        bodyChildId,
+        this.edges.get(bodyChildId)!.withPrevious(newNode.id),
+      );
+    }
+
+    this.nodes = nodes;
+    this.edges = edges;
+    return newNode;
+  }
+
+  attachNewNode = (target: EdgeInsertionTarget, newNodeType: NodeTypes) => {
     const currentEdge = this.edges.get(target.source);
 
     if (!currentEdge) {
@@ -306,7 +327,17 @@ export class Graph {
       }
 
       this.record();
-      return this.attachBranchNode(target, currentEdge, newNode);
+      return this.attachBranchNode(currentEdge, newNode, target);
+    }
+
+    if (target.type === EdgeInsertionTargetType.Loop) {
+      if (!(currentEdge instanceof LoopEdge)) {
+        console.error('Invalid loop insertion target', target);
+        return null;
+      }
+
+      this.record();
+      return this.attachLoopBodyNode(currentEdge, newNode);
     }
 
     this.record();

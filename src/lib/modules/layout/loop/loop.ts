@@ -13,6 +13,10 @@ import {
 import type { LoopLayoutOptions } from './loop.types';
 import { loopBackEdge, loopExitEdge } from './loop.utils';
 import { verticalEdge } from '../branch/branch.utils';
+import {
+  EdgeInsertionTargetType,
+  type EdgeInsertionTarget,
+} from '~/lib/modules/edge';
 
 export class LoopLayout implements LayoutBlock {
   private readonly gapY: number;
@@ -72,6 +76,11 @@ export class LoopLayout implements LayoutBlock {
     const exitX = origin.x + this.backGapX / 2;
     const backX = origin.x + this.backGapX + contentWidth + this.backGapX / 2;
     const bodySource = bodyResult.outputSource || this.options.id;
+    const bodyIsEmpty = bodyResult.nodes.length === 0;
+    const bodyInsertTarget: EdgeInsertionTarget = {
+      type: EdgeInsertionTargetType.Loop,
+      source: this.options.id,
+    };
 
     const edges: RenderEdge[] = [
       ...conditionResult.edges,
@@ -79,6 +88,7 @@ export class LoopLayout implements LayoutBlock {
       {
         id: `${this.options.id}.condition-body`,
         source: this.options.id,
+        insertTarget: bodyInsertTarget,
         points: verticalEdge(
           conditionResult.anchors.output,
           bodyResult.anchors.input,
@@ -87,6 +97,7 @@ export class LoopLayout implements LayoutBlock {
       {
         id: `${this.options.id}.body-condition`,
         source: bodySource,
+        insertTarget: bodyIsEmpty ? bodyInsertTarget : undefined,
         points: loopBackEdge(
           bodyResult.anchors.output,
           conditionResult.anchors.input,

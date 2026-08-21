@@ -19,6 +19,11 @@
       case RuntimeEvents.BranchChoose:
         return `${event.nodeId.slice(0, ID_MAX_LENGTH)} toma ${event.branch}`;
 
+      case RuntimeEvents.LoopCheck:
+        return event.continues
+          ? `${event.nodeId.slice(0, ID_MAX_LENGTH)} repite (${event.iteration + 1})`
+          : `${event.nodeId.slice(0, ID_MAX_LENGTH)} termina`;
+
       case RuntimeEvents.ActionAlert:
         return `Salida: ${event.message || '(vacía)'}`;
 

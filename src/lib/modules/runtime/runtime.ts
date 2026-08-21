@@ -7,6 +7,9 @@ import type {
   RuntimeNode,
   RuntimeServices,
   RuntimeStepNode,
+  RuntimeForLoopNode,
+  RuntimeLoopNode,
+  RuntimeWhileLoopNode,
 } from './runtime.types';
 import {
   BinaryOperator,
@@ -16,6 +19,7 @@ import {
   type Expression,
 } from '../expression';
 import { InputType } from '../nodes';
+import { MAX_LOOP_ITERATIONS } from './runtime.constants';
 
 function evaluateExpression(
   expression: Expression,
@@ -280,6 +284,130 @@ async function* executeBranch(
   }
 }
 
+const loopBodyLastId = (node: RuntimeLoopNode) =>
+  node.body[node.body.length - 1]?.id ?? node.id;
+
+const assertLoopIterationLimit = (iteration: number) => {
+  if (iteration < MAX_LOOP_ITERATIONS) return;
+
+  throw new Error(
+    `El ciclo superó ${MAX_LOOP_ITERATIONS} iteraciones. Revisa su condición de salida.`,
+  );
+};
+
+async function* executeLoopBody(
+  node: RuntimeLoopNode,
+  context: RuntimeContext,
+  services: RuntimeServices,
+): AsyncGenerator<RuntimeEvent> {
+  if (node.body.length > 0) {
+    yield {
+      type: RuntimeEvents.EdgeTraverse,
+      from: node.id,
+      to: node.body[0].id,
+    };
+
+    yield* executeSequence(node.body, context, services);
+  }
+
+  // TODO: review this
+  yield {
+    type: RuntimeEvents.EdgeTraverse,
+    from: loopBodyLastId(node),
+    to: node.id,
+  };
+}
+
+async function* executeWhileLoop(
+  node: RuntimeWhileLoopNode,
+  context: RuntimeContext,
+  services: RuntimeServices,
+): AsyncGenerator<RuntimeEvent> {
+  let iteration = 0;
+
+  while (true) {
+    yield {
+      type: RuntimeEvents.NodeProcess,
+      nodeId: node.id,
+    };
+
+    const continues = Boolean(evaluateExpression(node.condition, context));
+
+    yield {
+      type: RuntimeEvents.LoopCheck,
+      nodeId: node.id,
+      continues,
+      iteration,
+    };
+
+    if (!continues) return;
+    assertLoopIterationLimit(iteration);
+
+    yield* executeLoopBody(node, context, services);
+    iteration += 1;
+  }
+}
+
+async function* executeForLoop(
+  node: RuntimeForLoopNode,
+  context: RuntimeContext,
+  services: RuntimeServices,
+): AsyncGenerator<RuntimeEvent> {
+  const start = Number(evaluateExpression(node.start, context));
+  const end = Number(evaluateExpression(node.end, context));
+  const step = Number(evaluateExpression(node.step, context));
+
+  if (
+    !Number.isFinite(start) ||
+    !Number.isFinite(end) ||
+    !Number.isInteger(step) ||
+    step === 0
+  ) {
+    throw new Error(
+      'El ciclo para requiere límites numéricos y un paso entero distinto de cero.',
+    );
+  }
+
+  context.variables[node.iterator] = start;
+  yield {
+    type: RuntimeEvents.ContextUpdate,
+    variables: { ...context.variables },
+  };
+
+  let iteration = 0;
+
+  while (true) {
+    yield {
+      type: RuntimeEvents.NodeProcess,
+      nodeId: node.id,
+    };
+
+    const iterator = Number(context.variables[node.iterator]);
+    const continues = step > 0 ? iterator < end : iterator > end;
+
+    yield {
+      type: RuntimeEvents.LoopCheck,
+      nodeId: node.id,
+      continues,
+      iteration,
+    };
+
+    if (!continues) return;
+    assertLoopIterationLimit(iteration);
+
+    yield* executeLoopBody(node, context, services);
+
+    context.variables[node.iterator] =
+      Number(context.variables[node.iterator]) + step;
+    yield {
+      type: RuntimeEvents.ContextUpdate,
+      variables: { ...context.variables },
+    };
+
+    iteration += 1;
+  }
+}
+
 async function* executeNode(
   node: RuntimeNode,
   context: RuntimeContext,
@@ -287,6 +415,16 @@ async function* executeNode(
 ): AsyncGenerator<RuntimeEvent> {
   if (node.type === RuntimeNodes.Branch) {
     yield* executeBranch(node, context, services);
+    return;
+  }
+
+  if (node.type === RuntimeNodes.WhileLoop) {
+    yield* executeWhileLoop(node, context, services);
+    return;
+  }
+
+  if (node.type === RuntimeNodes.ForLoop) {
+    yield* executeForLoop(node, context, services);
     return;
   }
 

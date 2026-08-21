@@ -8,6 +8,8 @@ export enum IRKind {
   Assignment = 'Assignment',
   ExpressionStatement = 'ExpressionStatement',
   If = 'If',
+  While = 'While',
+  ForRange = 'ForRange',
   IdentifierPattern = 'IdentifierPattern',
 }
 
@@ -20,7 +22,9 @@ export type StatementIR =
   | VariableDeclarationIR
   | AssignmentIR
   | ExpressionStatementIR
-  | IfIR;
+  | IfIR
+  | WhileIR
+  | ForRangeIR;
 
 export type VariableDeclarationIR = {
   kind: `${IRKind.VariableDeclaration}`;
@@ -45,6 +49,21 @@ export type IfIR = {
   test: Expression;
   consequent: StatementIR[];
   alternate?: StatementIR[];
+};
+
+export type WhileIR = {
+  kind: `${IRKind.While}`;
+  test: Expression;
+  body: StatementIR[];
+};
+
+export type ForRangeIR = {
+  kind: `${IRKind.ForRange}`;
+  iterator: string;
+  start: Expression;
+  end: Expression;
+  step: Expression;
+  body: StatementIR[];
 };
 
 export type PatternIR = {
