@@ -25,9 +25,7 @@
     onSubmit: (values) => {
       if (!node) return;
 
-      onSave(
-        node.withUpdate(createWhileLoopNodeData(values), NodeStates.Ok),
-      );
+      onSave(node.withUpdate(createWhileLoopNodeData(values), NodeStates.Ok));
     },
     // svelte-ignore state_referenced_locally
     initialValues: createWhileLoopDrawerData(node),
@@ -45,7 +43,7 @@
   icon={Repeat}
   id="node-while-loop"
   label="Nodo"
-  panelTitle="Ciclo mientras"
+  panelTitle="Mientras"
   defaultOpenPanel
 >
   {#snippet panelActions()}

@@ -1,5 +1,5 @@
 import type { Snippet } from 'svelte';
-import type { HTMLButtonAttributes } from 'svelte/elements';
+import type { HTMLAttributes, HTMLButtonAttributes } from 'svelte/elements';
 import type { Props as TippyProps } from 'tippy.js';
 import type { LucideIconProps } from '~/lib/types';
 
@@ -10,6 +10,16 @@ export interface DropdownOption<T = string> {
   onclick?: (event: MouseEvent, option: DropdownOption<T>) => void;
   disabled?: boolean;
 }
+
+export interface DropdownOptionGroup<T = string> {
+  type: 'group';
+  label?: string;
+  options: DropdownOption<T>[];
+}
+
+export type DropdownEntry<T = string> =
+  | DropdownOption<T>
+  | DropdownOptionGroup<T>;
 
 export interface RootProps<T = string> {
   children: Snippet;
@@ -23,7 +33,7 @@ export interface TriggerProps extends HTMLButtonAttributes {
 }
 
 export interface ContentProps<T = string> {
-  options: DropdownOption<T>[];
+  options?: DropdownEntry<T>[];
   searchable?: boolean;
   clearable?: boolean;
   placeholder?: string;
@@ -37,6 +47,14 @@ export interface ItemProps<T = string> {
   onclick?: (event: MouseEvent, option: DropdownOption<T>) => void;
   disabled?: boolean;
   children?: Snippet;
+}
+
+export interface GroupProps extends HTMLAttributes<HTMLDivElement> {
+  children: Snippet;
+}
+
+export interface LabelProps extends HTMLAttributes<HTMLSpanElement> {
+  children: Snippet;
 }
 
 export interface DropdownContextValue<T = string> {

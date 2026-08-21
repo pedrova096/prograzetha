@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Plus } from 'lucide-svelte';
-  import { Dropdown } from '~/lib/components/Dropdown';
+  import { Dropdown, type DropdownEntry } from '~/lib/components/Dropdown';
   import { NodeTypes } from '~/lib/modules/nodes';
 
   import { ICON_BY_TYPE, TITLE_BY_TYPE } from '../Diagram/Node';
@@ -15,18 +15,26 @@
     ...props
   }: AddButtonProps = $props();
 
-  const options = [
-    NodeTypes.Input,
-    NodeTypes.Output,
-    NodeTypes.Condition,
-    NodeTypes.Operation,
-    NodeTypes.WhileLoop,
-    NodeTypes.ForLoop,
-  ].map((type) => ({
+  const createOption = (type: NodeTypes) => ({
     label: TITLE_BY_TYPE[type],
     value: type,
     icon: ICON_BY_TYPE[type],
-  }));
+  });
+
+  const options: DropdownEntry<NodeTypes>[] = [
+    createOption(NodeTypes.Input),
+    createOption(NodeTypes.Output),
+    createOption(NodeTypes.Condition),
+    createOption(NodeTypes.Operation),
+    {
+      type: 'group',
+      label: 'Ciclos',
+      options: [
+        createOption(NodeTypes.ForLoop),
+        createOption(NodeTypes.WhileLoop),
+      ],
+    },
+  ];
 </script>
 
 <div {...props} class={className}>

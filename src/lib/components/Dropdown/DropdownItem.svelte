@@ -19,9 +19,10 @@
   };
 </script>
 
-<li>
+<div role="none">
   <button
     type="button"
+    role="menuitem"
     onclick={onClickHandler}
     {disabled}
     class={[
@@ -42,4 +43,4 @@
       <span class="flex-1">{label}</span>
     {/if}
   </button>
-</li>
+</div>

@@ -5,13 +5,9 @@ import type {
   RenderEdge,
   Size,
 } from '../layout.types';
-import {
-  LOOP_BACK_GAP_X,
-  LOOP_EXIT_GAP_Y,
-  LOOP_GAP_Y,
-} from './loop.constants';
+import { LOOP_BACK_GAP_X, LOOP_EXIT_GAP_Y, LOOP_GAP_Y } from './loop.constants';
 import type { LoopLayoutOptions } from './loop.types';
-import { loopBackEdge, loopExitEdge } from './loop.utils';
+import { loopBackEdge } from './loop.utils';
 import { verticalEdge } from '../branch/branch.utils';
 import {
   EdgeInsertionTargetType,
@@ -46,7 +42,8 @@ export class LoopLayout implements LayoutBlock {
 
     return {
       width: contentWidth + this.backGapX * 2,
-      height: conditionSize.height + this.gapY + bodySize.height + this.exitGapY,
+      height:
+        conditionSize.height + this.gapY + bodySize.height + this.exitGapY,
     };
   }
 
@@ -68,15 +65,13 @@ export class LoopLayout implements LayoutBlock {
 
     const conditionResult = this.options.condition.layout(conditionOrigin);
     const bodyResult = this.options.body.layout(bodyOrigin);
-
-    const output: Point = {
-      x: conditionResult.anchors.output.x,
-      y: bodyOrigin.y + bodySize.height + this.exitGapY,
+    const conditionMiddleRight: Point = {
+      x: conditionResult.box.x + conditionResult.box.width,
+      y: conditionResult.box.y + conditionResult.box.height / 2,
     };
-    const exitX = origin.x + this.backGapX / 2;
+
     const backX = origin.x + this.backGapX + contentWidth + this.backGapX / 2;
     const bodySource = bodyResult.outputSource || this.options.id;
-    const bodyIsEmpty = bodyResult.nodes.length === 0;
     const bodyInsertTarget: EdgeInsertionTarget = {
       type: EdgeInsertionTargetType.Loop,
       source: this.options.id,
@@ -97,18 +92,12 @@ export class LoopLayout implements LayoutBlock {
       {
         id: `${this.options.id}.body-condition`,
         source: bodySource,
-        insertTarget: bodyIsEmpty ? bodyInsertTarget : undefined,
         points: loopBackEdge(
           bodyResult.anchors.output,
-          conditionResult.anchors.input,
+          conditionMiddleRight,
           backX,
         ),
-      },
-      {
-        id: `${this.options.id}.condition-exit`,
-        source: this.options.id,
-        points: loopExitEdge(conditionResult.anchors.output, output, exitX),
-        isJoin: true,
+        isDecorative: true,
       },
     ];
 
@@ -123,7 +112,7 @@ export class LoopLayout implements LayoutBlock {
       edges,
       anchors: {
         input: conditionResult.anchors.input,
-        output,
+        output: bodyResult.anchors.output,
       },
       outputSource: this.options.id,
     };

@@ -107,7 +107,9 @@
       id: edge.id,
       node: edge.source,
       isJoin: edge.isJoin,
-      isTraverse: runtime?.traverseNodeIds.has(edge.source),
+      isDecorative: edge.isDecorative,
+      isTraverse:
+        !edge.isDecorative && runtime?.traverseNodeIds.has(edge.source),
       path: roundedEdgePath(edge.points),
     })),
   );
@@ -154,19 +156,24 @@
       <g
         role="group"
         aria-label={`Connection ${edge.id}`}
-        onpointerenter={() => (hoveredEdgeId = edge.id)}
+        aria-hidden={edge.isDecorative ? 'true' : undefined}
+        onpointerenter={() => {
+          if (!edge.isDecorative) hoveredEdgeId = edge.id;
+        }}
       >
-        <path
-          aria-hidden="true"
-          d={edge.path}
-          fill="none"
-          stroke="transparent"
-          stroke-width="16"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          pointer-events="stroke"
-          class="cursor-pointer"
-        />
+        {#if !edge.isDecorative}
+          <path
+            aria-hidden="true"
+            d={edge.path}
+            fill="none"
+            stroke="transparent"
+            stroke-width="16"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            pointer-events="stroke"
+            class="cursor-pointer"
+          />
+        {/if}
         <path
           role="presentation"
           d={edge.path}
@@ -178,7 +185,8 @@
           marker-end={edge.isJoin ? undefined : 'url(#edge-arrow)'}
           class={[
             'transition-[filter,stroke-width] duration-150',
-            hoveredEdgeId === edge.id &&
+            !edge.isDecorative &&
+              hoveredEdgeId === edge.id &&
               'z-10 stroke-sky-500 drop-shadow-[0_3px_5px_rgba(37,99,235,0.45)]',
           ]}
         />

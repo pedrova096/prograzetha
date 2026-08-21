@@ -20,8 +20,8 @@ export const TITLE_BY_TYPE = {
   [NodeTypes.Output]: 'Escribir',
   [NodeTypes.Condition]: 'Condición',
   [NodeTypes.Operation]: 'Operación',
-  [NodeTypes.WhileLoop]: 'Ciclo mientras',
-  [NodeTypes.ForLoop]: 'Ciclo para',
+  [NodeTypes.WhileLoop]: 'Mientras',
+  [NodeTypes.ForLoop]: 'Para',
 } satisfies Record<NodeTypes, string>;
 
 export const ICON_BY_TYPE = {

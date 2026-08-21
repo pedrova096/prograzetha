@@ -7,6 +7,8 @@ export const Dropdown = { Root, Trigger, Content, Item };
 
 export type {
   DropdownOption,
+  DropdownOptionGroup,
+  DropdownEntry,
   RootProps,
   TriggerProps,
   ContentProps,

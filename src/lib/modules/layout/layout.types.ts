@@ -33,6 +33,7 @@ export type RenderEdge = {
   points: Point[];
   insertTarget?: EdgeInsertionTarget;
   isJoin?: boolean;
+  isDecorative?: boolean;
 };
 
 export type Anchors = {

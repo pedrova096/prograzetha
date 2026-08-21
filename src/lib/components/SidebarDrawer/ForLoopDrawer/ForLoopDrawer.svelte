@@ -44,7 +44,7 @@
   icon={Repeat}
   id="node-for-loop"
   label="Nodo"
-  panelTitle="Ciclo para"
+  panelTitle="Para"
   defaultOpenPanel
 >
   {#snippet panelActions()}
