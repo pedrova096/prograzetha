@@ -45,6 +45,15 @@
     ].join('; ');
   };
 
+  const edgeLabelStyle = (edge: RenderEdge) => {
+    const point = edge.labelPoint ?? edgeMidpoint(edge.points);
+
+    return [
+      `left: ${point.x - layout.box.x}px`,
+      `top: ${point.y - layout.box.y}px`,
+    ].join('; ');
+  };
+
   const clearHoveredEdge = () => {
     if (addMenuOpen) return;
 
@@ -208,6 +217,17 @@
       </g>
     {/each}
   </svg>
+
+  {#each layout.edges as edge (edge.id)}
+    {#if edge.label}
+      <span
+        class="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-1/2 rounded-xs bg-black px-1 py-px text-[10px] font-semibold text-zinc-200 shadow-sm"
+        style={edgeLabelStyle(edge)}
+      >
+        {edge.label}
+      </span>
+    {/if}
+  {/each}
 
   {#if hoveredEdge}
     <AddButton

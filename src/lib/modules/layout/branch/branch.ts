@@ -99,6 +99,9 @@ export class BranchLayout implements LayoutBlock {
       source: this.options.id,
       side: BranchEdgeSide.Right,
     };
+    const branchLabelY =
+      conditionResult.anchors.output.y +
+      (thenResult.anchors.input.y - conditionResult.anchors.output.y) / 2;
 
     const edges: RenderEdge[] = [
       ...conditionResult.edges,
@@ -108,6 +111,12 @@ export class BranchLayout implements LayoutBlock {
         id: `${this.options.id}.condition-then`,
         source: this.options.id,
         insertTarget: thenInsertTarget,
+        label: 'Si',
+        labelPoint: {
+          x:
+            (conditionResult.anchors.output.x + thenResult.anchors.input.x) / 2,
+          y: branchLabelY,
+        },
         points: elbowEdge(
           conditionResult.anchors.output,
           thenResult.anchors.input,
@@ -117,6 +126,12 @@ export class BranchLayout implements LayoutBlock {
         id: `${this.options.id}.condition-else`,
         source: this.options.id,
         insertTarget: elseInsertTarget,
+        label: 'No',
+        labelPoint: {
+          x:
+            (conditionResult.anchors.output.x + elseResult.anchors.input.x) / 2,
+          y: branchLabelY,
+        },
         points: elbowEdge(
           conditionResult.anchors.output,
           elseResult.anchors.input,

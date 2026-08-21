@@ -31,6 +31,8 @@ export type RenderEdge = {
   id: string;
   source: string;
   points: Point[];
+  label?: string;
+  labelPoint?: Point;
   insertTarget?: EdgeInsertionTarget;
   isJoin?: boolean;
   isDecorative?: boolean;

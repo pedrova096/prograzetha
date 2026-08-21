@@ -92,6 +92,11 @@ export class LoopLayout implements LayoutBlock {
       {
         id: `${this.options.id}.body-condition`,
         source: bodySource,
+        label: this.options.endLabel,
+        labelPoint: {
+          x: bodyResult.anchors.output.x,
+          y: bodyResult.anchors.output.y,
+        },
         points: loopBackEdge(
           bodyResult.anchors.output,
           conditionMiddleRight,

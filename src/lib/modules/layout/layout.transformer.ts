@@ -87,6 +87,10 @@ const createSequenceBlock = (
         children.push(
           LoopLayout.create({
             id: currentId,
+            endLabel:
+              node.type === NodeTypes.ForLoop
+                ? 'Fin Para'
+                : 'Fin Mientras',
             condition,
             body: createSequenceBlock(
               options,
