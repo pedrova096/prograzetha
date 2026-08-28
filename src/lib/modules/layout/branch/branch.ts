@@ -86,9 +86,6 @@ export class BranchLayout implements LayoutBlock {
       x: origin.x + size.width / 2,
       y: branchesY + Math.max(thenSize.height, elseSize.height) + this.joinGapY,
     };
-    const thenSource = thenResult.outputSource || this.options.id;
-    const elseSource = elseResult.outputSource || this.options.id;
-
     const thenInsertTarget: EdgeInsertionTarget = {
       type: EdgeInsertionTargetType.Branch,
       source: this.options.id,
@@ -103,55 +100,69 @@ export class BranchLayout implements LayoutBlock {
       conditionResult.anchors.output.y +
       (thenResult.anchors.input.y - conditionResult.anchors.output.y) / 2;
 
+    const createBranchSideEdges = (
+      side: 'then' | 'else',
+      label: string,
+      result: LayoutResult,
+      insertTarget: EdgeInsertionTarget,
+    ): RenderEdge[] => {
+      const conditionPoints = elbowEdge(
+        conditionResult.anchors.output,
+        result.anchors.input,
+      );
+      const joinPoints = joinEdge(result.anchors.output, joinPoint);
+
+      const conditionEdge: RenderEdge = {
+        id: `${this.options.id}.condition-${side}`,
+        source: this.options.id,
+        insertTarget,
+        label,
+        labelPoint: {
+          x: (conditionResult.anchors.output.x + result.anchors.input.x) / 2,
+          y: branchLabelY,
+        },
+        points: conditionPoints,
+      };
+
+      if (result.nodes.length === 0) {
+        return [
+          {
+            ...conditionEdge,
+            points: [...conditionPoints, ...joinPoints.slice(1)],
+            isJoin: true,
+          },
+        ];
+      }
+
+      const source = result.outputSource || this.options.id;
+
+      return [
+        conditionEdge,
+        {
+          id: `${this.options.id}.${side}-join`,
+          source,
+          insertTarget: source === this.options.id ? insertTarget : undefined,
+          points: joinPoints,
+          isJoin: true,
+        },
+      ];
+    };
+
     const edges: RenderEdge[] = [
       ...conditionResult.edges,
       ...thenResult.edges,
       ...elseResult.edges,
+      ...createBranchSideEdges('then', 'Si', thenResult, thenInsertTarget),
+      ...createBranchSideEdges('else', 'No', elseResult, elseInsertTarget),
       {
-        id: `${this.options.id}.condition-then`,
+        // This is a hack to render the label, we probably need RenderLabel
+        id: `${this.options.id}.end-label`,
         source: this.options.id,
-        insertTarget: thenInsertTarget,
-        label: 'Si',
-        labelPoint: {
-          x:
-            (conditionResult.anchors.output.x + thenResult.anchors.input.x) / 2,
-          y: branchLabelY,
-        },
-        points: elbowEdge(
-          conditionResult.anchors.output,
-          thenResult.anchors.input,
-        ),
-      },
-      {
-        id: `${this.options.id}.condition-else`,
-        source: this.options.id,
-        insertTarget: elseInsertTarget,
-        label: 'No',
-        labelPoint: {
-          x:
-            (conditionResult.anchors.output.x + elseResult.anchors.input.x) / 2,
-          y: branchLabelY,
-        },
-        points: elbowEdge(
-          conditionResult.anchors.output,
-          elseResult.anchors.input,
-        ),
-      },
-      {
-        id: `${this.options.id}.then-join`,
-        source: thenSource,
-        insertTarget:
-          thenSource === this.options.id ? thenInsertTarget : undefined,
-        points: joinEdge(thenResult.anchors.output, joinPoint),
+        label: 'Fin Si',
+        labelPoint: joinPoint,
+        points: [joinPoint],
         isJoin: true,
-      },
-      {
-        id: `${this.options.id}.else-join`,
-        source: elseSource,
-        insertTarget:
-          elseSource === this.options.id ? elseInsertTarget : undefined,
-        points: joinEdge(elseResult.anchors.output, joinPoint),
-        isJoin: true,
+        isDecorative: true,
       },
     ];
 

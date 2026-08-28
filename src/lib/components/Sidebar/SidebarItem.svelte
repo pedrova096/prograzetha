@@ -36,7 +36,9 @@
     <span class="min-w-0 flex-1 truncate text-left">{label}</span>
 
     {#if badge !== undefined}
-      <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-xs font-medium text-emerald-700">
+      <span
+        class="rounded bg-emerald-100 px-1.5 py-0.5 text-xs font-medium text-emerald-700"
+      >
         {badge}
       </span>
     {/if}

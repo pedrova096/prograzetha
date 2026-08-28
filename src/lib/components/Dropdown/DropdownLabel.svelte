@@ -5,7 +5,7 @@
 </script>
 
 <span
-  class={['px-3 py-1.5 text-xs font-medium text-slate-400', className]}
+  class={['px-3 py-1.5 text-xs font-medium text-zinc-400', className]}
   {...rest}
 >
   {@render children()}

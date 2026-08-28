@@ -1,23 +1,23 @@
 <script lang="ts">
-  import { GripVertical } from "lucide-svelte";
+  import { GripVertical } from 'lucide-svelte';
 
-  import { Sortable, SortItem, SortHandle } from "./index";
+  import { Sortable, SortItem, SortHandle } from './index';
   import type {
     SortValue,
     SortableClassNames,
     SortableProps,
-  } from "./Sortable.types";
-  import Self from "./Sortable.example.svelte";
-  import type { SortableOptions } from "sortablejs";
+  } from './Sortable.types';
+  import Self from './Sortable.example.svelte';
+  import type { SortableOptions } from 'sortablejs';
 
   type Props = {
     id?: string;
     data: SortValue;
   };
 
-  let { id = "root", data }: Props = $props();
+  let { id = 'root', data }: Props = $props();
 
-  const onEndHandler: SortableProps["onEnd"] = (event, sortable) => {
+  const onEndHandler: SortableProps['onEnd'] = (event, sortable) => {
     console.log(
       {
         id,
@@ -35,11 +35,11 @@
   const SORTABLE_OPTIONS: SortableOptions = {
     fallbackOnBody: true,
     swapThreshold: 0.65,
-    group: "nested",
-    dataIdAttr: "data-item",
+    group: 'nested',
+    dataIdAttr: 'data-item',
   };
   const SORTABLE_CLASSNAMES: SortableClassNames = {
-    item: "item",
+    item: 'item',
   };
 </script>
 

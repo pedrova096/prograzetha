@@ -24,10 +24,7 @@
 
   let { node, onSave, onClose, onDismiss }: OutputDrawerProps = $props();
 
-  let {
-    nodes,
-    edges,
-  } = $derived(getGraphContext());
+  let { nodes, edges } = $derived(getGraphContext());
 
   let options = $derived.by(() => {
     if (!node) return [];

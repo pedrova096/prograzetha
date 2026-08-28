@@ -1,10 +1,7 @@
 <script lang="ts" generics="T = string">
   import { Search } from 'lucide-svelte';
   import { getDropdownContext } from './Dropdown.context';
-  import {
-    getFilteredEntries,
-    isDropdownOptionGroup,
-  } from './Dropdown.utils';
+  import { getFilteredEntries, isDropdownOptionGroup } from './Dropdown.utils';
   import { Input } from '~/lib/components/Input';
   import DropdownGroup from './DropdownGroup.svelte';
   import DropdownItem from './DropdownItem.svelte';
@@ -28,13 +25,13 @@
 
 <div
   bind:this={() => {}, setContentRef}
-  class="min-w-48 p-2 bg-white rounded-xl shadow-xl border border-slate-100"
+  class="min-w-48 p-2 bg-white rounded-xl shadow-xl border border-zinc-100"
 >
   {#if searchable}
     <div class="mb-2">
       <Input bind:value={searchQuery} {placeholder} {clearable} autofocus>
         {#snippet startAdornment()}
-          <Search class="size-4 text-slate-400" />
+          <Search class="size-4 text-zinc-400" />
         {/snippet}
       </Input>
     </div>
@@ -42,7 +39,7 @@
 
   <div class="max-h-64 space-y-1 overflow-y-auto" role="menu">
     {#if filteredEntries.length === 0}
-      <div class="px-3 py-4 text-center text-sm text-slate-400">
+      <div class="px-3 py-4 text-center text-sm text-zinc-400">
         {emptyText}
       </div>
     {:else}

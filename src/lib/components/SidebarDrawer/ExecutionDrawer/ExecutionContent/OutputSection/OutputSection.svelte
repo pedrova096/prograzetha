@@ -7,9 +7,7 @@
 </script>
 
 <section class="flex min-h-0 flex-1 flex-col gap-2" aria-label="Salida">
-  <h3 class="text-xs font-semibold uppercase text-zinc-500">
-    Salida
-  </h3>
+  <h3 class="text-xs font-semibold uppercase text-zinc-500">Salida</h3>
   <div
     class="min-h-24 flex-1 overflow-y-auto rounded-md border border-zinc-200 bg-white p-3 text-sm text-zinc-700"
   >

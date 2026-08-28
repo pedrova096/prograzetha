@@ -36,7 +36,9 @@
 
   <div class="relative">
     {#if startAdornment}
-      <div class="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2">
+      <div
+        class="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2"
+      >
         {@render startAdornment()}
       </div>
     {/if}
@@ -47,8 +49,8 @@
       {id}
       class={[
         'w-full px-3 py-2 text-sm rounded-lg transition-all duration-150',
-        'bg-slate-50 border border-slate-200',
-        'text-slate-700 placeholder:text-slate-400',
+        'bg-zinc-50 border border-zinc-200',
+        'text-zinc-700 placeholder:text-zinc-400',
         'focus:outline-none focus:ring-2',
         error
           ? 'focus:ring-red-500/30 focus:border-red-400'
@@ -65,7 +67,7 @@
       <button
         type="button"
         onclick={onClearHandler}
-        class="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
+        class="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-zinc-400 hover:text-zinc-600 hover:bg-zinc-200 transition-colors cursor-pointer"
       >
         <X class="size-3.5" />
       </button>

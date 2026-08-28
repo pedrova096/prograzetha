@@ -19,12 +19,7 @@
     <span class="font-medium text-zinc-700">{label}</span>
   {/if}
 
-  <input
-    type="checkbox"
-    bind:checked
-    class="peer sr-only"
-    {...restProps}
-  />
+  <input type="checkbox" bind:checked class="peer sr-only" {...restProps} />
   <span
     class={[
       'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent transition-colors',

@@ -133,7 +133,7 @@
   onpointerleave={clearHoveredEdge}
 >
   <svg
-    class="pointer-events-none absolute inset-0 overflow-visible stroke-zinc-400"
+    class="pointer-events-none absolute inset-0 overflow-visible text-zinc-600"
     role="img"
     aria-label="Diagram connections"
     width={layout.box.width}
@@ -221,7 +221,7 @@
   {#each layout.edges as edge (edge.id)}
     {#if edge.label}
       <span
-        class="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-1/2 rounded-xs bg-black px-1 py-px text-[10px] font-semibold text-zinc-200 shadow-sm"
+        class="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-1/2 rounded-xs bg-zinc-600 px-1 py-px text-[10px] font-semibold text-zinc-200 shadow-sm"
         style={edgeLabelStyle(edge)}
       >
         {edge.label}

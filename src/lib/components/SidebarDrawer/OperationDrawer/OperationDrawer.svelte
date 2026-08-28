@@ -4,9 +4,7 @@
   import { GitCommitVertical, Lightbulb, Save } from 'lucide-svelte';
 
   import { getGraphContext } from '~/App.context.svelte';
-  import {
-    parseExpression,
-  } from '~/lib/modules/expression';
+  import { parseExpression } from '~/lib/modules/expression';
   import { NodeStates } from '~/lib/modules/nodes';
   import { CodeEditor, type CodeEditorProps } from '../../CodeEditor';
   import { Input } from '../../Input';
@@ -30,10 +28,7 @@
 
   let { node, onSave, onClose, onDismiss }: OperationDrawerProps = $props();
 
-  let {
-    nodes,
-    edges,
-  } = $derived(getGraphContext());
+  let { nodes, edges } = $derived(getGraphContext());
 
   let variablesList = $derived(getPreviousVariables({ nodes, edges }, node));
   let variablesSet = $derived(
@@ -79,9 +74,7 @@
     setTouched(FormFields.RightSide, true);
 
     try {
-      const newTree = parseExpression(
-        event.detail.value,
-      );
+      const newTree = parseExpression(event.detail.value);
       setFields(FormFields.Tree, newTree);
       setFields(FormFields.InferType, inferOperationType(newTree));
     } catch {
