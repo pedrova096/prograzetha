@@ -2,6 +2,12 @@
 
 Prograzetha is a visual programming tool for learning how code works. You can create programs by connecting steps in a diagram, follow their execution, and compare see the code version as JavaScript or Python.
 
+## Demo
+
+<video src="docs/hello_world.mp4" controls title="Prograzetha hello world demo"></video>
+
+[Watch the hello world demo](docs/hello_world.mp4)
+
 ## Visual program builder
 
 Create programs by arranging inputs, operations, conditions, loops, and outputs in a diagram. This makes the order and structure of a program easier to see while you learn the core programming concepts.
