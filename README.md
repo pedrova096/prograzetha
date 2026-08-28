@@ -4,7 +4,7 @@ Prograzetha is a visual programming tool for learning how code works. You can cr
 
 ## Demo
 
-<video src="docs/hello_world.mp4" controls title="Prograzetha hello world demo"></video>
+https://github.com/user-attachments/assets/e2249ad6-c8e1-44e5-8dc0-390441b5533d
 
 [Watch the hello world demo](docs/hello_world.mp4)
 
