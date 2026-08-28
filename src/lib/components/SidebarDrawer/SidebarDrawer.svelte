@@ -19,12 +19,13 @@
   import { ExecutionDrawer } from './ExecutionDrawer';
   import { DrawerRoutes, NodeRoutes } from './SidebarDrawer.constants';
   import type { SidebarDrawerProps } from './SidebarDrawer.types';
-  import { navigate, Route, useLocation } from 'svelte-routing';
+  import { Route, useLocation } from 'svelte-routing';
   import { tick } from 'svelte';
   import { CodeDrawer } from './CodeDrawer';
   import { StorageDrawer } from './StorageDrawer';
   import { ForLoopDrawer } from './ForLoopDrawer';
   import { WhileLoopDrawer } from './WhileLoopDrawer';
+  import { getAppPathname, navigateTo } from '~/utils/navigation';
 
   let { class: className, ...props }: SidebarDrawerProps = $props();
 
@@ -34,7 +35,7 @@
   let collapsed = $state(false);
   let actionId = $state<string | null>(null);
   const location = useLocation();
-  const pathname = $derived($location.pathname);
+  const pathname = $derived(getAppPathname($location.pathname));
   let previousPathname = $state(pathname);
 
   const closePanel = () => {
@@ -101,21 +102,21 @@
   const onSave = (node: Node) => {
     graph.updateNode(node);
     closePanel();
-    navigate(DrawerRoutes.Home);
+    navigateTo(DrawerRoutes.Home);
   };
   const onCloseNodePanel = () => {
     closePanel();
-    navigate(DrawerRoutes.Home);
+    navigateTo(DrawerRoutes.Home);
   };
 
   const toggleCodePanelRoute = () => {
-    navigate(
+    navigateTo(
       pathname === DrawerRoutes.Code ? DrawerRoutes.Home : DrawerRoutes.Code,
     );
   };
 
   const toggleExecutionPanelRoute = () => {
-    navigate(
+    navigateTo(
       pathname === DrawerRoutes.Execution
         ? DrawerRoutes.Home
         : DrawerRoutes.Execution,
@@ -123,7 +124,7 @@
   };
 
   const toggleStoragePanelRoute = () => {
-    navigate(
+    navigateTo(
       pathname === DrawerRoutes.Storage
         ? DrawerRoutes.Home
         : DrawerRoutes.Storage,

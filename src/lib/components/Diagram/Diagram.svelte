@@ -7,8 +7,8 @@
   import { Node, type NodeProps } from './Node';
   import { edgeMidpoint, roundedEdgePath } from './Diagram.utils';
   import { NodeTypes } from '~/lib/modules/nodes';
-  import { navigate } from 'svelte-routing';
   import { generatePath } from '~/utils';
+  import { navigateTo } from '~/utils/navigation';
   import { DrawerRoutes } from '../SidebarDrawer';
   import { NODE_COMPONENTS } from './Diagram.constants';
 
@@ -82,7 +82,7 @@
 
     if (!newNode) return;
 
-    navigate(
+    navigateTo(
       generatePath(DrawerRoutes.NodeTypeId, {
         id: newNode.id,
         type: newNode.type,
@@ -93,7 +93,7 @@
   const onNodeClickHandler = (node: NodeProps['node']) => {
     if (node.type === NodeTypes.Start || node.type === NodeTypes.End) return;
 
-    navigate(
+    navigateTo(
       generatePath(DrawerRoutes.NodeTypeId, {
         id: node.id,
         type: node.type,
@@ -104,7 +104,7 @@
   const onNodeDeleteHandler = (node: NodeProps['node']) => {
     if (!graph.deleteNode(node.id)) return;
     // Check if that id its open
-    navigate(DrawerRoutes.Home);
+    navigateTo(DrawerRoutes.Home);
   };
 
   const runtime = $derived(

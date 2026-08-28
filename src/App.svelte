@@ -58,7 +58,7 @@
 
 <svelte:window onkeydown={onHistoryShortcut} />
 
-<Router>
+<Router basepath={import.meta.env.BASE_URL}>
   <main class="flex h-screen gap-4 overflow-hidden p-4">
     <Background />
 
