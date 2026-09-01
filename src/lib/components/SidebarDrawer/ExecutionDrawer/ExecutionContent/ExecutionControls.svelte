@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Pause, Play, RotateCcw, Square } from 'lucide-svelte';
+  import { Pause, Play, RotateCcw, Square } from '@lucide/svelte';
   import { PlayerStatus } from '~/lib/modules/runtime';
   import type { ExecutionContentProps } from './ExecutionContent.types';
 

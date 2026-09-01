@@ -1,7 +1,7 @@
 <script lang="ts">
   import { validator } from '@felte/validator-yup';
   import { createForm } from 'felte';
-  import { Repeat, Save } from 'lucide-svelte';
+  import { Repeat, Save } from '@lucide/svelte';
   import { onMount } from 'svelte';
 
   import { NodeStates } from '~/lib/modules/nodes';

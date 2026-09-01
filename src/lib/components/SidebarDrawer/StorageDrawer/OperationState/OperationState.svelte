@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { CircleAlert, CircleCheck } from 'lucide-svelte';
+  import { CircleAlert, CircleCheck } from '@lucide/svelte';
 
   import {
     OperationKind,

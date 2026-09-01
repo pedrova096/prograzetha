@@ -18,7 +18,7 @@
 </button>
 
 <style lang="postcss">
-  @reference "../../../app.css";
+  @reference "../../../../app.css";
 
   .sort-handle-button {
     @apply cursor-grab touch-none p-1 active:cursor-grabbing;

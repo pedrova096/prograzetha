@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ChevronLeft, ChevronRight } from 'lucide-svelte';
+  import { ChevronLeft, ChevronRight } from '@lucide/svelte';
   import { getSidebarContext } from './Sidebar.context';
   import type { SidebarCollapseTriggerProps } from './Sidebar.types';
   import type { MouseEventHandler } from 'svelte/elements';

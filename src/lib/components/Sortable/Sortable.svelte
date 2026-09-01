@@ -42,7 +42,7 @@
 </ul>
 
 <style lang="postcss">
-  @reference "../../app.css";
+  @reference "../../../app.css";
 
   .sort-list {
     @apply m-0 list-none;

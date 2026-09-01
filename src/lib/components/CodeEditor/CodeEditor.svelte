@@ -197,7 +197,7 @@
 </div>
 
 <style lang="postcss">
-  @reference "../../app.css";
+  @reference "../../../app.css";
 
   :global(.editor-Ω) {
     @apply flex w-full rounded-md border border-zinc-200 bg-zinc-50 px-0.5 py-0.5 text-sm ring-offset-zinc-50 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50;

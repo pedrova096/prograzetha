@@ -1,4 +1,4 @@
-import type { IconProps } from 'lucide-svelte';
+import type { IconProps } from '@lucide/svelte';
 import type { Component, ComponentType, SvelteComponent } from 'svelte';
 
 import type { Edge } from '../modules/edge';

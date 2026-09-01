@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Activity } from 'lucide-svelte';
+  import { Activity } from '@lucide/svelte';
 
   import { getRuntimeContext } from '~/App.context.svelte';
   import { Sidebar } from '../../Sidebar';

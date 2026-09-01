@@ -1,5 +1,5 @@
 <script lang="ts" generics="T = string">
-  import { Search } from 'lucide-svelte';
+  import { Search } from '@lucide/svelte';
   import { getDropdownContext } from './Dropdown.context';
   import { getFilteredEntries, isDropdownOptionGroup } from './Dropdown.utils';
   import { Input } from '~/lib/components/Input';

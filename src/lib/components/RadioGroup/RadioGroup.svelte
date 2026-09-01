@@ -104,7 +104,7 @@
 </div>
 
 <style lang="postcss">
-  @reference "../../app.css";
+  @reference "../../../app.css";
 
   .toggle-group-item {
     &[data-variant='default'] {

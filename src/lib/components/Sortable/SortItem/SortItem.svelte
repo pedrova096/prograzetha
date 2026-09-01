@@ -19,7 +19,7 @@
 </li>
 
 <style lang="postcss">
-  @reference "../../../app.css";
+  @reference "../../../../app.css";
 
   .sort-item {
     @apply list-none;

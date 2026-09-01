@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Settings, Code } from 'lucide-svelte';
+  import { Settings, Code } from '@lucide/svelte';
   import { getGraphContext } from '~/App.context.svelte';
   import {
     ConditionalNode,

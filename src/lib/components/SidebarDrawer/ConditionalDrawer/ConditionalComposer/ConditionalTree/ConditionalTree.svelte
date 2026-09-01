@@ -10,7 +10,7 @@
   import Self from './ConditionalTree.svelte';
   import type { ConditionalTreeProps } from './ConditionalTree.types';
   import { isConditionNode, type ConditionUnion } from '~/lib/modules/nodes';
-  import { FolderPlus, Plus } from 'lucide-svelte';
+  import { FolderPlus, Plus } from '@lucide/svelte';
   import {
     createCondition,
     createConditionGroup,

@@ -8,7 +8,7 @@ import {
   Repeat,
   Repeat1,
   type IconProps,
-} from 'lucide-svelte';
+} from '@lucide/svelte';
 import type { Component } from 'svelte';
 
 import { NodeTypes } from '~/lib/modules/nodes';

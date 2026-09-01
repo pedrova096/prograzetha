@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { CircleCheck, Download, HardDrive, Upload } from 'lucide-svelte';
+  import { CircleCheck, Download, HardDrive, Upload } from '@lucide/svelte';
 
   import { getGraphContext } from '~/App.context.svelte';
   import {

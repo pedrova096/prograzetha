@@ -1,7 +1,7 @@
 <script lang="ts">
   import { validator } from '@felte/validator-yup';
   import { createForm } from 'felte';
-  import { GitCommitVertical, Lightbulb, Save } from 'lucide-svelte';
+  import { GitCommitVertical, Lightbulb, Save } from '@lucide/svelte';
 
   import { getGraphContext } from '~/App.context.svelte';
   import { parseExpression } from '~/lib/modules/expression';

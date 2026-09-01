@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { EllipsisVertical, GripVertical, Trash2 } from 'lucide-svelte';
+  import { EllipsisVertical, GripVertical, Trash2 } from '@lucide/svelte';
 
   import { SortHandle } from '~/lib/components/Sortable';
 
@@ -118,7 +118,7 @@
 </div>
 
 <style lang="postcss">
-  @reference "../../../../../../app.css";
+  @reference "../../../../../../../app.css";
 
   .input-field {
     @apply min-w-0 rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-sm text-zinc-700 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20;

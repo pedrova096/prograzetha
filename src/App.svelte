@@ -3,7 +3,7 @@
   import { Diagram, Background, SidebarDrawer } from '~/lib/components';
   import { setGraphContext, setRuntimeContext } from './App.context.svelte';
   import { Router } from 'svelte-routing';
-  import { Redo2, Undo2 } from 'lucide-svelte';
+  import { Redo2, Undo2 } from '@lucide/svelte';
   import { Graph, HistoryAction } from './lib/modules/graph';
   import {
     setStorageAutoSaving,

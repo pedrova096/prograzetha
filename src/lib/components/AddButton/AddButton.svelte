@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Plus } from 'lucide-svelte';
+  import { Plus } from '@lucide/svelte';
   import { Dropdown, type DropdownEntry } from '~/lib/components/Dropdown';
   import { NodeTypes } from '~/lib/modules/nodes';
 

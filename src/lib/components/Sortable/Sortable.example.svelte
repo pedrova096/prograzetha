@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GripVertical } from 'lucide-svelte';
+  import { GripVertical } from '@lucide/svelte';
 
   import { Sortable, SortItem, SortHandle } from './index';
   import type {

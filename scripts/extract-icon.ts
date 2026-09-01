@@ -4,7 +4,7 @@ import { basename, join } from 'node:path';
 
 type IconNode = [tag: string, attrs: Record<string, string | number>][];
 
-const ICONS_DIR = 'node_modules/lucide-svelte/dist/icons';
+const ICONS_DIR = 'node_modules/@lucide/svelte/dist/icons';
 const OUTPUT_DIR = 'src/lib/constants/LiteralVariants/svg';
 
 const DEFAULT_SVG_ATTRS = {

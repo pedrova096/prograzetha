@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { CircleAlert, Code } from 'lucide-svelte';
+  import { CircleAlert, Code } from '@lucide/svelte';
   import { onDestroy } from 'svelte';
 
   import { getGraphContext } from '~/App.context.svelte';

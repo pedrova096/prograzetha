@@ -1,6 +1,6 @@
 <script lang="ts">
   import { tooltip } from '~/lib/attachments';
-  import { Trash2 } from 'lucide-svelte';
+  import { Trash2 } from '@lucide/svelte';
 
   import { NodeStates, NodeTypes } from '~/lib/modules/nodes';
   import { ICON_BY_TYPE, TITLE_BY_TYPE } from './Node.constants';

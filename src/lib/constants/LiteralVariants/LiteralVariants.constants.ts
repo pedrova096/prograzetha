@@ -1,4 +1,4 @@
-import { CircleSlash, Hash, Quote, CircleCheck } from 'lucide-svelte';
+import { CircleSlash, Hash, Quote, CircleCheck } from '@lucide/svelte';
 import type { LucideIconProps } from '~/lib/types';
 
 import { LiteralVariants } from './LiteralVariants.types';

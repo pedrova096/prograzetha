@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { CircleDot } from 'lucide-svelte';
+  import { CircleDot } from '@lucide/svelte';
 
   import { RuntimeEvents, type RuntimeEvent } from '~/lib/modules/runtime';
 
