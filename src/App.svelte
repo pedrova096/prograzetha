@@ -1,6 +1,6 @@
 <script lang="ts">
   import 'tippy.js/dist/tippy.css';
-  import { Diagram, Background, SidebarDrawer } from '~/lib/components';
+  import { Diagram, Background, Dock } from '~/lib/components';
   import { setGraphContext, setRuntimeContext } from './App.context.svelte';
   import { Router } from 'svelte-routing';
   import { Redo2, Undo2 } from '@lucide/svelte';
@@ -92,6 +92,7 @@
       <Diagram />
     </div>
 
-    <SidebarDrawer />
+    <Dock />
+    <!-- <SidebarDrawer /> -->
   </main>
 </Router>

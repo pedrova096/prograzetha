@@ -6,5 +6,4 @@ export * from './Input';
 export * from './LiteralVariantBadge';
 export * from './MentionInput';
 export * from './RadioGroup';
-export * from './Sidebar';
-export * from './SidebarDrawer';
+export * from './Dock';
