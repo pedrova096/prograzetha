@@ -1,9 +1,9 @@
 import Root from './Nav.svelte';
 import Header from '../Panel/PanelHeader.svelte';
-import Group from '../Panel/PanelGroup.svelte';
+import Group from './NavGroup.svelte';
 import Item from './NavItem.svelte';
 import Divider from '../Panel/PanelDivider.svelte';
-import Footer from '../Panel/PanelFooter.svelte';
+import Footer from './NavFooter.svelte';
 import CollapseTrigger from './NavCollapseTrigger.svelte';
 
 export const Nav = {
