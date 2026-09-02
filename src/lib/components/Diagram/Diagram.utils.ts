@@ -1,5 +1,10 @@
 import type { Point } from '~/lib/modules/layout';
 
+export type DiagramViewport = {
+  pan: Point;
+  zoom: number;
+};
+
 const DEFAULT_CORNER_RADIUS = 8;
 
 const distance = (a: Point, b: Point) => {
@@ -102,4 +107,61 @@ export function edgeMidpoint(points: Point[]) {
   }
 
   return points[points.length - 1];
+}
+
+export function clamp(value: number, minimum: number, maximum: number) {
+  return Math.min(maximum, Math.max(minimum, value));
+}
+
+export function zoomAroundPoint(
+  viewport: DiagramViewport,
+  nextZoom: number,
+  point: Point,
+): DiagramViewport {
+  const diagramPoint = {
+    x: (point.x - viewport.pan.x) / viewport.zoom,
+    y: (point.y - viewport.pan.y) / viewport.zoom,
+  };
+
+  return {
+    zoom: nextZoom,
+    pan: {
+      x: point.x - diagramPoint.x * nextZoom,
+      y: point.y - diagramPoint.y * nextZoom,
+    },
+  };
+}
+
+export function fitDiagramToViewport({
+  viewportWidth,
+  viewportHeight,
+  diagramWidth,
+  diagramHeight,
+  padding,
+  minimumZoom,
+  maximumZoom,
+}: {
+  viewportWidth: number;
+  viewportHeight: number;
+  diagramWidth: number;
+  diagramHeight: number;
+  padding: number;
+  minimumZoom: number;
+  maximumZoom: number;
+}): DiagramViewport {
+  const availableWidth = Math.max(0, viewportWidth - padding * 2);
+  const availableHeight = Math.max(0, viewportHeight - padding * 2);
+  const zoom = clamp(
+    Math.min(availableWidth / diagramWidth, availableHeight / diagramHeight, 1),
+    minimumZoom,
+    maximumZoom,
+  );
+
+  return {
+    zoom,
+    pan: {
+      x: (viewportWidth - diagramWidth * zoom) / 2,
+      y: (viewportHeight - diagramHeight * zoom) / 2,
+    },
+  };
 }
