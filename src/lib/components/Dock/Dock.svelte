@@ -6,7 +6,6 @@
   import { getAppPathname, navigateTo } from '~/utils/navigation';
 
   import { Nav } from './Nav';
-  import { SidePanel } from './SidePanel';
   import { CodePanel } from './CodePanel';
   import { ExecutionPanel } from './ExecutionPanel';
   import { StoragePanel } from './StoragePanel';
@@ -40,9 +39,9 @@
   };
 </script>
 
-<SidePanel.Root>
-  <Route path={DockRoutes.NodeTypeId} let:params>
-    {@const nodeData = nodes.get(params.id)!}
+<Route path={DockRoutes.NodeTypeId} let:params>
+  {@const nodeData = nodes.get(params.id)}
+  {#if nodeData}
     {@const NodeComponent = NODE_COMPONENTS[nodeData.type]}
     {#key params.id}
       <NodeComponent
@@ -52,16 +51,16 @@
         {onDismiss}
       />
     {/key}
-  </Route>
+  {/if}
+</Route>
 
-  <Route path={DockRoutes.Execution}><ExecutionPanel /></Route>
-  <Route path={DockRoutes.Code}><CodePanel /></Route>
-  <Route path={DockRoutes.Storage}><StoragePanel /></Route>
-</SidePanel.Root>
+<Route path={DockRoutes.Execution}><ExecutionPanel /></Route>
+<Route path={DockRoutes.Code}><CodePanel /></Route>
+<Route path={DockRoutes.Storage}><StoragePanel /></Route>
 
 <Nav.Root bind:collapsed bind:pathname>
-  <Nav.CollapseTrigger />
-  <Nav.Header>
+  <Nav.CollapseTrigger class="hidden md:flex" />
+  <Nav.Header class="hidden md:flex">
     <!--TODO: Add Logo-->
     <div
       class="flex size-9 items-center justify-center rounded-lg bg-zinc-900 text-sm font-bold text-white"
@@ -76,14 +75,14 @@
     {/if}
   </Nav.Header>
 
-  <Nav.Divider />
+  <Nav.Divider class="hidden md:block" />
 
   {#if isNodeRoute}
     <Nav.Group>
       <Nav.Item {...NAV_ITEMS.Node} to="#" active />
     </Nav.Group>
-    
-    <Nav.Divider />
+
+    <Nav.Divider class="hidden md:block" />
   {/if}
 
   <Nav.Group>
@@ -92,7 +91,7 @@
     <Nav.Item {...NAV_ITEMS.Storage} to={DockRoutes.Storage} />
   </Nav.Group>
 
-  <Nav.Divider />
+  <Nav.Divider class="hidden md:block" />
 
   <Nav.Footer>
     <Nav.Item {...NAV_ITEMS.Settings} to="#" />

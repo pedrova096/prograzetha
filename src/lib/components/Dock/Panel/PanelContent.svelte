@@ -4,4 +4,6 @@
   let { children }: { children?: Snippet } = $props();
 </script>
 
-{@render children?.()}
+<div class="flex-1 flex flex-col overflow-y-scroll">
+  {@render children?.()}
+</div>

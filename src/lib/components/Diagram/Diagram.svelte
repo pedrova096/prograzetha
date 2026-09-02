@@ -10,7 +10,7 @@
   import { NodeTypes } from '~/lib/modules/nodes';
   import { generatePath } from '~/utils';
   import { navigateTo } from '~/utils/navigation';
-  import { DockRoutes } from '../Dock';
+  import { DockRoutes } from '../Dock/Dock.constants';
   import { NODE_COMPONENTS } from './Diagram.constants';
   import { DiagramViewportController } from './Diagram.viewport.svelte';
 

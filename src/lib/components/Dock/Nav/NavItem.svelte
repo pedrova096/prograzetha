@@ -27,8 +27,8 @@
   aria-expanded={isActive}
   data-active={isActive}
   class={[
-    'flex h-9 w-full items-center gap-2 rounded-md px-2 text-sm text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-950',
-    collapsed ? 'justify-center' : 'justify-start',
+    'flex h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-md px-1 text-[11px] text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-950 md:h-9 md:w-full md:flex-none md:flex-row md:gap-2 md:px-2 md:text-sm',
+    collapsed ? 'md:justify-center' : 'md:justify-start',
     isActive && 'bg-zinc-100 font-medium text-zinc-950',
     className,
   ]}
@@ -37,7 +37,10 @@
     <Icon class="size-4 shrink-0" />
   {/if}
 
-  {#if !collapsed}
-    <span class="min-w-0 flex-1 truncate text-left">{label}</span>
-  {/if}
+  <span
+    class={[
+      'min-w-0 max-w-full truncate text-center md:flex-1 md:text-left',
+      collapsed && 'md:hidden',
+    ]}>{label}</span
+  >
 </Link>
