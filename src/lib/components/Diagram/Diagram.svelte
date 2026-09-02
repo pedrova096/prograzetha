@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Maximize, ZoomIn, ZoomOut } from '@lucide/svelte';
   import { getGraphContext, getRuntimeContext } from '~/App.context.svelte';
   import { getLayout } from '~/lib/modules/layout';
   import type { RenderEdge, RenderNode } from '~/lib/modules/layout';
@@ -11,6 +12,7 @@
   import { navigateTo } from '~/utils/navigation';
   import { DockRoutes } from '../Dock/Dock.constants';
   import { NODE_COMPONENTS } from './Diagram.constants';
+  import { DiagramViewportController } from './Diagram.viewport.svelte';
 
   const graph = getGraphContext();
   let { nodes, edges, start } = $derived(graph);
@@ -20,6 +22,7 @@
   let hoveredEdgeId = $state<string | null>(null);
   let addMenuOpen = $state(false);
   let layout = $derived(getLayout({ nodes, edges }, start));
+  const viewport = new DiagramViewportController(() => layout.box);
   let layoutEdgesById = $derived(
     new Map(layout.edges.map((edge) => [edge.id, edge])),
   );
@@ -124,14 +127,32 @@
   );
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
-  class="relative"
-  role="region"
-  aria-label="Diagram"
-  style:width={`${layout.box.width}px`}
-  style:height={`${layout.box.height}px`}
+  {@attach viewport.attach}
+  class={[
+    'relative size-full min-h-0 overflow-hidden rounded-sm outline-none touch-none',
+    viewport.isPanning ? 'cursor-grabbing' : 'cursor-grab',
+  ]}
+  role="application"
+  aria-label="Diagrama interactivo"
+  aria-describedby="diagram-navigation-help"
+  tabindex="0"
   onpointerleave={clearHoveredEdge}
 >
+  <span id="diagram-navigation-help" class="sr-only">
+    Arrastra el fondo para mover el diagrama. Usa la rueda del ratón para
+    acercar o alejar. Pulsa más, menos o cero para controlar la vista con el
+    teclado.
+  </span>
+
+  <div
+    class="absolute left-0 top-0"
+    style:width={`${layout.box.width}px`}
+    style:height={`${layout.box.height}px`}
+    style:transform={viewport.transform}
+    style:transform-origin="0 0"
+  >
   <svg
     class="pointer-events-none absolute inset-0 overflow-visible text-zinc-600"
     role="img"
@@ -248,12 +269,56 @@
       <Component
         {node}
         onDelete={onNodeDeleteHandler}
+        data-diagram-interactive
         class="absolute"
         style={nodeStyle(renderNode)}
         onclick={() => onNodeClickHandler(node)}
       />
     {/if}
   {/each}
+  </div>
+
+  <div
+    class="absolute bottom-3 left-3 z-30 flex items-center rounded-md border border-zinc-200 bg-white p-1 shadow-sm"
+    data-diagram-interactive
+  >
+    <button
+      type="button"
+      aria-label="Alejar"
+      title="Alejar (-)"
+      disabled={!viewport.canZoomOut}
+      class="rounded p-1.5 text-zinc-600 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-30"
+      onclick={viewport.zoomOut}
+    >
+      <ZoomOut class="size-4" />
+    </button>
+    <output
+      aria-label="Nivel de zoom"
+      class="w-12 select-none text-center text-xs font-medium tabular-nums text-zinc-600"
+    >
+      {viewport.zoomPercentage}%
+    </output>
+    <button
+      type="button"
+      aria-label="Acercar"
+      title="Acercar (+)"
+      disabled={!viewport.canZoomIn}
+      class="rounded p-1.5 text-zinc-600 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-30"
+      onclick={viewport.zoomIn}
+    >
+      <ZoomIn class="size-4" />
+    </button>
+    <div class="mx-1 h-5 w-px bg-zinc-200"></div>
+    <button
+      type="button"
+      aria-label="Ajustar diagrama a la vista"
+      title="Ajustar a la vista (0)"
+      class="rounded p-1.5 text-zinc-600 hover:bg-zinc-100"
+      onclick={viewport.fitView}
+    >
+      <Maximize class="size-4" />
+    </button>
+  </div>
 </div>
 
 <style>

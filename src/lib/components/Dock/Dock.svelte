@@ -6,7 +6,6 @@
   import { getAppPathname, navigateTo } from '~/utils/navigation';
 
   import { Nav } from './Nav';
-  import { SidePanel } from './SidePanel';
   import { CodePanel } from './CodePanel';
   import { ExecutionPanel } from './ExecutionPanel';
   import { StoragePanel } from './StoragePanel';
