@@ -9,7 +9,7 @@
   import { NodeTypes } from '~/lib/modules/nodes';
   import { generatePath } from '~/utils';
   import { navigateTo } from '~/utils/navigation';
-  import { DrawerRoutes } from '../SidebarDrawer';
+  import { DockRoutes } from '../Dock/Dock.constants';
   import { NODE_COMPONENTS } from './Diagram.constants';
 
   const graph = getGraphContext();
@@ -83,7 +83,7 @@
     if (!newNode) return;
 
     navigateTo(
-      generatePath(DrawerRoutes.NodeTypeId, {
+      generatePath(DockRoutes.NodeTypeId, {
         id: newNode.id,
         type: newNode.type,
       }),
@@ -94,7 +94,7 @@
     if (node.type === NodeTypes.Start || node.type === NodeTypes.End) return;
 
     navigateTo(
-      generatePath(DrawerRoutes.NodeTypeId, {
+      generatePath(DockRoutes.NodeTypeId, {
         id: node.id,
         type: node.type,
       }),
@@ -104,7 +104,7 @@
   const onNodeDeleteHandler = (node: NodeProps['node']) => {
     if (!graph.deleteNode(node.id)) return;
     // Check if that id its open
-    navigateTo(DrawerRoutes.Home);
+    navigateTo(DockRoutes.Home);
   };
 
   const runtime = $derived(
