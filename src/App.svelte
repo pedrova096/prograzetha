@@ -65,7 +65,7 @@
     <Background />
 
     <div
-      class="relative flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto rounded-sm p-2"
+      class="relative flex min-h-0 min-w-0 flex-1 flex-col items-center gap-1 overflow-hidden rounded-sm p-2"
     >
       <div
         class="sticky left-2 top-2 z-30 flex self-start rounded-md border border-zinc-200 bg-white p-1 shadow-sm"
