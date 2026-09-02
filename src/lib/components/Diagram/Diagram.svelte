@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { Maximize, ZoomIn, ZoomOut } from '@lucide/svelte';
   import { getGraphContext, getRuntimeContext } from '~/App.context.svelte';
   import { getLayout } from '~/lib/modules/layout';
@@ -7,24 +6,13 @@
   import { EdgeInsertionTargetType } from '~/lib/modules/edge';
   import { AddButton, type AddButtonProps } from '../AddButton';
   import { Node, type NodeProps } from './Node';
-  import {
-    clamp,
-    edgeMidpoint,
-    fitDiagramToViewport,
-    roundedEdgePath,
-    zoomAroundPoint,
-  } from './Diagram.utils';
+  import { edgeMidpoint, roundedEdgePath } from './Diagram.utils';
   import { NodeTypes } from '~/lib/modules/nodes';
   import { generatePath } from '~/utils';
   import { navigateTo } from '~/utils/navigation';
   import { DockRoutes } from '../Dock';
-  import {
-    DIAGRAM_VIEW_PADDING,
-    DIAGRAM_ZOOM_STEP,
-    MAX_DIAGRAM_ZOOM,
-    MIN_DIAGRAM_ZOOM,
-    NODE_COMPONENTS,
-  } from './Diagram.constants';
+  import { NODE_COMPONENTS } from './Diagram.constants';
+  import { DiagramViewportController } from './Diagram.viewport.svelte';
 
   const graph = getGraphContext();
   let { nodes, edges, start } = $derived(graph);
@@ -33,14 +21,8 @@
 
   let hoveredEdgeId = $state<string | null>(null);
   let addMenuOpen = $state(false);
-  let viewportElement = $state<HTMLDivElement>();
-  let pan = $state({ x: 0, y: 0 });
-  let zoom = $state(1);
-  let isPanning = $state(false);
-  let activePointerId: number | null = null;
-  let pointerOrigin = { x: 0, y: 0 };
-  let panOrigin = { x: 0, y: 0 };
   let layout = $derived(getLayout({ nodes, edges }, start));
+  const viewport = new DiagramViewportController(() => layout.box);
   let layoutEdgesById = $derived(
     new Map(layout.edges.map((edge) => [edge.id, edge])),
   );
@@ -143,120 +125,19 @@
       path: roundedEdgePath(edge.points),
     })),
   );
-
-  const fitView = () => {
-    if (!viewportElement || !layout.box.width || !layout.box.height) return;
-
-    const fitted = fitDiagramToViewport({
-      viewportWidth: viewportElement.clientWidth,
-      viewportHeight: viewportElement.clientHeight,
-      diagramWidth: layout.box.width,
-      diagramHeight: layout.box.height,
-      padding: DIAGRAM_VIEW_PADDING,
-      minimumZoom: MIN_DIAGRAM_ZOOM,
-      maximumZoom: MAX_DIAGRAM_ZOOM,
-    });
-
-    pan = fitted.pan;
-    zoom = fitted.zoom;
-  };
-
-  const changeZoom = (nextZoom: number, point?: { x: number; y: number }) => {
-    if (!viewportElement) return;
-
-    const boundedZoom = clamp(
-      nextZoom,
-      MIN_DIAGRAM_ZOOM,
-      MAX_DIAGRAM_ZOOM,
-    );
-    const zoomPoint = point ?? {
-      x: viewportElement.clientWidth / 2,
-      y: viewportElement.clientHeight / 2,
-    };
-    const nextViewport = zoomAroundPoint({ pan, zoom }, boundedZoom, zoomPoint);
-
-    pan = nextViewport.pan;
-    zoom = nextViewport.zoom;
-  };
-
-  const onWheel = (event: WheelEvent) => {
-    if (!viewportElement) return;
-
-    event.preventDefault();
-    const bounds = viewportElement.getBoundingClientRect();
-    const zoomPoint = {
-      x: event.clientX - bounds.left,
-      y: event.clientY - bounds.top,
-    };
-    const zoomFactor = Math.exp(-event.deltaY * 0.0015);
-
-    changeZoom(zoom * zoomFactor, zoomPoint);
-  };
-
-  const onPointerDown = (event: PointerEvent) => {
-    if (event.button !== 0) return;
-
-    const target = event.target as Element | null;
-    if (target?.closest('[data-diagram-interactive], button')) return;
-
-    activePointerId = event.pointerId;
-    pointerOrigin = { x: event.clientX, y: event.clientY };
-    panOrigin = pan;
-    isPanning = true;
-    viewportElement?.setPointerCapture(event.pointerId);
-  };
-
-  const onPointerMove = (event: PointerEvent) => {
-    if (!isPanning || event.pointerId !== activePointerId) return;
-
-    pan = {
-      x: panOrigin.x + event.clientX - pointerOrigin.x,
-      y: panOrigin.y + event.clientY - pointerOrigin.y,
-    };
-  };
-
-  const stopPanning = (event: PointerEvent) => {
-    if (event.pointerId !== activePointerId) return;
-
-    isPanning = false;
-    activePointerId = null;
-  };
-
-  const onViewportKeyDown = (event: KeyboardEvent) => {
-    if (event.key === '+' || event.key === '=') {
-      event.preventDefault();
-      changeZoom(zoom + DIAGRAM_ZOOM_STEP);
-    } else if (event.key === '-') {
-      event.preventDefault();
-      changeZoom(zoom - DIAGRAM_ZOOM_STEP);
-    } else if (event.key === '0') {
-      event.preventDefault();
-      fitView();
-    }
-  };
-
-  onMount(() => {
-    requestAnimationFrame(fitView);
-  });
 </script>
 
-<!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
-  bind:this={viewportElement}
+  {@attach viewport.attach}
   class={[
     'relative size-full min-h-0 overflow-hidden rounded-sm outline-none touch-none',
-    isPanning ? 'cursor-grabbing' : 'cursor-grab',
+    viewport.isPanning ? 'cursor-grabbing' : 'cursor-grab',
   ]}
   role="application"
   aria-label="Diagrama interactivo"
   aria-describedby="diagram-navigation-help"
   tabindex="0"
-  onwheel={onWheel}
-  onpointerdown={onPointerDown}
-  onpointermove={onPointerMove}
-  onpointerup={stopPanning}
-  onpointercancel={stopPanning}
-  onkeydown={onViewportKeyDown}
   onpointerleave={clearHoveredEdge}
 >
   <span id="diagram-navigation-help" class="sr-only">
@@ -269,7 +150,7 @@
     class="absolute left-0 top-0"
     style:width={`${layout.box.width}px`}
     style:height={`${layout.box.height}px`}
-    style:transform={`translate(${pan.x}px, ${pan.y}px) scale(${zoom})`}
+    style:transform={viewport.transform}
     style:transform-origin="0 0"
   >
   <svg
@@ -405,9 +286,9 @@
       type="button"
       aria-label="Alejar"
       title="Alejar (-)"
-      disabled={zoom <= MIN_DIAGRAM_ZOOM}
+      disabled={!viewport.canZoomOut}
       class="rounded p-1.5 text-zinc-600 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-30"
-      onclick={() => changeZoom(zoom - DIAGRAM_ZOOM_STEP)}
+      onclick={viewport.zoomOut}
     >
       <ZoomOut class="size-4" />
     </button>
@@ -415,15 +296,15 @@
       aria-label="Nivel de zoom"
       class="w-12 select-none text-center text-xs font-medium tabular-nums text-zinc-600"
     >
-      {Math.round(zoom * 100)}%
+      {viewport.zoomPercentage}%
     </output>
     <button
       type="button"
       aria-label="Acercar"
       title="Acercar (+)"
-      disabled={zoom >= MAX_DIAGRAM_ZOOM}
+      disabled={!viewport.canZoomIn}
       class="rounded p-1.5 text-zinc-600 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-30"
-      onclick={() => changeZoom(zoom + DIAGRAM_ZOOM_STEP)}
+      onclick={viewport.zoomIn}
     >
       <ZoomIn class="size-4" />
     </button>
@@ -433,7 +314,7 @@
       aria-label="Ajustar diagrama a la vista"
       title="Ajustar a la vista (0)"
       class="rounded p-1.5 text-zinc-600 hover:bg-zinc-100"
-      onclick={fitView}
+      onclick={viewport.fitView}
     >
       <Maximize class="size-4" />
     </button>
