@@ -12,7 +12,7 @@
   import { navigateTo } from '~/utils/navigation';
   import { DockRoutes } from '../Dock/Dock.constants';
   import { NODE_COMPONENTS } from './Diagram.constants';
-  import { DiagramViewportController } from './Diagram.viewport.svelte';
+  import { Viewport } from './viewport';
 
   const graph = getGraphContext();
   let { nodes, edges, start } = $derived(graph);
@@ -22,7 +22,7 @@
   let hoveredEdgeId = $state<string | null>(null);
   let addMenuOpen = $state(false);
   let layout = $derived(getLayout({ nodes, edges }, start));
-  const viewport = new DiagramViewportController(() => layout.box);
+  const viewport = new Viewport(() => layout.box);
   let layoutEdgesById = $derived(
     new Map(layout.edges.map((edge) => [edge.id, edge])),
   );

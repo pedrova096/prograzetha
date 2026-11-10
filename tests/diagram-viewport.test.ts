@@ -3,7 +3,7 @@ import { describe, expect, test } from 'bun:test';
 import {
   fitDiagramToViewport,
   zoomAroundPoint,
-} from '../src/lib/components/Diagram/Diagram.utils';
+} from '../src/lib/components/Diagram/viewport/viewport.utils';
 
 describe('diagram viewport', () => {
   test('fits and centers a diagram inside the available viewport', () => {
