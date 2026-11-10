@@ -19,3 +19,7 @@ View or edit the program in JavaScript or Python and see the changes reflected i
 ## Step-by-step execution
 
 Follow each step as the program runs and see how its variables change.
+
+## License
+
+Licensed under the [MIT License](LICENSE).
